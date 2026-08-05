@@ -13,7 +13,7 @@
     :root {
       --primary: #0284c7; --primary-light: #38bdf8; --bg-color: #f1f5f9; --card-bg: #ffffff;
       --text-main: #0f172a; --text-muted: #64748b; --success: #059669; --success-bg: #d1fae5;
-      --danger: #e11d48; --danger-bg: #ffe4e6; --border-color: #e2e8f0;
+      --danger: #e11d48; --danger-bg: #ffe4e6; --border-color: #e2e8f0; --warning-bg: #fef3c7; --warning-text: #d97706;
     }
     body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); padding-bottom: 40px; -webkit-tap-highlight-color: transparent;}
     
@@ -37,9 +37,15 @@
     .search-box input:focus { border-color: var(--primary); background: #fff;}
     .search-icon { position: absolute; left: 15px; opacity: 0.5; font-size: 16px; }
     
-    /* Tombol Filter di dalam Search Box */
-    .filter-btn { position: absolute; right: 8px; background: var(--primary); border: none; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; transition: background 0.2s;}
-    .filter-btn:active { background: #0369a1; }
+    .filter-btn { position: absolute; right: 8px; background: #94a3b8; border: none; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; transition: all 0.3s ease;}
+    .filter-btn.active { background: var(--primary); box-shadow: 0 0 12px rgba(2, 132, 199, 0.4); }
+
+    /* Indikator Filter Aktif */
+    .filter-indicator { display: none; align-items: center; justify-content: space-between; margin-top: 12px; padding: 10px 14px; background: var(--warning-bg); border-radius: 10px; border: 1px solid rgba(217, 119, 6, 0.2);}
+    .filter-indicator.show { display: flex; }
+    .filter-indicator-text { font-size: 12px; font-weight: 700; color: var(--warning-text); display: flex; align-items: center; gap: 6px;}
+    .reset-btn { background: #fff; color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.3); padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: background 0.2s;}
+    .reset-btn:active { background: var(--danger-bg); }
 
     /* Filter Modal (Bottom Sheet) */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.3s; }
@@ -102,9 +108,15 @@
     <div class="search-box">
       <span class="search-icon">🔍</span>
       <input type="text" id="searchInput" placeholder="Cari nama atau NIK pasien..." onkeyup="applyFilters()">
-      <button class="filter-btn" onclick="toggleFilter()" title="Filter Data">
+      <button id="filterBtnIcon" class="filter-btn" onclick="toggleFilter()" title="Filter Data">
         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
       </button>
+    </div>
+    
+    <!-- Indikator Filter Muncul Disini -->
+    <div id="filterIndicator" class="filter-indicator">
+      <div class="filter-indicator-text"><span>⚙️</span> Data sedang difilter</div>
+      <button class="reset-btn" onclick="resetFilters()">Reset Filter</button>
     </div>
   </div>
 
@@ -114,7 +126,7 @@
 <!-- FILTER MODAL -->
 <div id="filterModal" class="modal-overlay">
   <div class="modal-content">
-    <div class="modal-title"><span>⚙️ Filter Data</span><button class="close-modal" onclick="toggleFilter()">✕</button></div>
+    <div class="modal-title"><span>⚙️ Filter Spesifik</span><button class="close-modal" onclick="toggleFilter()">✕</button></div>
     
     <div class="filter-group">
       <label>Status Geotagging</label>
@@ -125,15 +137,24 @@
       </select>
     </div>
 
+    <!-- Pilihan Wilayah Dipatenkan Berdasarkan Area Puskesmas -->
     <div class="filter-group">
-      <label>Wilayah / Alamat</label>
+      <label>Wilayah / Desa</label>
       <select id="filterAlamat" onchange="applyFilters()">
-        <option value="all">Semua Alamat</option>
-        <!-- Daftar alamat akan diisi otomatis oleh Javascript -->
+        <option value="all">Semua Wilayah</option>
+        <option value="satra">Satra</option>
+        <option value="kamasan">Kamasan</option>
+        <option value="semarapura kauh">Semarapura Kauh</option>
+        <option value="gelgel">Gelgel</option>
+        <option value="tojan">Tojan</option>
+        <option value="tangkas">Tangkas</option>
+        <option value="semarapura klod">Semarapura Klod</option>
+        <option value="semarapura klod kangin">Semarapura Klod Kangin</option>
+        <option value="kampung gelgel">Kampung Gelgel</option>
       </select>
     </div>
 
-    <button class="btn btn-submit" onclick="toggleFilter()">Terapkan Filter</button>
+    <button class="btn btn-submit" onclick="toggleFilter()">Terapkan & Tutup</button>
   </div>
 </div>
 
@@ -167,13 +188,21 @@
     modal.classList.toggle('active');
   }
 
+  // Fungsi Reset Semua Filter ke Bawaan
+  function resetFilters() {
+    document.getElementById('searchInput').value = "";
+    document.getElementById('filterStatus').value = "all";
+    document.getElementById('filterAlamat').value = "all";
+    applyFilters();
+  }
+
   const request = indexedDB.open("DatabasePESONA", 1);
   request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("dataTunda", { autoIncrement: true }); };
   request.onsuccess = (e) => { db = e.target.result; if (navigator.onLine) sinkronisasiDataTunda(); };
 
   window.onload = () => {
-    const cachedData = localStorage.getItem('pesona_data_v6');
-    if (cachedData) { dataPasienLokal = JSON.parse(cachedData); setAlamatDropdown(); applyFilters(); }
+    const cachedData = localStorage.getItem('pesona_data_v7');
+    if (cachedData) { dataPasienLokal = JSON.parse(cachedData); applyFilters(); }
     if (navigator.onLine) fetchDataPasien();
   };
 
@@ -183,32 +212,34 @@
       const response = await fetch(GAS_URL);
       const data = await response.json();
       dataPasienLokal = data;
-      localStorage.setItem('pesona_data_v6', JSON.stringify(data));
-      setAlamatDropdown();
+      localStorage.setItem('pesona_data_v7', JSON.stringify(data));
       applyFilters(); 
-    } catch(e) { console.log("Mode offline"); } finally { hideLoader(); }
-  }
-
-  // FUNGSI MENGISI DROPDOWN ALAMAT SECARA OTOMATIS
-  function setAlamatDropdown() {
-    const dropdown = document.getElementById('filterAlamat');
-    dropdown.innerHTML = '<option value="all">Semua Alamat</option>';
-    
-    // Mengambil daftar alamat yang unik (tidak duplikat)
-    const uniqueAddresses = [...new Set(dataPasienLokal.map(p => p.alamat))].filter(a => a && a !== "Alamat tidak tersedia");
-    
-    uniqueAddresses.sort().forEach(alamat => {
-      const option = document.createElement('option');
-      option.value = alamat;
-      option.innerText = alamat;
-      dropdown.appendChild(option);
-    });
+    } catch(e) { 
+      console.log("Mode offline aktif atau terjadi kendala tautan", e);
+      applyFilters(); 
+    } finally { 
+      hideLoader(); 
+    }
   }
 
   function applyFilters() {
     const keyword = document.getElementById('searchInput').value.toLowerCase();
     const statusFilter = document.getElementById('filterStatus').value;
     const alamatFilter = document.getElementById('filterAlamat').value;
+
+    // Deteksi apakah sedang ada filter yang berjalan
+    const isFilterActive = (keyword !== '' || statusFilter !== 'all' || alamatFilter !== 'all');
+    
+    // Tampilkan atau sembunyikan indikator filter UI
+    const indicator = document.getElementById('filterIndicator');
+    const filterBtnIcon = document.getElementById('filterBtnIcon');
+    if (isFilterActive) {
+      indicator.classList.add('show');
+      filterBtnIcon.classList.add('active');
+    } else {
+      indicator.classList.remove('show');
+      filterBtnIcon.classList.remove('active');
+    }
 
     const filteredData = dataPasienLokal.filter(p => {
       const isSelesai = p.status.toLowerCase().includes("sudah");
@@ -218,19 +249,32 @@
       if (statusFilter === 'sudah') matchStatus = isSelesai;
       if (statusFilter === 'belum') matchStatus = !isSelesai;
 
+      // Logika Pencarian Alamat Menggunakan 'includes' agar variasi seperti "Br. Tangkas, Gelgel" tetap terbaca sebagai "Gelgel"
       let matchAlamat = true;
-      if (alamatFilter !== 'all') matchAlamat = (p.alamat === alamatFilter);
+      if (alamatFilter !== 'all') {
+         const alamatDatabase = p.alamat ? p.alamat.toLowerCase() : "";
+         matchAlamat = alamatDatabase.includes(alamatFilter);
+      }
 
       return matchKeyword && matchStatus && matchAlamat;
     });
 
-    renderList(filteredData);
+    renderList(filteredData, isFilterActive);
   }
 
-  function renderList(data) {
+  function renderList(data, isFilterActive) {
     const container = document.getElementById('patientList');
     container.innerHTML = "";
-    if(data.length === 0) { container.innerHTML = '<div style="text-align:center; padding:40px; color:#94a3b8; font-weight:600;">Data tidak ditemukan.</div>'; return; }
+    
+    if(data.length === 0) { 
+      // Teks cerdas: membedakan antara data kosong murni vs data kosong karena difilter
+      const emptyMessage = isFilterActive 
+        ? "Tidak ada data yang cocok dengan filter. Silakan ubah atau Reset Filter." 
+        : "Belum ada data pasien dari database.";
+        
+      container.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8; font-weight:600; line-height: 1.5;">${emptyMessage}</div>`; 
+      return; 
+    }
 
     const svgPin = `<svg class="pin-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
 
@@ -242,7 +286,6 @@
 
       const item = document.createElement('div');
       item.className = `patient-card`;
-      // Mengirimkan NAMA, NIK, dan KOORDINAT ke Form
       item.onclick = () => bukaForm(p.nama, p.nik, p.koordinat);
       item.innerHTML = `
         <div class="card-top"><div><h3 class="p-name">${p.nama}</h3><div class="p-nik">NIK: ${p.nik}</div></div></div>
@@ -255,35 +298,21 @@
     });
   }
 
-  // LOGIKA PETA DENGAN TITIK KOORDINAT YANG SUDAH ADA
   function inisialisasiPeta(savedKoordinat) {
-    let lat = -8.5333; // Default Klungkung
-    let lng = 115.4000;
-    let zoomLvl = 13;
-
-    // Jika pasien sudah punya koordinat, pindahkan titik awal peta ke koordinat tersebut
+    let lat = -8.5333; let lng = 115.4000; let zoomLvl = 13;
     if (savedKoordinat && savedKoordinat.includes(",")) {
        const parts = savedKoordinat.split(',');
-       lat = parseFloat(parts[0].trim());
-       lng = parseFloat(parts[1].trim());
-       zoomLvl = 17; // Zoom lebih dekat jika koordinat sudah ada
+       lat = parseFloat(parts[0].trim()); lng = parseFloat(parts[1].trim());
+       zoomLvl = 17; 
     }
 
     if (!map) {
       map = L.map('map').setView([lat, lng], zoomLvl);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
       marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-      
-      marker.on('dragend', function(e) {
-         const pos = marker.getLatLng();
-         document.getElementById('koordinat').value = `${pos.lat}, ${pos.lng}`;
-      });
-      map.on('click', function(e) {
-         marker.setLatLng(e.latlng);
-         document.getElementById('koordinat').value = `${e.latlng.lat}, ${e.latlng.lng}`;
-      });
+      marker.on('dragend', function(e) { const pos = marker.getLatLng(); document.getElementById('koordinat').value = `${pos.lat}, ${pos.lng}`; });
+      map.on('click', function(e) { marker.setLatLng(e.latlng); document.getElementById('koordinat').value = `${e.latlng.lat}, ${e.latlng.lng}`; });
     } else {
-      // Jika peta sudah pernah dimuat sebelumnya, cukup pindahkan lokasinya
       map.setView([lat, lng], zoomLvl);
       marker.setLatLng([lat, lng]);
     }
@@ -295,10 +324,7 @@
     document.getElementById('formView').style.display = 'block';
     document.getElementById('subtitleNama').innerText = nama;
     document.getElementById('nik').value = nik;
-    
-    // Menampilkan koordinat yang sudah ada di kotak input
     document.getElementById('koordinat').value = koordinat || "";
-    
     inisialisasiPeta(koordinat);
   }
 
