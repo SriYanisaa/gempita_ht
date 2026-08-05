@@ -1,8 +1,8 @@
 const CACHE_NAME = 'pesona-ht-cache-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  '/gempita_ht/',
+  '/gempita_ht/index.html',
+  '/gempita_ht/manifest.json'
 ];
 
 // Menginstall cache saat aplikasi pertama kali dibuka
