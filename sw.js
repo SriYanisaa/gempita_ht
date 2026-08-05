@@ -1,11 +1,10 @@
-const CACHE_NAME = 'pesona-ht-cache-v3.2.0';
+const CACHE_NAME = 'pesona-geo-v3.3.0'; // Versi sudah dinaikkan untuk mereset cache
 const urlsToCache = [
   '/gempita_ht/',
   '/gempita_ht/index.html',
   '/gempita_ht/manifest.json'
 ];
 
-// Menginstall cache saat aplikasi pertama kali dibuka
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -15,18 +14,31 @@ self.addEventListener('install', event => {
   );
 });
 
-// Menyediakan cache saat tidak ada internet
 self.addEventListener('fetch', event => {
-  // Biarkan request POST (pengiriman data) berjalan normal, tidak dicache
-  if (event.request.method === 'POST') return;
+  // Abaikan caching untuk link Apps Script dan Leaflet (peta) agar tidak error
+  if (event.request.url.includes('script.google.com') || event.request.url.includes('unpkg.com') || event.request.url.includes('openstreetmap.org')) {
+    return;
+  }
   
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        if (response) {
-          return response; // Mengembalikan file dari memori HP
-        }
-        return fetch(event.request);
+        return response || fetch(event.request);
       })
+  );
+});
+
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
