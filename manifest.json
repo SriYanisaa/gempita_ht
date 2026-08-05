@@ -1,7 +1,7 @@
 {
   "name": "Pemetaan HT Pustu",
   "short_name": "Peta HT",
-  "start_url": "/index.html",
+  "start_url": "/gempita_ht/index.html",
   "display": "standalone",
   "background_color": "#f4f7f6",
   "theme_color": "#27ae60",
