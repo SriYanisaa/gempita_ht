@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pesona-ht-cache-v2.1.0';
+const CACHE_NAME = 'pesona-ht-cache-v3.1.0';
 const urlsToCache = [
   '/gempita_ht/',
   '/gempita_ht/index.html',
