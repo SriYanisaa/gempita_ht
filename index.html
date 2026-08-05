@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geotagging Pasien</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; }
+    .container { max-width: 400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { color: #2c3e50; text-align: center; margin-bottom: 5px; }
+    p.subtitle { text-align: center; color: #7f8c8d; font-size: 14px; margin-top: 0; margin-bottom: 20px;}
+    label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px;}
+    input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; margin-top: 20px; background: #27ae60; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+    button.gps-btn { background: #3498db; margin-top: 5px; }
+    .status { text-align: center; margin-top: 15px; font-size: 12px; color: #7f8c8d; }
+    .offline-alert { color: #e74c3c; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>PESONA Geotagging</h2>
+  <p class="subtitle">Pemetaan Titik Koordinat Kohort</p>
+  <div id="networkStatus" class="status">Memeriksa jaringan...</div>
+
+  <form id="formGeo">
+    <label>Program / Kategori</label>
+    <select id="kategori" required>
+      <option value="HT">Hipertensi (HT)</option>
+      <option value="DM">Diabetes Melitus (DM)</option>
+    </select>
+
+    <label>Masukkan NIK Pasien</label>
+    <input type="number" id="nik" placeholder="Ketik 16 digit NIK..." required>
+
+    <label>Titik Koordinat</label>
+    <input type="text" id="koordinat" placeholder="Ketuk tombol di bawah" readonly required>
+    <button type="button" class="gps-btn" onclick="getGPS()">📍 Ambil Lokasi Sekarang</button>
+
+    <button type="submit">Sinkronkan Data</button>
+  </form>
+</div>
+
+<script>
+  // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA YANG BARU
+  const GAS_URL = "https://script.google.com/macros/library/d/1gHmLM5ZeRqsOTyI8wC1gcXUQGqMyICjAb2xciueN05NLkUuH1T2gBUH5/2";
+  let db;
+
+  const request = indexedDB.open("DatabaseGeotagging", 1);
+  request.onupgradeneeded = (e) => {
+    db = e.target.result;
+    db.createObjectStore("dataTunda", { autoIncrement: true });
+  };
+  request.onsuccess = (e) => {
+    db = e.target.result;
+    if (navigator.onLine) sinkronisasiData();
+  };
+
+  function getGPS() {
+    if (navigator.geolocation) {
+      document.getElementById('koordinat').value = "Mencari akurasi lokasi...";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          document.getElementById('koordinat').value = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+        },
+        (err) => {
+          alert("Gagal ambil GPS. Pastikan izin lokasi aktif.");
+          document.getElementById('koordinat').value = "";
+        },
+        { enableHighAccuracy: true }
+      );
+    }
+  }
+
+  document.getElementById('formGeo').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = {
+      kategori: document.getElementById('kategori').value,
+      nik: document.getElementById('nik').value,
+      koordinat: document.getElementById('koordinat').value
+    };
+
+    if (navigator.onLine) {
+      kirimKeServer(data);
+    } else {
+      simpanOffline(data);
+    }
+  });
+
+  function kirimKeServer(data) {
+    const btnSubmit = document.querySelector("button[type=submit]");
+    btnSubmit.innerText = "Mengirim...";
+    
+    fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify(data),
+      mode: 'no-cors', 
+      headers: { "Content-Type": "application/json" }
+    }).then(() => {
+      alert("Permintaan sinkronisasi terkirim!");
+      document.getElementById('nik').value = "";
+      document.getElementById('koordinat').value = "";
+      btnSubmit.innerText = "Sinkronkan Data";
+    }).catch(err => {
+      simpanOffline(data);
+    });
+  }
+
+  function simpanOffline(data) {
+    const tx = db.transaction("dataTunda", "readwrite");
+    const store = tx.objectStore("dataTunda");
+    store.add(data);
+    alert("Koneksi terputus. Data disimpan di HP dan akan sinkron otomatis saat ada sinyal.");
+    document.getElementById('nik').value = "";
+    document.getElementById('koordinat').value = "";
+    document.querySelector("button[type=submit]").innerText = "Sinkronkan Data";
+  }
+
+  function sinkronisasiData() {
+    const tx = db.transaction("dataTunda", "readwrite");
+    const store = tx.objectStore("dataTunda");
+    const getReq = store.getAll();
+    const getKeys = store.getAllKeys();
+
+    getReq.onsuccess = () => {
+      const dataNyangkut = getReq.result;
+      const keys = getKeys.result;
+      
+      if(dataNyangkut.length > 0) {
+        document.getElementById('networkStatus').innerText = `Menyinkronkan ${dataNyangkut.length} data tertunda...`;
+        
+        dataNyangkut.forEach((data, index) => {
+          fetch(GAS_URL, {
+            method: "POST",
+            body: JSON.stringify(data),
+            mode: 'no-cors'
+          }).then(() => {
+            const deleteTx = db.transaction("dataTunda", "readwrite");
+            deleteTx.objectStore("dataTunda").delete(keys[index]);
+          });
+        });
+        setTimeout(() => { document.getElementById('networkStatus').innerText = "Sistem Online"; }, 3000);
+      }
+    };
+  }
+
+  window.addEventListener('online', () => {
+    document.getElementById('networkStatus').innerText = "Status: Online";
+    document.getElementById('networkStatus').className = "status";
+    sinkronisasiData();
+  });
+  
+  window.addEventListener('offline', () => {
+    document.getElementById('networkStatus').innerText = "Status: Offline (Mode Lapangan Aktif)";
+    document.getElementById('networkStatus').className = "status offline-alert";
+  });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>
