@@ -5,178 +5,197 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PESONA Geotagging</title>
   <link rel="manifest" href="manifest.json">
+  <!-- Menggunakan Font Modern Google -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; padding-bottom: 70px; }
-    
-    /* App Bar & Pencarian */
-    .header { background: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
-    .header h3 { margin: 0; color: #333; font-size: 18px; }
-    .btn-icon { background: none; border: none; font-size: 20px; cursor: pointer; color: #555; }
-    .search-container { padding: 10px 15px; background: #fff; border-bottom: 1px solid #eee; }
-    .search-container input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; box-sizing: border-box; background: #f4f6f8; }
+    :root {
+      --primary: #4F46E5;
+      --primary-light: #818CF8;
+      --bg-color: #F3F4F6;
+      --card-bg: #FFFFFF;
+      --text-main: #1F2937;
+      --text-muted: #6B7280;
+      --success: #10B981;
+      --success-bg: #D1FAE5;
+      --danger: #EF4444;
+      --danger-bg: #FEE2E2;
+    }
 
-    /* Daftar Pasien */
-    .list-container { padding: 10px; }
-    .list-item { display: flex; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
-    .map-thumb { width: 70px; height: 60px; background: #90caf9 url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/250px-World_map_-_low_resolution.svg.png') center/cover; border-radius: 4px; margin-right: 15px; border: 1px solid #e0e0e0; }
-    .item-content { flex: 1; }
-    .item-title { font-size: 16px; color: #222; margin-bottom: 4px; }
-    .item-status { font-size: 13px; font-style: italic; }
-    .status-red { color: #e74c3c; }
-    .status-green { color: #27ae60; }
+    body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-color); padding-bottom: 80px; color: var(--text-main); }
     
-    /* Form Geotagging (Disembunyikan di awal) */
-    #formView { display: none; padding: 20px; background: #fff; min-height: 100vh; }
-    label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #444;}
-    input.form-input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #f9f9f9;}
-    button.btn-primary { width: 100%; padding: 14px; margin-top: 20px; background: #1976D2; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
-    button.btn-gps { background: #0288d1; margin-top: 8px; }
-    .btn-back { margin-bottom: 15px; background: #eee; padding: 10px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    /* Header Elegan dengan Gradien */
+    .header { background: linear-gradient(135deg, var(--primary), #6366F1); padding: 25px 20px 30px; color: white; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); position: relative;}
+    .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+    .header p { margin: 5px 0 0; font-size: 13px; opacity: 0.9; font-weight: 400; }
+    .sync-btn { position: absolute; right: 20px; top: 30px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(5px); font-size: 14px;}
 
-    /* Navigasi Bawah */
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #ddd; z-index: 100;}
-    .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 13px; font-weight: bold; cursor: pointer; color: #666; }
-    .nav-item.active { background: #1976D2; color: #fff; }
+    /* Kotak Pencarian Mengambang */
+    .search-wrapper { padding: 0 20px; margin-top: -25px; position: relative; z-index: 10; }
+    .search-input { width: 100%; padding: 15px 20px; border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-family: 'Poppins', sans-serif; font-size: 14px; box-sizing: border-box; outline: none; transition: box-shadow 0.3s; }
+    .search-input:focus { box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2); }
+
+    /* Daftar Pasien yang Estetik */
+    .list-container { padding: 20px; }
+    .patient-card { background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s; cursor: pointer; border-left: 4px solid transparent; }
+    .patient-card:active { transform: scale(0.98); }
+    .patient-card.done { border-left-color: var(--success); }
+    .patient-card.pending { border-left-color: var(--danger); }
     
-    #networkStatus { text-align: center; padding: 5px; font-size: 12px; color: white; background: #27ae60; }
-    #networkStatus.offline { background: #e74c3c; }
+    .patient-info { flex: 1; }
+    .p-name { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: var(--text-main); }
+    .p-address { margin: 0; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+    
+    /* Status Badge di Pojok */
+    .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; white-space: nowrap; }
+    .badge-done { background: var(--success-bg); color: var(--success); }
+    .badge-pending { background: var(--danger-bg); color: var(--danger); }
+
+    /* Desain Form (Overlay) */
+    #formView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; box-sizing: border-box; padding: 25px; }
+    .nav-back { background: none; border: none; font-size: 16px; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 0; display: flex; align-items: center; gap: 8px; margin-bottom: 25px; font-family: 'Poppins', sans-serif;}
+    .form-title { font-size: 24px; font-weight: 700; color: var(--text-main); margin-bottom: 5px; margin-top: 0; }
+    .form-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 30px; }
+    
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+    .input-group input { width: 100%; padding: 15px; border: 1px solid #E5E7EB; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 14px; box-sizing: border-box; background: #F9FAFB; color: var(--text-muted); }
+    
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .btn:active { opacity: 0.8; }
+    .btn-gps { background: #E0E7FF; color: var(--primary); margin-bottom: 15px; }
+    .btn-submit { background: linear-gradient(135deg, var(--primary), #6366F1); color: white; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
+
+    /* Indikator Status Sistem */
+    #sysStatus { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; padding: 10px; font-size: 12px; font-weight: 500; color: white; background: var(--success); z-index: 2000; transition: background 0.3s; }
+    #sysStatus.offline { background: var(--danger); }
   </style>
 </head>
 <body>
 
-<div id="networkStatus">Status: Online (Siap Sinkronisasi)</div>
+<!-- Indikator Jaringan -->
+<div id="sysStatus">Online (Sinkronisasi Aktif)</div>
 
 <!-- TAMPILAN 1: DAFTAR PASIEN -->
 <div id="listView">
   <div class="header">
-    <button class="btn-icon">☰</button>
-    <h3>PESONA</h3>
-    <button class="btn-icon" onclick="fetchDataPasien()">🔄</button>
+    <h1>PESONA Kohort</h1>
+    <p>Puskesmas Klungkung I</p>
+    <button class="sync-btn" onclick="fetchDataPasien()">🔄 Segarkan</button>
   </div>
   
-  <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Cari nama pasien..." onkeyup="filterPencarian()">
+  <div class="search-wrapper">
+    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari nama pasien..." onkeyup="filterPencarian()">
   </div>
 
   <div id="patientList" class="list-container">
-    <div style="text-align:center; padding:20px; color:#666;">Mengunduh data pasien...</div>
+    <div style="text-align:center; padding:30px; color:#9CA3AF; font-size: 14px;">Memuat data pasien...</div>
   </div>
 </div>
 
-<!-- TAMPILAN 2: FORM INPUT (Muncul saat pasien diklik) -->
+<!-- TAMPILAN 2: FORM INPUT -->
 <div id="formView">
-  <button class="btn-back" onclick="tutupForm()">🔙 Kembali ke Daftar</button>
-  <h2 style="margin-top:0;">Geotagging Pasien</h2>
+  <button class="nav-back" onclick="tutupForm()">← Kembali</button>
+  
+  <h2 class="form-title">Geotagging</h2>
+  <div class="form-subtitle" id="subtitleNama">Nama Pasien</div>
+  
   <form id="formGeo">
     <input type="hidden" id="kategori" value="HT">
     
-    <label>Nama Pasien</label>
-    <input type="text" id="namaPasien" class="form-input" readonly>
-    
-    <label>NIK</label>
-    <input type="text" id="nik" class="form-input" readonly>
+    <div class="input-group">
+      <label>Nomor Induk Kependudukan (NIK)</label>
+      <input type="text" id="nik" readonly>
+    </div>
 
-    <label>Titik Koordinat</label>
-    <input type="text" id="koordinat" class="form-input" placeholder="Ketuk tombol lokasi di bawah" readonly required>
-    <button type="button" class="btn-primary btn-gps" onclick="getGPS()">📍 Ambil Lokasi Sekarang</button>
+    <div class="input-group">
+      <label>Titik Koordinat Geografis</label>
+      <input type="text" id="koordinat" placeholder="Belum ada koordinat" readonly required>
+    </div>
 
-    <button type="submit" class="btn-primary">Simpan Koordinat</button>
+    <button type="button" class="btn btn-gps" onclick="getGPS()">📍 Ambil Lokasi Saat Ini</button>
+    <button type="submit" class="btn btn-submit">Simpan & Sinkronkan</button>
   </form>
 </div>
 
-<!-- NAVIGASI BAWAH -->
-<div class="bottom-nav">
-  <div class="nav-item active" onclick="tutupForm()">Pasien HT</div>
-  <div class="nav-item">Peta Pasien HT</div>
-</div>
-
 <script>
-  // === GANTI DENGAN URL WEB APP ANDA ===
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzcp57xHiOczZayb9wpQwDNkAuBiJpGPGHsfuaxpB4CxyaPzsfTN2fU9VpECskx49lE/exec"; 
+  // === MASUKKAN URL DEPLOYMENT BARU ANDA DI SINI ===
+  const GAS_URL = "https://script.google.com/macros/library/d/1gHmLM5ZeRqsOTyI8wC1gcXUQGqMyICjAb2xciueN05NLkUuH1T2gBUH5/5"; 
   let db;
   let dataPasienLokal = [];
 
-  // Inisialisasi IndexedDB untuk mode offline
-  const request = indexedDB.open("DatabaseGeotagging", 1);
+  // Inisialisasi IndexedDB
+  const request = indexedDB.open("DatabasePESONA", 1);
   request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("dataTunda", { autoIncrement: true }); };
   request.onsuccess = (e) => { db = e.target.result; if (navigator.onLine) sinkronisasiDataTunda(); };
 
-  // Memuat data saat aplikasi dibuka
   window.onload = () => {
-    const cachedData = localStorage.getItem('pesona_ht_data');
-    if (cachedData) {
-      dataPasienLokal = JSON.parse(cachedData);
-      renderList(dataPasienLokal);
-    }
+    const cachedData = localStorage.getItem('pesona_data_v2');
+    if (cachedData) { dataPasienLokal = JSON.parse(cachedData); renderList(dataPasienLokal); }
     if (navigator.onLine) fetchDataPasien();
   };
 
-  // 1. Mengambil Daftar Pasien dari Google Sheets (doGet)
   async function fetchDataPasien() {
     try {
       const response = await fetch(GAS_URL);
       const data = await response.json();
       dataPasienLokal = data;
-      localStorage.setItem('pesona_ht_data', JSON.stringify(data)); // Simpan ke memori HP
+      localStorage.setItem('pesona_data_v2', JSON.stringify(data));
       renderList(dataPasienLokal);
-    } catch(e) {
-      console.log("Menggunakan data offline");
-    }
+    } catch(e) { console.log("Offline mode aktif"); }
   }
 
-  // 2. Menampilkan UI Daftar Pasien
   function renderList(data) {
     const container = document.getElementById('patientList');
     container.innerHTML = "";
     
     data.forEach(p => {
       const isSelesai = p.status.toLowerCase().includes("sudah");
-      const statusIcon = isSelesai ? "✅" : "❗";
-      const statusClass = isSelesai ? "status-green" : "status-red";
-      const statusText = isSelesai ? "Sudah Ditandai" : "Belum Ditandai";
+      const cardClass = isSelesai ? "done" : "pending";
+      const badgeClass = isSelesai ? "badge-done" : "badge-pending";
+      const badgeText = isSelesai ? "Selesai" : "Belum";
 
+      // Desain Kartu dengan Nama, Alamat di bawahnya, dan Status di pojok
       const item = document.createElement('div');
-      item.className = 'list-item';
+      item.className = `patient-card ${cardClass}`;
       item.onclick = () => bukaForm(p.nama, p.nik);
       item.innerHTML = `
-        <div class="map-thumb"></div>
-        <div class="item-content">
-          <div class="item-title"><strong>${p.nama}</strong></div>
-          <div class="item-status ${statusClass}">${statusIcon} <i>${statusText}</i></div>
+        <div class="patient-info">
+          <h3 class="p-name">${p.nama}</h3>
+          <p class="p-address">📍 ${p.alamat}</p>
         </div>
-        <div style="color:#aaa;">&#10247;</div>
+        <div>
+          <span class="status-badge ${badgeClass}">${badgeText}</span>
+        </div>
       `;
       container.appendChild(item);
     });
   }
 
-  // 3. Fitur Pencarian Cepat
   function filterPencarian() {
     const keyword = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = dataPasienLokal.filter(p => p.nama.toLowerCase().includes(keyword));
-    renderList(filtered);
+    renderList(dataPasienLokal.filter(p => p.nama.toLowerCase().includes(keyword)));
   }
 
-  // 4. Buka & Tutup Form (Perpindahan Halaman)
   function bukaForm(nama, nik) {
     document.getElementById('listView').style.display = 'none';
     document.getElementById('formView').style.display = 'block';
-    document.getElementById('namaPasien').value = nama;
+    document.getElementById('subtitleNama').innerText = "Pasien: " + nama;
     document.getElementById('nik').value = nik;
     document.getElementById('koordinat').value = "";
+    window.scrollTo(0, 0);
   }
+
   function tutupForm() {
     document.getElementById('listView').style.display = 'block';
     document.getElementById('formView').style.display = 'none';
   }
 
-  // 5. Fitur GPS & Simpan (Logika Offline/Online)
   function getGPS() {
     if (navigator.geolocation) {
       document.getElementById('koordinat').value = "Mencari akurasi...";
       navigator.geolocation.getCurrentPosition(
         pos => document.getElementById('koordinat').value = `${pos.coords.latitude}, ${pos.coords.longitude}`,
-        err => alert("Gagal ambil GPS. Aktifkan lokasi HP Anda."),
+        err => alert("Gagal mengambil GPS. Pastikan izin lokasi HP aktif."),
         { enableHighAccuracy: true }
       );
     }
@@ -190,26 +209,27 @@
       koordinat: document.getElementById('koordinat').value
     };
 
+    const btnSubmit = document.querySelector('.btn-submit');
+    btnSubmit.innerText = "Menyimpan...";
+
     if (navigator.onLine) {
-      kirimKeServer(data);
+      fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
+        .then(() => {
+          alert("Koordinat Berhasil Disimpan!");
+          fetchDataPasien(); 
+          tutupForm();
+          btnSubmit.innerText = "Simpan & Sinkronkan";
+        }).catch(() => { simpanOffline(data); btnSubmit.innerText = "Simpan & Sinkronkan"; });
     } else {
       simpanOffline(data);
+      btnSubmit.innerText = "Simpan & Sinkronkan";
     }
   });
-
-  function kirimKeServer(data) {
-    fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
-      .then(() => {
-        alert("Koordinat Tersimpan!");
-        fetchDataPasien(); // Segarkan data agar status berubah
-        tutupForm();
-      }).catch(() => simpanOffline(data));
-  }
 
   function simpanOffline(data) {
     const tx = db.transaction("dataTunda", "readwrite");
     tx.objectStore("dataTunda").add(data);
-    alert("Offline: Data disimpan di HP. Akan otomatis terkirim saat ada sinyal.");
+    alert("Anda sedang offline. Data disimpan di HP dan akan dikirim otomatis saat ada sinyal.");
     tutupForm();
   }
 
@@ -218,24 +238,29 @@
     store.getAll().onsuccess = (e) => {
       const dataNyangkut = e.target.result;
       if (dataNyangkut.length > 0) {
+        document.getElementById('sysStatus').innerText = `Menyinkronkan ${dataNyangkut.length} data...`;
         dataNyangkut.forEach((data, i) => {
           fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
             .then(() => db.transaction("dataTunda", "readwrite").objectStore("dataTunda").delete(store.getAllKeys().result[i]));
         });
-        setTimeout(fetchDataPasien, 3000); // Segarkan list setelah sinkron
+        setTimeout(() => { 
+          fetchDataPasien(); 
+          document.getElementById('sysStatus').innerText = "Online (Sinkronisasi Aktif)";
+        }, 3000);
       }
     };
   }
 
-  // Monitor Jaringan
   window.addEventListener('online', () => {
-    document.getElementById('networkStatus').innerText = "Status: Online (Siap Sinkronisasi)";
-    document.getElementById('networkStatus').className = "";
+    const sys = document.getElementById('sysStatus');
+    sys.innerText = "Online (Sinkronisasi Aktif)";
+    sys.className = "";
     sinkronisasiDataTunda();
   });
   window.addEventListener('offline', () => {
-    document.getElementById('networkStatus').innerText = "Status: Offline (Mode Lapangan)";
-    document.getElementById('networkStatus').className = "offline";
+    const sys = document.getElementById('sysStatus');
+    sys.innerText = "Mode Lapangan (Offline)";
+    sys.className = "offline";
   });
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
