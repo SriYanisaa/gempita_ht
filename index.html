@@ -5,96 +5,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PESONA Geotagging</title>
   <link rel="manifest" href="manifest.json">
-  <!-- Menggunakan Font Modern Google -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #4F46E5;
-      --primary-light: #818CF8;
+      --primary: #2563EB;
+      --primary-gradient: linear-gradient(135deg, #2563EB, #3B82F6);
       --bg-color: #F3F4F6;
       --card-bg: #FFFFFF;
       --text-main: #1F2937;
       --text-muted: #6B7280;
-      --success: #10B981;
+      --success: #059669;
       --success-bg: #D1FAE5;
-      --danger: #EF4444;
+      --danger: #DC2626;
       --danger-bg: #FEE2E2;
     }
 
-    body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-color); padding-bottom: 80px; color: var(--text-main); }
+    body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-color); color: var(--text-main); padding-bottom: 20px;}
     
-    /* Header Elegan dengan Gradien */
-    .header { background: linear-gradient(135deg, var(--primary), #6366F1); padding: 25px 20px 30px; color: white; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); position: relative;}
-    .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+    /* Header Modern */
+    .header { background: var(--primary-gradient); padding: 30px 20px 40px; color: white; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); position: relative;}
+    .header h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.5px;}
     .header p { margin: 5px 0 0; font-size: 13px; opacity: 0.9; font-weight: 400; }
-    .sync-btn { position: absolute; right: 20px; top: 30px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(5px); font-size: 14px;}
+    .btn-sync { position: absolute; right: 20px; top: 35px; background: rgba(255,255,255,0.25); border: none; color: white; padding: 8px 14px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(8px); font-size: 12px; font-weight: 600;}
 
-    /* Kotak Pencarian Mengambang */
+    /* Kotak Pencarian */
     .search-wrapper { padding: 0 20px; margin-top: -25px; position: relative; z-index: 10; }
-    .search-input { width: 100%; padding: 15px 20px; border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-family: 'Poppins', sans-serif; font-size: 14px; box-sizing: border-box; outline: none; transition: box-shadow 0.3s; }
-    .search-input:focus { box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2); }
+    .search-input { width: 100%; padding: 16px 20px; border: none; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); font-family: 'Poppins', sans-serif; font-size: 14px; box-sizing: border-box; outline: none; transition: all 0.3s ease; }
+    .search-input:focus { box-shadow: 0 6px 20px rgba(37, 99, 235, 0.15); transform: translateY(-2px); }
 
-    /* Daftar Pasien yang Estetik */
-    .list-container { padding: 20px; }
-    .patient-card { background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s; cursor: pointer; border-left: 4px solid transparent; }
+    /* Daftar Pasien (Card Style) */
+    .list-container { padding: 25px 20px; }
+    .patient-card { background: var(--card-bg); border-radius: 20px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-left: 5px solid transparent; transition: all 0.2s ease; }
     .patient-card:active { transform: scale(0.98); }
     .patient-card.done { border-left-color: var(--success); }
     .patient-card.pending { border-left-color: var(--danger); }
     
-    .patient-info { flex: 1; }
-    .p-name { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: var(--text-main); }
-    .p-address { margin: 0; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+    .patient-info { flex: 1; padding-right: 10px; }
+    .p-name { margin: 0 0 6px 0; font-size: 15px; font-weight: 600; color: var(--text-main); }
+    .p-address { margin: 0; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
     
-    /* Status Badge di Pojok */
+    /* Status Badge */
     .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; white-space: nowrap; }
     .badge-done { background: var(--success-bg); color: var(--success); }
     .badge-pending { background: var(--danger-bg); color: var(--danger); }
 
-    /* Desain Form (Overlay) */
-    #formView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; box-sizing: border-box; padding: 25px; }
-    .nav-back { background: none; border: none; font-size: 16px; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 0; display: flex; align-items: center; gap: 8px; margin-bottom: 25px; font-family: 'Poppins', sans-serif;}
-    .form-title { font-size: 24px; font-weight: 700; color: var(--text-main); margin-bottom: 5px; margin-top: 0; }
-    .form-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 30px; }
+    /* Desain Form Geotagging */
+    #formView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 1000; overflow-y: auto; box-sizing: border-box; padding: 30px 25px; }
+    .nav-back { background: #F3F4F6; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-main); cursor: pointer; margin-bottom: 25px; transition: background 0.2s; }
+    .nav-back:active { background: #E5E7EB; }
+    .form-title { font-size: 26px; font-weight: 700; color: var(--text-main); margin-bottom: 5px; margin-top: 0; }
+    .form-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 35px; }
     
-    .input-group { margin-bottom: 20px; }
-    .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
-    .input-group input { width: 100%; padding: 15px; border: 1px solid #E5E7EB; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 14px; box-sizing: border-box; background: #F9FAFB; color: var(--text-muted); }
+    .input-group { margin-bottom: 24px; }
+    .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
+    .input-group input { width: 100%; padding: 16px; border: 2px solid #F3F4F6; border-radius: 16px; font-family: 'Poppins', sans-serif; font-size: 15px; box-sizing: border-box; background: #F9FAFB; color: var(--text-main); font-weight: 500; outline: none; transition: border-color 0.3s;}
+    .input-group input:focus { border-color: var(--primary); }
     
-    .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-    .btn:active { opacity: 0.8; }
-    .btn-gps { background: #E0E7FF; color: var(--primary); margin-bottom: 15px; }
-    .btn-submit { background: linear-gradient(135deg, var(--primary), #6366F1); color: white; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
+    .btn { width: 100%; padding: 18px; border: none; border-radius: 16px; font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; margin-bottom: 12px;}
+    .btn:active { transform: translateY(2px); }
+    .btn-gps { background: #EFF6FF; color: var(--primary); }
+    .btn-submit { background: var(--primary-gradient); color: white; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25); }
 
-    /* Indikator Status Sistem */
-    #sysStatus { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; padding: 10px; font-size: 12px; font-weight: 500; color: white; background: var(--success); z-index: 2000; transition: background 0.3s; }
+    /* Indikator Sistem Mini di Atas */
+    #sysStatus { position: fixed; top: 0; left: 0; width: 100%; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; color: white; background: var(--success); z-index: 2000; transition: background 0.3s; }
     #sysStatus.offline { background: var(--danger); }
   </style>
 </head>
 <body>
 
-<!-- Indikator Jaringan -->
-<div id="sysStatus">Online (Sinkronisasi Aktif)</div>
+<div id="sysStatus">Online (Siap Sinkronisasi)</div>
 
-<!-- TAMPILAN 1: DAFTAR PASIEN -->
+<!-- TAMPILAN DAFTAR -->
 <div id="listView">
   <div class="header">
     <h1>PESONA Kohort</h1>
-    <p>Puskesmas Klungkung I</p>
-    <button class="sync-btn" onclick="fetchDataPasien()">🔄 Segarkan</button>
+    <p>Pemetaan Koordinat Pasien</p>
+    <button class="btn-sync" onclick="fetchDataPasien()">Segarkan Data</button>
   </div>
   
   <div class="search-wrapper">
-    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari nama pasien..." onkeyup="filterPencarian()">
+    <input type="text" id="searchInput" class="search-input" placeholder="Cari nama pasien..." onkeyup="filterPencarian()">
   </div>
 
   <div id="patientList" class="list-container">
-    <div style="text-align:center; padding:30px; color:#9CA3AF; font-size: 14px;">Memuat data pasien...</div>
+    <div style="text-align:center; padding:40px; color:#9CA3AF; font-size: 14px;">Menyiapkan data pasien...</div>
   </div>
 </div>
 
-<!-- TAMPILAN 2: FORM INPUT -->
+<!-- TAMPILAN FORM -->
 <div id="formView">
-  <button class="nav-back" onclick="tutupForm()">← Kembali</button>
+  <button class="nav-back" onclick="tutupForm()">←</button>
   
   <h2 class="form-title">Geotagging</h2>
   <div class="form-subtitle" id="subtitleNama">Nama Pasien</div>
@@ -103,33 +103,32 @@
     <input type="hidden" id="kategori" value="HT">
     
     <div class="input-group">
-      <label>Nomor Induk Kependudukan (NIK)</label>
+      <label>Nomor Induk Kependudukan</label>
       <input type="text" id="nik" readonly>
     </div>
 
     <div class="input-group">
       <label>Titik Koordinat Geografis</label>
-      <input type="text" id="koordinat" placeholder="Belum ada koordinat" readonly required>
+      <input type="text" id="koordinat" placeholder="Belum ada data koordinat" readonly required>
     </div>
 
-    <button type="button" class="btn btn-gps" onclick="getGPS()">📍 Ambil Lokasi Saat Ini</button>
-    <button type="submit" class="btn btn-submit">Simpan & Sinkronkan</button>
+    <button type="button" class="btn btn-gps" onclick="getGPS()">📍 Ambil Lokasi Sekarang</button>
+    <button type="submit" class="btn btn-submit">Simpan ke Database</button>
   </form>
 </div>
 
 <script>
-  // === MASUKKAN URL DEPLOYMENT BARU ANDA DI SINI ===
+  // === JANGAN LUPA GANTI URL WEB APP GAS ANDA ===
   const GAS_URL = "https://script.google.com/macros/library/d/1gHmLM5ZeRqsOTyI8wC1gcXUQGqMyICjAb2xciueN05NLkUuH1T2gBUH5/5"; 
   let db;
   let dataPasienLokal = [];
 
-  // Inisialisasi IndexedDB
   const request = indexedDB.open("DatabasePESONA", 1);
   request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("dataTunda", { autoIncrement: true }); };
   request.onsuccess = (e) => { db = e.target.result; if (navigator.onLine) sinkronisasiDataTunda(); };
 
   window.onload = () => {
-    const cachedData = localStorage.getItem('pesona_data_v2');
+    const cachedData = localStorage.getItem('pesona_data_v3');
     if (cachedData) { dataPasienLokal = JSON.parse(cachedData); renderList(dataPasienLokal); }
     if (navigator.onLine) fetchDataPasien();
   };
@@ -139,9 +138,9 @@
       const response = await fetch(GAS_URL);
       const data = await response.json();
       dataPasienLokal = data;
-      localStorage.setItem('pesona_data_v2', JSON.stringify(data));
+      localStorage.setItem('pesona_data_v3', JSON.stringify(data));
       renderList(dataPasienLokal);
-    } catch(e) { console.log("Offline mode aktif"); }
+    } catch(e) { console.log("Mode offline aktif"); }
   }
 
   function renderList(data) {
@@ -153,19 +152,17 @@
       const cardClass = isSelesai ? "done" : "pending";
       const badgeClass = isSelesai ? "badge-done" : "badge-pending";
       const badgeText = isSelesai ? "Selesai" : "Belum";
+      const alamat = p.alamat || "Alamat belum tersedia";
 
-      // Desain Kartu dengan Nama, Alamat di bawahnya, dan Status di pojok
       const item = document.createElement('div');
       item.className = `patient-card ${cardClass}`;
       item.onclick = () => bukaForm(p.nama, p.nik);
       item.innerHTML = `
         <div class="patient-info">
           <h3 class="p-name">${p.nama}</h3>
-          <p class="p-address">📍 ${p.alamat}</p>
+          <p class="p-address">📍 ${alamat}</p>
         </div>
-        <div>
-          <span class="status-badge ${badgeClass}">${badgeText}</span>
-        </div>
+        <div><span class="status-badge ${badgeClass}">${badgeText}</span></div>
       `;
       container.appendChild(item);
     });
@@ -179,7 +176,7 @@
   function bukaForm(nama, nik) {
     document.getElementById('listView').style.display = 'none';
     document.getElementById('formView').style.display = 'block';
-    document.getElementById('subtitleNama').innerText = "Pasien: " + nama;
+    document.getElementById('subtitleNama').innerText = nama;
     document.getElementById('nik').value = nik;
     document.getElementById('koordinat').value = "";
     window.scrollTo(0, 0);
@@ -203,27 +200,15 @@
 
   document.getElementById('formGeo').addEventListener('submit', (e) => {
     e.preventDefault();
-    const data = {
-      kategori: document.getElementById('kategori').value,
-      nik: document.getElementById('nik').value,
-      koordinat: document.getElementById('koordinat').value
-    };
-
+    const data = { kategori: document.getElementById('kategori').value, nik: document.getElementById('nik').value, koordinat: document.getElementById('koordinat').value };
     const btnSubmit = document.querySelector('.btn-submit');
     btnSubmit.innerText = "Menyimpan...";
 
     if (navigator.onLine) {
       fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
-        .then(() => {
-          alert("Koordinat Berhasil Disimpan!");
-          fetchDataPasien(); 
-          tutupForm();
-          btnSubmit.innerText = "Simpan & Sinkronkan";
-        }).catch(() => { simpanOffline(data); btnSubmit.innerText = "Simpan & Sinkronkan"; });
-    } else {
-      simpanOffline(data);
-      btnSubmit.innerText = "Simpan & Sinkronkan";
-    }
+        .then(() => { alert("Koordinat Berhasil Disimpan!"); fetchDataPasien(); tutupForm(); btnSubmit.innerText = "Simpan ke Database"; })
+        .catch(() => { simpanOffline(data); btnSubmit.innerText = "Simpan ke Database"; });
+    } else { simpanOffline(data); btnSubmit.innerText = "Simpan ke Database"; }
   });
 
   function simpanOffline(data) {
@@ -243,25 +228,13 @@
           fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
             .then(() => db.transaction("dataTunda", "readwrite").objectStore("dataTunda").delete(store.getAllKeys().result[i]));
         });
-        setTimeout(() => { 
-          fetchDataPasien(); 
-          document.getElementById('sysStatus').innerText = "Online (Sinkronisasi Aktif)";
-        }, 3000);
+        setTimeout(() => { fetchDataPasien(); document.getElementById('sysStatus').innerText = "Online (Siap Sinkronisasi)"; }, 3000);
       }
     };
   }
 
-  window.addEventListener('online', () => {
-    const sys = document.getElementById('sysStatus');
-    sys.innerText = "Online (Sinkronisasi Aktif)";
-    sys.className = "";
-    sinkronisasiDataTunda();
-  });
-  window.addEventListener('offline', () => {
-    const sys = document.getElementById('sysStatus');
-    sys.innerText = "Mode Lapangan (Offline)";
-    sys.className = "offline";
-  });
+  window.addEventListener('online', () => { document.getElementById('sysStatus').innerText = "Online (Siap Sinkronisasi)"; document.getElementById('sysStatus').className = ""; sinkronisasiDataTunda(); });
+  window.addEventListener('offline', () => { document.getElementById('sysStatus').innerText = "Mode Lapangan (Offline)"; document.getElementById('sysStatus').className = "offline"; });
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
