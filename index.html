@@ -2,73 +2,181 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Geotagging Pasien</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PESONA Geotagging</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f7f6; }
-    .container { max-width: 400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h2 { color: #2c3e50; text-align: center; margin-bottom: 5px; }
-    p.subtitle { text-align: center; color: #7f8c8d; font-size: 14px; margin-top: 0; margin-bottom: 20px;}
-    label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px;}
-    input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    button { width: 100%; padding: 12px; margin-top: 20px; background: #27ae60; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
-    button.gps-btn { background: #3498db; margin-top: 5px; }
-    .status { text-align: center; margin-top: 15px; font-size: 12px; color: #7f8c8d; }
-    .offline-alert { color: #e74c3c; font-weight: bold; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8f9fa; padding-bottom: 70px; }
+    
+    /* App Bar & Pencarian */
+    .header { background: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;}
+    .header h3 { margin: 0; color: #333; font-size: 18px; }
+    .btn-icon { background: none; border: none; font-size: 20px; cursor: pointer; color: #555; }
+    .search-container { padding: 10px 15px; background: #fff; border-bottom: 1px solid #eee; }
+    .search-container input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; box-sizing: border-box; background: #f4f6f8; }
+
+    /* Daftar Pasien */
+    .list-container { padding: 10px; }
+    .list-item { display: flex; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; }
+    .map-thumb { width: 70px; height: 60px; background: #90caf9 url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/250px-World_map_-_low_resolution.svg.png') center/cover; border-radius: 4px; margin-right: 15px; border: 1px solid #e0e0e0; }
+    .item-content { flex: 1; }
+    .item-title { font-size: 16px; color: #222; margin-bottom: 4px; }
+    .item-status { font-size: 13px; font-style: italic; }
+    .status-red { color: #e74c3c; }
+    .status-green { color: #27ae60; }
+    
+    /* Form Geotagging (Disembunyikan di awal) */
+    #formView { display: none; padding: 20px; background: #fff; min-height: 100vh; }
+    label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #444;}
+    input.form-input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #f9f9f9;}
+    button.btn-primary { width: 100%; padding: 14px; margin-top: 20px; background: #1976D2; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    button.btn-gps { background: #0288d1; margin-top: 8px; }
+    .btn-back { margin-bottom: 15px; background: #eee; padding: 10px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+    /* Navigasi Bawah */
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #ddd; z-index: 100;}
+    .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 13px; font-weight: bold; cursor: pointer; color: #666; }
+    .nav-item.active { background: #1976D2; color: #fff; }
+    
+    #networkStatus { text-align: center; padding: 5px; font-size: 12px; color: white; background: #27ae60; }
+    #networkStatus.offline { background: #e74c3c; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>PESONA Geotagging</h2>
-  <p class="subtitle">Pemetaan Titik Koordinat Kohort</p>
-  <div id="networkStatus" class="status">Memeriksa jaringan...</div>
+<div id="networkStatus">Status: Online (Siap Sinkronisasi)</div>
 
+<!-- TAMPILAN 1: DAFTAR PASIEN -->
+<div id="listView">
+  <div class="header">
+    <button class="btn-icon">☰</button>
+    <h3>PESONA</h3>
+    <button class="btn-icon" onclick="fetchDataPasien()">🔄</button>
+  </div>
+  
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Cari nama pasien..." onkeyup="filterPencarian()">
+  </div>
+
+  <div id="patientList" class="list-container">
+    <div style="text-align:center; padding:20px; color:#666;">Mengunduh data pasien...</div>
+  </div>
+</div>
+
+<!-- TAMPILAN 2: FORM INPUT (Muncul saat pasien diklik) -->
+<div id="formView">
+  <button class="btn-back" onclick="tutupForm()">🔙 Kembali ke Daftar</button>
+  <h2 style="margin-top:0;">Geotagging Pasien</h2>
   <form id="formGeo">
-    <label>Program / Kategori</label>
-    <select id="kategori" required>
-      <option value="HT">Hipertensi (HT)</option>
-      <option value="DM">Diabetes Melitus (DM)</option>
-    </select>
-
-    <label>Masukkan NIK Pasien</label>
-    <input type="number" id="nik" placeholder="Ketik 16 digit NIK..." required>
+    <input type="hidden" id="kategori" value="HT">
+    
+    <label>Nama Pasien</label>
+    <input type="text" id="namaPasien" class="form-input" readonly>
+    
+    <label>NIK</label>
+    <input type="text" id="nik" class="form-input" readonly>
 
     <label>Titik Koordinat</label>
-    <input type="text" id="koordinat" placeholder="Ketuk tombol di bawah" readonly required>
-    <button type="button" class="gps-btn" onclick="getGPS()">📍 Ambil Lokasi Sekarang</button>
+    <input type="text" id="koordinat" class="form-input" placeholder="Ketuk tombol lokasi di bawah" readonly required>
+    <button type="button" class="btn-primary btn-gps" onclick="getGPS()">📍 Ambil Lokasi Sekarang</button>
 
-    <button type="submit">Sinkronkan Data</button>
+    <button type="submit" class="btn-primary">Simpan Koordinat</button>
   </form>
 </div>
 
+<!-- NAVIGASI BAWAH -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="tutupForm()">Pasien HT</div>
+  <div class="nav-item">Peta Pasien HT</div>
+</div>
+
 <script>
-  // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA YANG BARU
-  const GAS_URL = "https://script.google.com/macros/library/d/1gHmLM5ZeRqsOTyI8wC1gcXUQGqMyICjAb2xciueN05NLkUuH1T2gBUH5/2";
+  // === GANTI DENGAN URL WEB APP ANDA ===
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxICrHmiycBg6JZoZx4GXfTY1JoHbtc9leFblBX7Ckw3dwkK6Ux8dLTj9q08ftark9J/exec"; 
   let db;
+  let dataPasienLokal = [];
 
+  // Inisialisasi IndexedDB untuk mode offline
   const request = indexedDB.open("DatabaseGeotagging", 1);
-  request.onupgradeneeded = (e) => {
-    db = e.target.result;
-    db.createObjectStore("dataTunda", { autoIncrement: true });
-  };
-  request.onsuccess = (e) => {
-    db = e.target.result;
-    if (navigator.onLine) sinkronisasiData();
+  request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("dataTunda", { autoIncrement: true }); };
+  request.onsuccess = (e) => { db = e.target.result; if (navigator.onLine) sinkronisasiDataTunda(); };
+
+  // Memuat data saat aplikasi dibuka
+  window.onload = () => {
+    const cachedData = localStorage.getItem('pesona_ht_data');
+    if (cachedData) {
+      dataPasienLokal = JSON.parse(cachedData);
+      renderList(dataPasienLokal);
+    }
+    if (navigator.onLine) fetchDataPasien();
   };
 
+  // 1. Mengambil Daftar Pasien dari Google Sheets (doGet)
+  async function fetchDataPasien() {
+    try {
+      const response = await fetch(GAS_URL);
+      const data = await response.json();
+      dataPasienLokal = data;
+      localStorage.setItem('pesona_ht_data', JSON.stringify(data)); // Simpan ke memori HP
+      renderList(dataPasienLokal);
+    } catch(e) {
+      console.log("Menggunakan data offline");
+    }
+  }
+
+  // 2. Menampilkan UI Daftar Pasien
+  function renderList(data) {
+    const container = document.getElementById('patientList');
+    container.innerHTML = "";
+    
+    data.forEach(p => {
+      const isSelesai = p.status.toLowerCase().includes("sudah");
+      const statusIcon = isSelesai ? "✅" : "❗";
+      const statusClass = isSelesai ? "status-green" : "status-red";
+      const statusText = isSelesai ? "Sudah Ditandai" : "Belum Ditandai";
+
+      const item = document.createElement('div');
+      item.className = 'list-item';
+      item.onclick = () => bukaForm(p.nama, p.nik);
+      item.innerHTML = `
+        <div class="map-thumb"></div>
+        <div class="item-content">
+          <div class="item-title"><strong>${p.nama}</strong></div>
+          <div class="item-status ${statusClass}">${statusIcon} <i>${statusText}</i></div>
+        </div>
+        <div style="color:#aaa;">&#10247;</div>
+      `;
+      container.appendChild(item);
+    });
+  }
+
+  // 3. Fitur Pencarian Cepat
+  function filterPencarian() {
+    const keyword = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = dataPasienLokal.filter(p => p.nama.toLowerCase().includes(keyword));
+    renderList(filtered);
+  }
+
+  // 4. Buka & Tutup Form (Perpindahan Halaman)
+  function bukaForm(nama, nik) {
+    document.getElementById('listView').style.display = 'none';
+    document.getElementById('formView').style.display = 'block';
+    document.getElementById('namaPasien').value = nama;
+    document.getElementById('nik').value = nik;
+    document.getElementById('koordinat').value = "";
+  }
+  function tutupForm() {
+    document.getElementById('listView').style.display = 'block';
+    document.getElementById('formView').style.display = 'none';
+  }
+
+  // 5. Fitur GPS & Simpan (Logika Offline/Online)
   function getGPS() {
     if (navigator.geolocation) {
-      document.getElementById('koordinat').value = "Mencari akurasi lokasi...";
+      document.getElementById('koordinat').value = "Mencari akurasi...";
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          document.getElementById('koordinat').value = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-        },
-        (err) => {
-          alert("Gagal ambil GPS. Pastikan izin lokasi aktif.");
-          document.getElementById('koordinat').value = "";
-        },
+        pos => document.getElementById('koordinat').value = `${pos.coords.latitude}, ${pos.coords.longitude}`,
+        err => alert("Gagal ambil GPS. Aktifkan lokasi HP Anda."),
         { enableHighAccuracy: true }
       );
     }
@@ -90,76 +198,47 @@
   });
 
   function kirimKeServer(data) {
-    const btnSubmit = document.querySelector("button[type=submit]");
-    btnSubmit.innerText = "Mengirim...";
-    
-    fetch(GAS_URL, {
-      method: "POST",
-      body: JSON.stringify(data),
-      mode: 'no-cors', 
-      headers: { "Content-Type": "application/json" }
-    }).then(() => {
-      alert("Permintaan sinkronisasi terkirim!");
-      document.getElementById('nik').value = "";
-      document.getElementById('koordinat').value = "";
-      btnSubmit.innerText = "Sinkronkan Data";
-    }).catch(err => {
-      simpanOffline(data);
-    });
+    fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
+      .then(() => {
+        alert("Koordinat Tersimpan!");
+        fetchDataPasien(); // Segarkan data agar status berubah
+        tutupForm();
+      }).catch(() => simpanOffline(data));
   }
 
   function simpanOffline(data) {
     const tx = db.transaction("dataTunda", "readwrite");
-    const store = tx.objectStore("dataTunda");
-    store.add(data);
-    alert("Koneksi terputus. Data disimpan di HP dan akan sinkron otomatis saat ada sinyal.");
-    document.getElementById('nik').value = "";
-    document.getElementById('koordinat').value = "";
-    document.querySelector("button[type=submit]").innerText = "Sinkronkan Data";
+    tx.objectStore("dataTunda").add(data);
+    alert("Offline: Data disimpan di HP. Akan otomatis terkirim saat ada sinyal.");
+    tutupForm();
   }
 
-  function sinkronisasiData() {
-    const tx = db.transaction("dataTunda", "readwrite");
-    const store = tx.objectStore("dataTunda");
-    const getReq = store.getAll();
-    const getKeys = store.getAllKeys();
-
-    getReq.onsuccess = () => {
-      const dataNyangkut = getReq.result;
-      const keys = getKeys.result;
-      
-      if(dataNyangkut.length > 0) {
-        document.getElementById('networkStatus').innerText = `Menyinkronkan ${dataNyangkut.length} data tertunda...`;
-        
-        dataNyangkut.forEach((data, index) => {
-          fetch(GAS_URL, {
-            method: "POST",
-            body: JSON.stringify(data),
-            mode: 'no-cors'
-          }).then(() => {
-            const deleteTx = db.transaction("dataTunda", "readwrite");
-            deleteTx.objectStore("dataTunda").delete(keys[index]);
-          });
+  function sinkronisasiDataTunda() {
+    const store = db.transaction("dataTunda", "readwrite").objectStore("dataTunda");
+    store.getAll().onsuccess = (e) => {
+      const dataNyangkut = e.target.result;
+      if (dataNyangkut.length > 0) {
+        dataNyangkut.forEach((data, i) => {
+          fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
+            .then(() => db.transaction("dataTunda", "readwrite").objectStore("dataTunda").delete(store.getAllKeys().result[i]));
         });
-        setTimeout(() => { document.getElementById('networkStatus').innerText = "Sistem Online"; }, 3000);
+        setTimeout(fetchDataPasien, 3000); // Segarkan list setelah sinkron
       }
     };
   }
 
+  // Monitor Jaringan
   window.addEventListener('online', () => {
-    document.getElementById('networkStatus').innerText = "Status: Online";
-    document.getElementById('networkStatus').className = "status";
-    sinkronisasiData();
+    document.getElementById('networkStatus').innerText = "Status: Online (Siap Sinkronisasi)";
+    document.getElementById('networkStatus').className = "";
+    sinkronisasiDataTunda();
   });
-  
   window.addEventListener('offline', () => {
-    document.getElementById('networkStatus').innerText = "Status: Offline (Mode Lapangan Aktif)";
-    document.getElementById('networkStatus').className = "status offline-alert";
+    document.getElementById('networkStatus').innerText = "Status: Offline (Mode Lapangan)";
+    document.getElementById('networkStatus').className = "offline";
   });
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
