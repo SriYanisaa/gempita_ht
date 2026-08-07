@@ -162,19 +162,17 @@
     
     #sysStatus { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); padding: 8px 18px; font-size: 11px; font-weight: 700; color: white; background: rgba(5, 150, 105, 0.95); border-radius: 20px; z-index: 2000; backdrop-filter: blur(4px); box-shadow: 0 4px 15px rgba(0,0,0,0.15);}
     #sysStatus.offline { background: rgba(225, 29, 72, 0.95); }
-    
+  
     .watermark-it {
-      position: fixed;
-      bottom: 45px; /* Posisinya pas di atas tombol status online/offline */
-      right: 20px;
-      font-size: 10px;
+      text-align: center; /* Dibuat rata tengah agar lebih estetik di bawah */
+      padding: 15px 20px 80px 20px; /* Padding bawah 80px agar tidak tertutup tombol Sistem Online */
+      font-size: 9px;
       font-weight: 700;
       color: var(--text-muted);
-      opacity: 0.6; /* Dibuat agak transparan */
-      z-index: 1500;
+      opacity: 0.6; 
       letter-spacing: 0.5px;
-      pointer-events: none; /* Agar tidak menghalangi jika tidak sengaja terklik */
       text-transform: uppercase;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -480,6 +478,7 @@
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 
+  <div id="patientList" class="list-container"></div>
   <div class="watermark-it">App by Penata Kelola Sistem dan Teknologi Informasi<br>UPTD. Puskesmas Klungkung I</div>
 </body>
 </html>
