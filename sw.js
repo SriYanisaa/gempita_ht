@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pesona-geo-v5.8.3'; // Versi sudah dinaikkan untuk mereset cache
+const CACHE_NAME = 'pesona-geo-v5.8.4'; // Versi sudah dinaikkan untuk mereset cache
 const urlsToCache = [
   '/gempita_ht/',
   '/gempita_ht/index.html',
