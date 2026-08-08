@@ -364,29 +364,65 @@
     });
   }
 
-  function inisialisasiPeta(savedKoordinat) {
+  function inisialisasiPeta(savedKoordinat, namaPasien) {
     let lat = -8.5333; let lng = 115.4000; let zoomLvl = 13; 
+    let isLocked = false;
+
+    // Cek apakah koordinat sudah ada
     if (savedKoordinat && savedKoordinat.includes(",")) {
        const parts = savedKoordinat.split(',');
        lat = parseFloat(parts[0].trim()); lng = parseFloat(parts[1].trim());
        zoomLvl = 17; 
+       isLocked = true; // Aktifkan mode penguncian
     }
+
     if (!map) {
       map = L.map('map').setView([lat, lng], zoomLvl);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-      marker = L.marker([lat, lng], {draggable: true}).addTo(map);
-      marker.on('dragend', function(e) { 
-        const pos = marker.getLatLng(); 
-        document.getElementById('koordinat').value = `${pos.lat}, ${pos.lng}`; 
-      });
-      map.on('click', function(e) { 
-        marker.setLatLng(e.latlng); 
-        document.getElementById('koordinat').value = `${e.latlng.lat}, ${e.latlng.lng}`; 
-      });
+      marker = L.marker([lat, lng]).addTo(map);
     } else {
       map.setView([lat, lng], zoomLvl);
       marker.setLatLng([lat, lng]);
     }
+
+    // WAJIB: Bersihkan memori klik/geser peta sebelumnya agar tidak bentrok
+    map.off('click');
+    marker.off('dragend');
+    marker.unbindPopup(); // Hapus popup sebelumnya
+
+    // Ambil elemen HTML yang akan disembunyikan jika terkunci
+    const btnGps = document.querySelector('.btn-gps');
+    const btnSubmit = document.querySelector('.btn-submit');
+    const mapHint = document.querySelector('.map-hint');
+
+    if (isLocked) {
+      // --- MODE TERKUNCI (SUDAH DITANDAI) ---
+      marker.dragging.disable(); // Kunci pin agar tidak bisa digeser
+      mapHint.style.display = 'none'; // Sembunyikan teks panduan geser pin
+      btnGps.style.display = 'none'; // Sembunyikan tombol GPS
+      btnSubmit.style.display = 'none'; // Sembunyikan tombol Simpan
+      
+      // Tambahkan detail nama pasien saat pin biru diklik
+      marker.bindPopup(`<div style="text-align:center;"><b>${namaPasien}</b><br><span style="color:var(--danger); font-size:10px; font-weight:800;">📍 LOKASI TERKUNCI</span></div>`);
+    } else {
+      // --- MODE BEBAS (BELUM DITANDAI / TAMBAH PASIEN BARU) ---
+      marker.dragging.enable(); // Izinkan geser pin
+      mapHint.style.display = 'block'; 
+      btnGps.style.display = 'block'; 
+      btnSubmit.style.display = 'block'; 
+
+      // Fungsi saat pin selesai digeser
+      marker.on('dragend', function(e) { 
+        const pos = marker.getLatLng(); 
+        document.getElementById('koordinat').value = `${pos.lat}, ${pos.lng}`; 
+      });
+      // Fungsi saat sembarang tempat di peta diklik
+      map.on('click', function(e) { 
+        marker.setLatLng(e.latlng); 
+        document.getElementById('koordinat').value = `${e.latlng.lat}, ${e.latlng.lng}`; 
+      });
+    }
+
     setTimeout(() => { map.invalidateSize(); }, 300);
   }
 
@@ -409,12 +445,13 @@
     if (koordinat && koordinat.trim() !== "") {
       const koorBersih = koordinat.replace(/\s/g, ''); 
       btnRute.href = `https://www.google.com/maps/dir/?api=1&destination=${koorBersih}`;
-      btnRute.style.display = 'flex'; // Menampilkan tombol rute
+      btnRute.style.display = 'flex'; 
     } else {
-      btnRute.style.display = 'none'; // Menyembunyikan jika belum ada koordinat
+      btnRute.style.display = 'none'; 
     }
 
-    inisialisasiPeta(koordinat);
+    // Kirimkan 'nama' untuk ditampilkan di detail popup peta
+    inisialisasiPeta(koordinat, nama);
   }
 
   function bukaFormTambah() {
@@ -426,7 +463,6 @@
     document.getElementById('groupNamaInput').style.display = 'block';
     document.getElementById('groupAlamatInput').style.display = 'block';
     
-    // Pastikan tombol rute tersembunyi saat menambah pasien baru
     document.getElementById('btnRuteDetail').style.display = 'none';
     
     document.getElementById('inputNama').value = "";
@@ -434,7 +470,9 @@
     document.getElementById('nik').value = "";
     document.getElementById('nik').readOnly = false;
     document.getElementById('koordinat').value = "";
-    inisialisasiPeta(""); 
+    
+    // Kirim teks default untuk pasien baru
+    inisialisasiPeta("", "Pasien Baru"); 
   }
 
   function tutupForm() { document.getElementById('listView').style.display = 'block'; document.getElementById('formView').style.display = 'none'; }
