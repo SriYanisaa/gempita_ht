@@ -72,7 +72,7 @@
     .reset-btn { background: #ffffff; color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.2); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: background 0.2s;}
 
     /* Tombol Melayang Tambah Pasien */
-    .fab-add { position: fixed; bottom: 85px; right: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4); cursor: pointer; z-index: 100; border: none; transition: transform 0.2s; padding-bottom: 4px;}
+    .fab-add { position: fixed; bottom: 85px; right: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4); cursor: pointer; z-index: 100; border: none; transition: transform 0.2s; }
     .fab-add:active { transform: scale(0.92); }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(3px);}
@@ -167,7 +167,11 @@
   <div id="patientList" class="list-container"></div>
   
   <!-- Tombol Tambah Pasien Melayang -->
-  <button class="fab-add" onclick="bukaFormTambah()" title="Tambah Pasien Baru">➕</button>
+  <button class="fab-add" onclick="bukaFormTambah()" title="Tambah Pasien Baru">
+  <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+  </svg>
+</button>
   
   <!-- WATERMARK IT DI SINI -->
   <div class="watermark-it">App by Penata Kelola Sistem dan Teknologi Informasi<br>UPTD. Puskesmas Klungkung I</div>
@@ -247,7 +251,7 @@
 </div>
 
 <script>
-  // === JANGAN LUPA PASTIKAN LINK INI ADALAH URL WEB APP ANDA ===
+
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzcp57xHiOczZayb9wpQwDNkAuBiJpGPGHsfuaxpB4CxyaPzsfTN2fU9VpECskx49lE/exec"; 
   
   let db; let dataPasienLokal = []; let map, marker;
