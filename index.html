@@ -128,6 +128,21 @@
     #sysStatus.offline { background: rgba(225, 29, 72, 0.95); }
   
     .watermark-it { text-align: center; padding: 15px 20px 80px 20px; font-size: 9px; font-weight: 700; color: var(--text-muted); opacity: 0.6; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.5; }
+
+    /* ========================================= */
+    /* DESAIN LAYAR LOGIN & LOGOUT               */
+    /* ========================================= */
+    #loginView { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+    .login-box { background: var(--card-bg); width: 100%; max-width: 400px; padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; }
+    .login-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3); }
+    .login-box h2 { margin: 0 0 5px; color: var(--accent-navy); font-size: 24px; font-weight: 800; }
+    .login-box p { margin: 0 0 30px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
+    .login-input { width: 100%; padding: 16px; border: 2px solid var(--border-color); border-radius: 14px; font-family: inherit; font-size: 18px; text-align: center; font-weight: 800; color: var(--text-main); margin-bottom: 20px; box-sizing: border-box; outline: none; transition: border-color 0.3s; letter-spacing: 5px;}
+    .login-input:focus { border-color: var(--primary); }
+    .error-msg { color: var(--danger); font-size: 12px; font-weight: 700; margin-top: -10px; margin-bottom: 15px; display: none; }
+    
+    .btn-logout { background: rgba(225, 29, 72, 0.1); color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; margin-top: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.2s;}
+    .btn-logout:active { background: rgba(225, 29, 72, 0.2); }
   </style>
 </head>
 <body>
@@ -142,14 +157,29 @@
 <div id="loaderOverlay"><div class="spinner"></div><div class="loader-text" id="loaderText">Menyinkronkan Data...</div></div>
 <div id="sysStatus">SISTEM ONLINE</div>
 
+  <!-- LAYAR LOGIN -->
+<div id="loginView" style="display: none;">
+  <div class="login-box">
+    <img src="logo_transparent.png?v=3" alt="Logo PANDU" class="login-logo">
+    <h2>PANDU</h2>
+    <p>Silakan masukkan PIN akses Anda</p>
+    <input type="password" id="inputPin" class="login-input" placeholder="••••••" maxlength="6" inputmode="numeric">
+    <div id="loginError" class="error-msg">PIN yang Anda masukkan salah!</div>
+    <button class="btn btn-submit" onclick="prosesLogin()">Masuk Aplikasi</button>
+  </div>
+  <div class="watermark-it" style="position: static; margin-top: 40px; padding: 0;">App by Penata Kelola Sistem dan Teknologi Informasi<br>UPTD. Puskesmas Klungkung I</div>
+</div>
+
 <!-- TAMPILAN DAFTAR -->
-<div id="listView">
+<div id="listView" style="display: none;">
   <div class="header">
     <div style="display: flex; align-items: center; gap: 15px;">
       <img src="logo_transparent.png?v=3" alt="Logo PANDU" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 15px rgba(20, 184, 166, 0.3);">
       <div class="header-text">
         <h1>PANDU</h1>
         <p>Aplikasi Pemetaan Kesehatan Masyarakat</p>
+        <!-- TOMBOL LOGOUT BARU -->
+        <button class="btn-logout" onclick="prosesLogout()">🔒 Keluar (Logout)</button>
       </div>
     </div>
     <button class="btn-sync" onclick="fetchDataPasien()">🔄 Segarkan</button>
@@ -260,13 +290,65 @@
   
   let db; let dataPasienLokal = []; let map, marker;
 
+  // === PENGATURAN PIN APLIKASI ===
+  const PIN_APLIKASI = "123456"; 
+
+  // Logika Menghilangkan Splash Screen & Cek Login
   window.addEventListener('load', () => {
     setTimeout(() => {
       const splash = document.getElementById('splashScreen');
       splash.classList.add('hidden');
-      setTimeout(() => splash.remove(), 600);
+      setTimeout(() => {
+        splash.remove();
+        cekStatusLogin(); // Periksa login setelah splash screen hilang
+      }, 600);
     }, 1500); 
   });
+
+  // Fungsi Pengecekan Status Login
+  function cekStatusLogin() {
+    const isLoggedIn = localStorage.getItem('pandu_logged_in');
+    
+    if (isLoggedIn === 'true') {
+      // Jika sudah login, tampilkan halaman utama
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('listView').style.display = 'block';
+      
+      // Ambil data pasien hanya jika sudah masuk halaman utama
+      const cachedData = localStorage.getItem('pesona_data_v13');
+      if (cachedData) { dataPasienLokal = JSON.parse(cachedData); applyFilters(); }
+      if (navigator.onLine) fetchDataPasien();
+    } else {
+      // Jika belum login, sembunyikan semua dan tampilkan form login
+      document.getElementById('listView').style.display = 'none';
+      document.getElementById('formView').style.display = 'none';
+      document.getElementById('loginView').style.display = 'flex';
+    }
+  }
+
+  // Fungsi Memproses Input PIN
+  function prosesLogin() {
+    const pinInput = document.getElementById('inputPin').value;
+    if (pinInput === PIN_APLIKASI) {
+      localStorage.setItem('pandu_logged_in', 'true'); // Simpan sesi di HP
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('inputPin').value = ''; // Kosongkan input
+      cekStatusLogin(); // Buka aplikasi
+    } else {
+      document.getElementById('loginError').style.display = 'block'; // Tampilkan pesan error
+    }
+  }
+
+  // Fungsi Keluar / Logout
+  function prosesLogout() {
+    if(confirm("Apakah Anda yakin ingin keluar dan mengunci aplikasi?")) {
+      localStorage.removeItem('pandu_logged_in'); // Hapus sesi
+      cekStatusLogin(); // Kembalikan ke layar login
+    }
+  }
+
+  // (HAPUS blok window.onload lama agar tidak bertabrakan dengan cekStatusLogin)
+  // PASTIKAN BARIS window.onload = () => { ... } YANG LAMA DIHAPUS.
 
   function showLoader(text) { document.getElementById('loaderText').innerText = text; document.getElementById('loaderOverlay').classList.add('active'); }
   function hideLoader() { document.getElementById('loaderOverlay').classList.remove('active'); }
