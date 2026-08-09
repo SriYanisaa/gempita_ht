@@ -355,38 +355,37 @@
     }
   }
 
-  // Fungsi Memproses Input PIN ke Database Server (Sangat Aman)
   async function prosesLogin() {
     const pinInput = document.getElementById('inputPin').value;
-    if (!pinInput) return; // Jangan proses jika kotak kosong
+    if (!pinInput) return; 
 
     document.getElementById('loginError').style.display = 'none';
-    showLoader("Memverifikasi Keamanan..."); // Tampilkan layar loading
+    showLoader("Memverifikasi Keamanan..."); 
 
     try {
-      // Mengirim PIN yang diketik ke Google Apps Script secara diam-diam
       const response = await fetch(GAS_URL + "?action=login&pin=" + pinInput);
       const result = await response.json();
 
       if (result.status === "success") {
-        localStorage.setItem('pandu_logged_in', 'true'); // Jika server menjawab benar, simpan sesi
-        document.getElementById('inputPin').value = ''; // Kosongkan layar input
-        cekStatusLogin(); // Buka gembok aplikasi
+        localStorage.setItem('pandu_logged_in', 'true'); 
+        localStorage.setItem('pandu_pin', pinInput); // KITA SIMPAN KUNCI PIN DI SINI
+        document.getElementById('inputPin').value = ''; 
+        cekStatusLogin(); 
       } else {
-        document.getElementById('loginError').style.display = 'block'; // Server menjawab salah
+        document.getElementById('loginError').style.display = 'block'; 
       }
     } catch (error) {
       alert("Gagal menghubungi server Puskesmas. Pastikan internet Anda menyala saat login pertama kali.");
     } finally {
-      hideLoader(); // Matikan layar loading
+      hideLoader(); 
     }
   }
 
-  // Fungsi Keluar / Logout
   function prosesLogout() {
     if(confirm("Apakah Anda yakin ingin keluar dan mengunci aplikasi?")) {
-      localStorage.removeItem('pandu_logged_in'); // Hapus sesi
-      cekStatusLogin(); // Kembalikan ke layar login
+      localStorage.removeItem('pandu_logged_in'); 
+      localStorage.removeItem('pandu_pin'); // HAPUS KUNCI PIN SAAT KELUAR
+      cekStatusLogin(); 
     }
   }
 
@@ -415,10 +414,22 @@
   };
 
   async function fetchDataPasien() {
+    const pinAkses = localStorage.getItem('pandu_pin');
+    if (!pinAkses) return; // Jangan izinkan ambil data tanpa PIN
+
     setTimeout(() => showLoader("Mengambil data terbaru..."), 1500);
     try {
-      const response = await fetch(GAS_URL);
+      // SISIPKAN KUNCI PIN SAAT MENGAMBIL DATA 
+      const response = await fetch(GAS_URL + "?pin=" + pinAkses);
       const data = await response.json();
+      
+      // Jika server menjawab unauthorized (misal PIN diganti dari pusat)
+      if (data.status === "unauthorized") {
+         alert("PIN Akses Anda sudah tidak valid. Silakan login kembali.");
+         prosesLogout();
+         return;
+      }
+
       dataPasienLokal = data;
       localStorage.setItem('pesona_data_v13', JSON.stringify(data));
       applyFilters(); 
@@ -622,25 +633,19 @@
     e.preventDefault();
     const action = document.getElementById('formAction').value;
     
+    // SISIPKAN KUNCI PIN SAAT MENYIMPAN DATA
     let data = { 
       action: action, 
       nik: document.getElementById('nik').value, 
-      koordinat: document.getElementById('koordinat').value
+      koordinat: document.getElementById('koordinat').value,
+      pin: localStorage.getItem('pandu_pin') 
     };
     
     if (action === "tambah") {
       data.nama = document.getElementById('inputNama').value;
       data.alamat = document.getElementById('inputAlamat').value;
     }
-
-    showLoader("Menyimpan & Sinkronisasi...");
-    if (navigator.onLine) {
-      fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
-        .then(() => { alert("Data berhasil disimpan ke Database!"); fetchDataPasien(); tutupForm(); })
-        .catch(() => { simpanOffline(data); })
-        .finally(() => { hideLoader(); });
-    } else { simpanOffline(data); hideLoader(); }
-  });
+    // ... sisa kode di bawahnya biarkan sama (showLoader dst...)
 
   function simpanOffline(data) { const tx = db.transaction("dataTunda", "readwrite"); tx.objectStore("dataTunda").add(data); alert("Koneksi terputus! Data disimpan di HP (Akan disinkronkan saat sinyal ada)."); tutupForm(); }
 
