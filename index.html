@@ -595,70 +595,74 @@
     }
   }
 
-  // BLOK KODE YANG SEBELUMNYA TERPUTUS KINI SUDAH LENGKAP
   document.getElementById('formGeo').addEventListener('submit', (e) => {
     e.preventDefault();
     const action = document.getElementById('formAction').value;
     
+    // --- 1. CATAT WAKTU SAAT TOMBOL SIMPAN DITEKAN ---
+    const now = new Date();
+    const tgl = String(now.getDate()).padStart(2, '0');
+    const bln = String(now.getMonth() + 1).padStart(2, '0');
+    const thn = now.getFullYear();
+    const jam = String(now.getHours()).padStart(2, '0');
+    const mnt = String(now.getMinutes()).padStart(2, '0');
+    const waktuGeotag = `${tgl}-${bln}-${thn} ${jam}:${mnt}`; // Hasil: 09-08-2026 19:30
+
+    // --- 2. SUSUN DATA YANG AKAN DIKIRIM ---
     let data = { 
       action: action, 
       nik: document.getElementById('nik').value, 
       koordinat: document.getElementById('koordinat').value,
-      pin: localStorage.getItem('pandu_pin') 
+      pin: localStorage.getItem('pandu_pin'),
+      tanggalGeotagging: waktuGeotag // Sisipkan tanggal perekaman di sini
     };
     
     if (action === "tambah") {
       data.nama = document.getElementById('inputNama').value;
       data.alamat = document.getElementById('inputAlamat').value;
       
-      // ==========================================
-      // LOGIKA OTOMATIS EKSTRAKSI TGL LAHIR & GENDER
-      // NIK KTP: DD MM YY (Digit ke 7 sampai 12)
-      // ==========================================
+      // Logika Ekstraksi Tgl Lahir & Gender Otomatis
       const nikKtp = document.getElementById('nik').value;
       let tglLahirFinal = "";
       let jenisKelaminFinal = "";
       
-      // Validasi NIK wajib 16 digit
       if (nikKtp && nikKtp.length >= 16) {
-        let tgl = parseInt(nikKtp.substring(6, 8));
-        let bln = nikKtp.substring(8, 10);
+        let tglLhr = parseInt(nikKtp.substring(6, 8));
+        let blnLhr = nikKtp.substring(8, 10);
         let thnStr = nikKtp.substring(10, 12);
-        let thn = parseInt(thnStr);
+        let thnLhr = parseInt(thnStr);
         
-        // Cek Gender dari Tanggal (Perempuan > 40)
-        if (tgl > 40) { 
+        if (tglLhr > 40) { 
           jenisKelaminFinal = "Perempuan";
-          tgl = tgl - 40; // Kembalikan ke tanggal lahir asli
+          tglLhr = tglLhr - 40; 
         } else {
           jenisKelaminFinal = "Laki-Laki";
         }
         
-        // Format angka tanggal agar selalu 2 digit (01, 02, dst)
-        let strTgl = tgl < 10 ? '0' + tgl : '' + tgl;
-        
-        // Aturan penentuan abad: Jika tahun > 26 dianggap kelahiran 19XX, selain itu 20XX
-        let strThn = (thn > 26) ? '19' + thnStr : '20' + thnStr;
-        
-        tglLahirFinal = strTgl + '-' + bln + '-' + strThn;
+        let strTgl = tglLhr < 10 ? '0' + tglLhr : '' + tglLhr;
+        let strThn = (thnLhr > 26) ? '19' + thnStr : '20' + thnStr;
+        tglLahirFinal = strTgl + '-' + blnLhr + '-' + strThn;
       } else {
         alert("Gagal memproses! NIK yang Anda masukkan belum lengkap (Wajib 16 digit).");
         hideLoader();
-        return; // Hentikan pengiriman jika NIK kurang panjang
+        return; 
       }
 
-      // Masukkan hasil ekstraksi otomatis ke data yang akan dikirim ke database
       data.tanggalLahir = tglLahirFinal;
       data.jenisKelamin = jenisKelaminFinal;
     }
 
+    // --- 3. KIRIM DATA KE DATABASE ---
     showLoader("Menyimpan & Sinkronisasi...");
     if (navigator.onLine) {
       fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
         .then(() => { alert("Data berhasil disimpan ke Database!"); fetchDataPasien(); tutupForm(); })
         .catch(() => { simpanOffline(data); })
         .finally(() => { hideLoader(); });
-    } else { simpanOffline(data); hideLoader(); }
+    } else { 
+      simpanOffline(data); 
+      hideLoader(); 
+    }
   });
 
   function simpanOffline(data) { const tx = db.transaction("dataTunda", "readwrite"); tx.objectStore("dataTunda").add(data); alert("Koneksi terputus! Data disimpan di HP (Akan disinkronkan saat sinyal ada)."); tutupForm(); }
