@@ -130,12 +130,12 @@
     .btn-fullscreen { position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--text-main); transition: background 0.2s; }
     .btn-fullscreen:active { background: var(--bg-color); }
 
-    /* DESAIN PENCARIAN PETA & PERBAIKAN JARAK */
-    .search-map-box { display: flex; gap: 8px; margin-bottom: 12px; }
-    .search-map-box input { flex: 1; padding: 14px 16px; border: 1.5px solid var(--border-color); border-radius: 12px; font-family: inherit; font-size: 13px; outline: none; background: var(--card-bg); transition: border-color 0.3s; color: var(--text-main); font-weight: 600;}
-    .search-map-box input:focus { border-color: var(--primary); }
-    .search-map-box button { background: var(--primary); color: white; border: none; padding: 0 18px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 13px; transition: transform 0.2s, box-shadow 0.2s;}
-    .search-map-box button:active { transform: scale(0.95); }
+    /* DESAIN PENCARIAN MENGAMBANG DI DALAM PETA */
+    .search-map-overlay { position: absolute; top: 10px; left: 50px; right: 55px; z-index: 1000; display: flex; gap: 5px; }
+    .search-map-overlay input { flex: 1; padding: 10px 14px; border: 1px solid rgba(0,0,0,0.2); border-radius: 8px; font-family: inherit; font-size: 13px; outline: none; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); box-shadow: 0 2px 6px rgba(0,0,0,0.1); color: var(--text-main); font-weight: 600; min-width: 0; }
+    .search-map-overlay input:focus { border-color: var(--primary); }
+    .search-map-overlay button { background: var(--primary); color: white; border: none; padding: 0 14px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .search-map-overlay button:active { background: var(--primary-dark); }
     
     /* Jarak Teks Pin Diperlebar */
     .map-hint { font-size: 12px; color: var(--primary-dark); text-align: center; margin-top: 14px; margin-bottom: 25px; font-weight: 600;}
@@ -171,7 +171,7 @@
 <div id="loaderOverlay"><div class="spinner"></div><div class="loader-text" id="loaderText">Memproses...</div></div>
 <div id="sysStatus">SISTEM ONLINE</div>
 
-  <!-- LAYAR LOGIN -->
+<!-- LAYAR LOGIN -->
 <div id="loginView" style="display: none;">
   <div class="login-box">
     <img src="logo_transparent.png?v=3" alt="Logo PANDU" class="login-logo">
@@ -274,13 +274,13 @@
         <input type="text" id="inputNama" placeholder="Masukkan nama lengkap pasien">
       </div>
 
-      <!-- FITUR BARU: Pencarian Lokasi Peta (Hanya saat pin tidak terkunci) -->
-      <div class="search-map-box" id="searchMapBox" style="display: none;">
-        <input type="text" id="inputCariMap" placeholder="🔍 Cari patokan (misal: Pasar Satra)">
-        <button type="button" onclick="cariPatokanMap()">Cari</button>
-      </div>
-
       <div id="mapWrapper" class="map-wrapper">
+        <!-- FITUR PENCARIAN LOKASI DI DALAM PETA -->
+        <div class="search-map-overlay" id="searchMapBox" style="display: none;">
+          <input type="text" id="inputCariMap" placeholder="🔍 Cari lokasi...">
+          <button type="button" onclick="cariPatokanMap()">Cari</button>
+        </div>
+        
         <div id="map"></div>
         <button type="button" class="btn-fullscreen" onclick="toggleFullscreenMap()" title="Perbesar/Perkecil Peta">
           <svg id="fullscreenIcon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -519,7 +519,6 @@
     });
   }
 
-  // --- FUNGSI CARI PATOKAN LOKASI ---
   async function cariPatokanMap() {
     const query = document.getElementById('inputCariMap').value;
     if (!query) return;
@@ -530,7 +529,6 @@
     btn.innerText = "⏳";
 
     try {
-      // Menggunakan OpenStreetMap Nominatim secara aman & gratis (dipertajam untuk area Bali)
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bali')}&limit=1`);
       const data = await res.json();
       
@@ -598,14 +596,14 @@
       mapHint.style.display = 'none'; 
       btnGps.style.display = 'none'; 
       btnSubmit.style.display = 'none'; 
-      searchBox.style.display = 'none'; // Matikan fitur pencarian jika sudah dikunci
+      searchBox.style.display = 'none'; 
       marker.bindPopup(`<div style="text-align:center;"><b>${namaPasien}</b><br><span style="color:var(--danger); font-size:10px; font-weight:800;">📍 LOKASI TERKUNCI</span></div>`);
     } else {
       marker.dragging.enable(); 
       mapHint.style.display = 'block'; 
       btnGps.style.display = 'block'; 
       btnSubmit.style.display = 'block'; 
-      searchBox.style.display = 'flex'; // Hidupkan kolom pencarian peta
+      searchBox.style.display = 'flex'; 
 
       marker.on('dragend', function(e) { 
         const pos = marker.getLatLng(); 
@@ -650,7 +648,7 @@
     document.getElementById('nik').value = nik;
     document.getElementById('nik').readOnly = true;
     document.getElementById('koordinat').value = koordinat || "";
-    document.getElementById('inputCariMap').value = ""; // Bersihkan kolom pencarian
+    document.getElementById('inputCariMap').value = ""; 
     
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
@@ -682,7 +680,7 @@
     document.getElementById('nik').value = "";
     document.getElementById('nik').readOnly = false;
     document.getElementById('koordinat').value = "";
-    document.getElementById('inputCariMap').value = ""; // Bersihkan kolom pencarian
+    document.getElementById('inputCariMap').value = ""; 
     
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
