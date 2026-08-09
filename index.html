@@ -14,6 +14,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- LIBRARY KRIPTOGRAFI KEAMANAN (Menjawab Temuan Audit) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
   <style>
     :root {
@@ -163,12 +166,10 @@
     <img src="logo_transparent.png?v=3" alt="Logo PANDU" class="login-logo">
     <h2>PANDU</h2>
     <p>Silakan masukkan PIN akses Anda</p>
-    <!-- WADAH INPUT PASSWORD & IKON MATA -->
     <div class="password-container">
-      <input type="password" id="inputPin" class="login-input" placeholder="••••••••••" maxlength="10" inputmode="numeric">
+      <input type="password" id="inputPin" class="login-input" placeholder="••••••••" maxlength="10" inputmode="numeric">
       <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" title="Tampilkan PIN">
         <svg id="eyeIcon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <!-- Ikon Default: Mata Terbuka -->
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
         </svg>
@@ -188,7 +189,6 @@
       <div class="header-text">
         <h1>PANDU</h1>
         <p>Aplikasi Pemetaan Kesehatan Masyarakat</p>
-        <!-- TOMBOL LOGOUT -->
         <button class="btn-logout" onclick="prosesLogout()">🔒 Keluar (Logout)</button>
       </div>
     </div>
@@ -211,7 +211,6 @@
 
   <div id="patientList" class="list-container"></div>
   
-  <!-- Tombol Tambah Pasien Melayang -->
   <button class="fab-add" onclick="bukaFormTambah()" title="Tambah Pasien Baru">
     <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
@@ -270,7 +269,8 @@
       <a href="#" target="_blank" id="btnRuteDetail" class="btn btn-rute-detail" style="display: none;">🗺️ Buka Rute di Google Maps</a>
       
       <div class="input-group"><label>Koordinat Terpilih</label><input type="text" id="koordinat" placeholder="Belum ada koordinat" readonly required></div>
-      <!-- Input NIK dengan Peringatan Validasi -->
+      
+      <!-- Input NIK dengan Validasi Real-time -->
       <div class="input-group">
         <label>Nomor Induk Kependudukan</label>
         <input type="text" id="nik" placeholder="Masukkan 16 digit angka NIK" maxlength="16" inputmode="numeric" oninput="validasiNIK(this)" readonly required>
@@ -299,28 +299,20 @@
 </div>
 
 <script>
-  // === JANGAN LUPA PASTIKAN LINK INI ADALAH URL WEB APP ANDA ===
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzcp57xHiOczZayb9wpQwDNkAuBiJpGPGHsfuaxpB4CxyaPzsfTN2fU9VpECskx49lE/exec"; 
-  
   let db; let dataPasienLokal = []; let map, marker;
 
-  // Logika Menghilangkan Splash Screen & Cek Login
   window.addEventListener('load', () => {
     setTimeout(() => {
       const splash = document.getElementById('splashScreen');
       splash.classList.add('hidden');
-      setTimeout(() => {
-        splash.remove();
-        cekStatusLogin(); 
-      }, 600);
+      setTimeout(() => { splash.remove(); cekStatusLogin(); }, 600);
     }, 1500); 
   });
 
-  // Fungsi Tampilkan/Sembunyikan PIN
   function togglePasswordVisibility() {
     const pinInput = document.getElementById('inputPin');
     const eyeIcon = document.getElementById('eyeIcon');
-
     if (pinInput.type === 'password') {
       pinInput.type = 'text';
       eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />`;
@@ -330,16 +322,24 @@
     }
   }
 
-  // Fungsi Pengecekan Status Login
+  // --- CEK LOGIN & ENKRIPSI DATA LOCAL ---
   function cekStatusLogin() {
-    const isLoggedIn = localStorage.getItem('pandu_logged_in');
+    const token = localStorage.getItem('pandu_token');
     
-    if (isLoggedIn === 'true') {
+    if (token) {
       document.getElementById('loginView').style.display = 'none';
       document.getElementById('listView').style.display = 'block';
       
-      const cachedData = localStorage.getItem('pesona_data_v15');
-      if (cachedData) { dataPasienLokal = JSON.parse(cachedData); applyFilters(); }
+      const encryptedData = localStorage.getItem('pesona_data_secure');
+      if (encryptedData) {
+        try {
+          const bytes = CryptoJS.AES.decrypt(encryptedData, token);
+          dataPasienLokal = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+          applyFilters();
+        } catch(e) {
+          console.error("Gagal mendeskripsi data lokal.");
+        }
+      }
       if (navigator.onLine) fetchDataPasien();
     } else {
       document.getElementById('listView').style.display = 'none';
@@ -348,36 +348,61 @@
     }
   }
 
+  // --- PROSES LOGIN (ANTI BRUTE-FORCE & HASH PIN) ---
   async function prosesLogin() {
     const pinInput = document.getElementById('inputPin').value;
     if (!pinInput) return; 
 
+    // Cek Anti Brute-Force (Terkunci 3 Menit)
+    let lockout = localStorage.getItem('pandu_lockout');
+    if (lockout && Date.now() < parseInt(lockout)) {
+       let sisaWaktu = Math.ceil((parseInt(lockout) - Date.now()) / 60000);
+       document.getElementById('loginError').innerText = `Aplikasi terkunci. Coba lagi dalam ${sisaWaktu} menit.`;
+       document.getElementById('loginError').style.display = 'block';
+       return;
+    }
+
     document.getElementById('loginError').style.display = 'none';
     showLoader("Memverifikasi Keamanan..."); 
 
+    // Mengubah PIN menjadi Hash agar sangat aman
+    const hashedPin = CryptoJS.SHA256(pinInput).toString();
+
     try {
-      const response = await fetch(GAS_URL + "?action=login&pin=" + pinInput);
+      const response = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'login', pin: hashedPin }) // Mengirim secara tersembunyi (POST)
+      });
       const result = await response.json();
 
       if (result.status === "success") {
-        localStorage.setItem('pandu_logged_in', 'true'); 
-        localStorage.setItem('pandu_pin', pinInput); 
+        localStorage.setItem('pandu_token', hashedPin); // Simpan Hash, bukan PIN asli
+        localStorage.setItem('pandu_attempts', '0'); // Reset percobaan salah
         document.getElementById('inputPin').value = ''; 
         cekStatusLogin(); 
       } else {
+        // Logika Brute Force
+        let attempts = parseInt(localStorage.getItem('pandu_attempts') || '0') + 1;
+        localStorage.setItem('pandu_attempts', attempts);
+        if (attempts >= 3) {
+           localStorage.setItem('pandu_lockout', Date.now() + 3 * 60 * 1000); // Kunci 3 menit
+           document.getElementById('loginError').innerText = "Anda salah 3 kali. Aplikasi terkunci 3 menit.";
+        } else {
+           document.getElementById('loginError').innerText = "PIN salah! Sisa percobaan: " + (3 - attempts);
+        }
         document.getElementById('loginError').style.display = 'block'; 
       }
     } catch (error) {
-      alert("Gagal menghubungi server Puskesmas. Pastikan internet Anda menyala saat login pertama kali.");
+      alert("Gagal menghubungi server. Pastikan internet menyala.");
     } finally {
       hideLoader(); 
     }
   }
 
   function prosesLogout() {
-    if(confirm("Apakah Anda yakin ingin keluar dan mengunci aplikasi?")) {
-      localStorage.removeItem('pandu_logged_in'); 
-      localStorage.removeItem('pandu_pin'); 
+    if(confirm("Apakah Anda yakin ingin mengunci dan menghapus data sesi aplikasi?")) {
+      localStorage.removeItem('pandu_token'); 
+      localStorage.removeItem('pesona_data_secure'); // Hapus data terenkripsi demi keamanan total
       cekStatusLogin(); 
     }
   }
@@ -385,38 +410,39 @@
   function showLoader(text) { document.getElementById('loaderText').innerText = text; document.getElementById('loaderOverlay').classList.add('active'); }
   function hideLoader() { document.getElementById('loaderOverlay').classList.remove('active'); }
   function toggleFilter() { document.getElementById('filterModal').classList.toggle('active'); }
-  
-  function resetFilters() {
-    document.getElementById('searchInput').value = "";
-    document.getElementById('filterStatus').value = "all";
-    document.getElementById('filterAlamat').value = "all";
-    applyFilters();
-  }
+  function resetFilters() { document.getElementById('searchInput').value = ""; document.getElementById('filterStatus').value = "all"; document.getElementById('filterAlamat').value = "all"; applyFilters(); }
 
-  const request = indexedDB.open("DatabasePESONA", 1);
+  // Database Offline (IndexedDB)
+  const request = indexedDB.open("DatabasePESONA_Secure", 2);
   request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("dataTunda", { autoIncrement: true }); };
   request.onsuccess = (e) => { db = e.target.result; if (navigator.onLine) sinkronisasiDataTunda(); };
 
+  // --- PENGAMBILAN DATA (MENGGUNAKAN POST AGAR PIN TIDAK BOCOR DI URL) ---
   async function fetchDataPasien() {
-    const pinAkses = localStorage.getItem('pandu_pin');
-    if (!pinAkses) return; 
+    const token = localStorage.getItem('pandu_token');
+    if (!token) return; 
 
-    setTimeout(() => showLoader("Mengambil data terbaru..."), 1500);
+    setTimeout(() => showLoader("Mengambil data rahasia..."), 1500);
     try {
-      const response = await fetch(GAS_URL + "?pin=" + pinAkses);
+      const response = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get_data', pin: token })
+      });
       const data = await response.json();
       
       if (data.status === "unauthorized") {
-         alert("PIN Akses Anda sudah tidak valid. Silakan login kembali.");
+         alert("Otorisasi Gagal. Silakan login kembali.");
          prosesLogout();
          return;
       }
 
       dataPasienLokal = data;
-      localStorage.setItem('pesona_data_v15', JSON.stringify(data));
+      // Enkripsi Data sebelum disimpan di HP
+      const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), token).toString();
+      localStorage.setItem('pesona_data_secure', encryptedData);
       applyFilters(); 
     } catch(e) { 
-      console.log("Mode offline aktif", e);
+      console.log("Mode offline aktif");
       applyFilters(); 
     } finally { 
       hideLoader(); 
@@ -515,7 +541,6 @@
       mapHint.style.display = 'none'; 
       btnGps.style.display = 'none'; 
       btnSubmit.style.display = 'none'; 
-      
       marker.bindPopup(`<div style="text-align:center;"><b>${namaPasien}</b><br><span style="color:var(--danger); font-size:10px; font-weight:800;">📍 LOKASI TERKUNCI</span></div>`);
     } else {
       marker.dragging.enable(); 
@@ -532,8 +557,26 @@
         document.getElementById('koordinat').value = `${e.latlng.lat}, ${e.latlng.lng}`; 
       });
     }
-
     setTimeout(() => { map.invalidateSize(); }, 300);
+  }
+
+  // Validasi NIK
+  function validasiNIK(input) {
+    input.value = input.value.replace(/[^0-9]/g, '');
+    const nikLength = input.value.length;
+    const warning = document.getElementById('nikWarning');
+    const countSpan = document.getElementById('nikCount');
+    
+    if (!input.readOnly) {
+      countSpan.innerText = nikLength;
+      if (nikLength > 0 && nikLength < 16) {
+        warning.style.display = 'block';
+        input.style.borderColor = 'var(--danger)'; 
+      } else {
+        warning.style.display = 'none';
+        input.style.borderColor = 'var(--border-color)'; 
+      }
+    }
   }
 
   function bukaForm(nama, nik, koordinat) {
@@ -548,9 +591,10 @@
     document.getElementById('inputNama').required = false;
     document.getElementById('nik').value = nik;
     document.getElementById('nik').readOnly = true;
+    document.getElementById('koordinat').value = koordinat || "";
+    
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
-    document.getElementById('koordinat').value = koordinat || "";
     
     const btnRute = document.getElementById('btnRuteDetail');
     if (koordinat && koordinat.trim() !== "") {
@@ -572,44 +616,22 @@
     
     document.getElementById('groupNamaInput').style.display = 'block';
     document.getElementById('groupAlamatInput').style.display = 'block';
-    
     document.getElementById('btnRuteDetail').style.display = 'none';
     
     document.getElementById('inputNama').value = "";
     document.getElementById('inputNama').required = true;
     document.getElementById('nik').value = "";
     document.getElementById('nik').readOnly = false;
+    document.getElementById('koordinat').value = "";
+    
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
     document.getElementById('nikCount').innerText = '0';
-    document.getElementById('koordinat').value = "";
     
     inisialisasiPeta("", "Pasien Baru"); 
   }
 
   function tutupForm() { document.getElementById('listView').style.display = 'block'; document.getElementById('formView').style.display = 'none'; }
-
-  // --- FUNGSI VALIDASI NIK REAL-TIME ---
-  function validasiNIK(input) {
-    // Paksa hanya bisa mengetik angka (buang huruf/simbol)
-    input.value = input.value.replace(/[^0-9]/g, '');
-    
-    const nikLength = input.value.length;
-    const warning = document.getElementById('nikWarning');
-    const countSpan = document.getElementById('nikCount');
-    
-    // Hanya lakukan validasi peringatan jika sedang dalam mode Tambah Pasien (tidak readonly)
-    if (!input.readOnly) {
-      countSpan.innerText = nikLength;
-      if (nikLength > 0 && nikLength < 16) {
-        warning.style.display = 'block';
-        input.style.borderColor = 'var(--danger)'; // Ubah garis pinggir jadi merah
-      } else {
-        warning.style.display = 'none';
-        input.style.borderColor = 'var(--border-color)'; // Kembalikan ke warna normal
-      }
-    }
-  }
 
   function getGPS() {
     if (navigator.geolocation) {
@@ -630,92 +652,122 @@
   document.getElementById('formGeo').addEventListener('submit', (e) => {
     e.preventDefault();
     const action = document.getElementById('formAction').value;
-
-    // --- 1. WARNING NIK JIKA KURANG DARI 16 ---
     const cekNik = document.getElementById('nik').value;
+    
+    // Validasi 16 Digit Absolute
     if (action === "tambah" && cekNik.length !== 16) {
       alert("Peringatan: Gagal memproses! NIK wajib berjumlah tepat 16 digit angka.");
       document.getElementById('nikWarning').style.display = 'block';
       document.getElementById('nik').style.borderColor = 'var(--danger)';
-      return; // Sistem STOP di sini, tidak akan mengirim data apa pun!
+      return; 
     }
     
-    // --- 2. CATAT WAKTU SAAT TOMBOL SIMPAN DITEKAN ---
     const now = new Date();
     const tgl = String(now.getDate()).padStart(2, '0');
     const bln = String(now.getMonth() + 1).padStart(2, '0');
     const thn = now.getFullYear();
     const jam = String(now.getHours()).padStart(2, '0');
     const mnt = String(now.getMinutes()).padStart(2, '0');
-    const waktuGeotag = `${tgl}-${bln}-${thn} ${jam}:${mnt}`; // Hasil: 09-08-2026 19:30
-
-    // --- 3. SUSUN DATA YANG AKAN DIKIRIM ---
+    const waktuGeotag = `${tgl}-${bln}-${thn} ${jam}:${mnt}`;
+    
     let data = { 
       action: action, 
-      nik: document.getElementById('nik').value, 
+      nik: cekNik, 
       koordinat: document.getElementById('koordinat').value,
-      pin: localStorage.getItem('pandu_pin'),
-      tanggalGeotagging: waktuGeotag // Sisipkan tanggal perekaman di sini
+      pin: localStorage.getItem('pandu_token'), // MENGGUNAKAN HASH PIN
+      tanggalGeotagging: waktuGeotag
     };
     
     if (action === "tambah") {
       data.nama = document.getElementById('inputNama').value;
       data.alamat = document.getElementById('inputAlamat').value;
       
-      // Logika Ekstraksi Tgl Lahir & Gender Otomatis
-      const nikKtp = document.getElementById('nik').value;
       let tglLahirFinal = "";
       let jenisKelaminFinal = "";
       
-      if (nikKtp && nikKtp.length >= 16) {
-        let tglLhr = parseInt(nikKtp.substring(6, 8));
-        let blnLhr = nikKtp.substring(8, 10);
-        let thnStr = nikKtp.substring(10, 12);
-        let thnLhr = parseInt(thnStr);
-        
-        if (tglLhr > 40) { 
-          jenisKelaminFinal = "Perempuan";
-          tglLhr = tglLhr - 40; 
-        } else {
-          jenisKelaminFinal = "Laki-Laki";
-        }
-        
-        let strTgl = tglLhr < 10 ? '0' + tglLhr : '' + tglLhr;
-        let strThn = (thnLhr > 26) ? '19' + thnStr : '20' + thnStr;
-        tglLahirFinal = strTgl + '-' + blnLhr + '-' + strThn;
+      let tglLhr = parseInt(cekNik.substring(6, 8));
+      let blnLhr = cekNik.substring(8, 10);
+      let thnStr = cekNik.substring(10, 12);
+      let thnLhr = parseInt(thnStr);
+      
+      if (tglLhr > 40) { 
+        jenisKelaminFinal = "Perempuan";
+        tglLhr = tglLhr - 40; 
       } else {
-        alert("Gagal memproses! NIK yang Anda masukkan belum lengkap (Wajib 16 digit).");
-        hideLoader();
-        return; 
+        jenisKelaminFinal = "Laki-Laki";
       }
-
-      data.tanggalLahir = tglLahirFinal;
+      
+      let strTgl = tglLhr < 10 ? '0' + tglLhr : '' + tglLhr;
+      let strThn = (thnLhr > 26) ? '19' + thnStr : '20' + thnStr;
+      
+      data.tanggalLahir = strTgl + '-' + blnLhr + '-' + strThn;
       data.jenisKelamin = jenisKelaminFinal;
     }
 
-    // --- 4. KIRIM DATA KE DATABASE ---
-    showLoader("Menyimpan & Sinkronisasi...");
+    showLoader("Menyimpan Rahasia...");
     if (navigator.onLine) {
-      fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
-        .then(() => { alert("Data berhasil disimpan ke Database!"); fetchDataPasien(); tutupForm(); })
-        .catch(() => { simpanOffline(data); })
-        .finally(() => { hideLoader(); });
+      // PENGIRIMAN DATA MENGGUNAKAN POST, BUKAN URL PARAMETER (SANGAT AMAN)
+      fetch(GAS_URL, { 
+        method: "POST", 
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(result => { 
+        if(result.status === "success") {
+          alert("Data berhasil disimpan ke Database!"); 
+          fetchDataPasien(); 
+          tutupForm(); 
+        } else {
+          alert("Gagal: " + result.message);
+        }
+      })
+      .catch(() => { simpanOffline(data); })
+      .finally(() => { hideLoader(); });
     } else { 
-      simpanOffline(data); 
-      hideLoader(); 
+      simpanOffline(data); hideLoader(); 
     }
   });
 
-  function simpanOffline(data) { const tx = db.transaction("dataTunda", "readwrite"); tx.objectStore("dataTunda").add(data); alert("Koneksi terputus! Data disimpan di HP (Akan disinkronkan saat sinyal ada)."); tutupForm(); }
+  // --- ENKRIPSI DATA TUNDA (OFFLINE) ---
+  function simpanOffline(data) { 
+    const token = localStorage.getItem('pandu_token');
+    // Enkripsi sebelum masuk IndexedDB HP
+    const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), token).toString();
+    
+    const tx = db.transaction("dataTunda", "readwrite"); 
+    tx.objectStore("dataTunda").add({ payload: encryptedData }); 
+    alert("Koneksi terputus! Data TERENKRIPSI disimpan di HP (Akan disinkronkan saat sinyal ada)."); 
+    tutupForm(); 
+  }
 
   function sinkronisasiDataTunda() {
     const store = db.transaction("dataTunda", "readwrite").objectStore("dataTunda");
+    const token = localStorage.getItem('pandu_token');
+    if (!token) return;
+
     store.getAll().onsuccess = (e) => {
       const dataNyangkut = e.target.result;
       if (dataNyangkut.length > 0) {
         showLoader(`Menyinkronkan ${dataNyangkut.length} data tertunda...`);
-        dataNyangkut.forEach((data, i) => { fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' }).then(() => db.transaction("dataTunda", "readwrite").objectStore("dataTunda").delete(store.getAllKeys().result[i])); });
-        setTimeout(() => { fetchDataPasien(); hideLoader(); }, 3000);
+        
+        dataNyangkut.forEach((item, i) => { 
+          // Buka gembok data yang tersangkut
+          try {
+            const bytes = CryptoJS.AES.decrypt(item.payload, token);
+            const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            
+            fetch(GAS_URL, { method: "POST", body: JSON.stringify(decryptedData) })
+              .then(res => res.json())
+              .then(result => {
+                 if(result.status === "success") {
+                   db.transaction("dataTunda", "readwrite").objectStore("dataTunda").delete(store.getAllKeys().result[i]);
+                 }
+              });
+          } catch (err) {
+            console.error("Gagal membaca data offline yang terenkripsi");
+          }
+        });
+        setTimeout(() => { fetchDataPasien(); hideLoader(); }, 4000);
       }
     };
   }
