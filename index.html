@@ -270,7 +270,12 @@
       <a href="#" target="_blank" id="btnRuteDetail" class="btn btn-rute-detail" style="display: none;">🗺️ Buka Rute di Google Maps</a>
       
       <div class="input-group"><label>Koordinat Terpilih</label><input type="text" id="koordinat" placeholder="Belum ada koordinat" readonly required></div>
-      <div class="input-group"><label>Nomor Induk Kependudukan</label><input type="number" id="nik" placeholder="Masukkan NIK 16 Digit" readonly required></div>
+      <!-- Input NIK dengan Peringatan Validasi -->
+      <div class="input-group">
+        <label>Nomor Induk Kependudukan</label>
+        <input type="text" id="nik" placeholder="Masukkan 16 digit angka NIK" maxlength="16" inputmode="numeric" oninput="validasiNIK(this)" readonly required>
+        <div id="nikWarning" class="error-msg" style="display: none; margin-top: 6px; text-transform: none; letter-spacing: 0;">⚠️ NIK wajib 16 digit! (Saat ini: <span id="nikCount">0</span> digit)</div>
+      </div>
       
       <div class="input-group" id="groupAlamatInput" style="display:none;">
         <label>Wilayah / Desa</label>
