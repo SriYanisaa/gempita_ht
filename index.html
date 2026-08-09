@@ -548,6 +548,8 @@
     document.getElementById('inputNama').required = false;
     document.getElementById('nik').value = nik;
     document.getElementById('nik').readOnly = true;
+    document.getElementById('nikWarning').style.display = 'none';
+    document.getElementById('nik').style.borderColor = 'var(--border-color)';
     document.getElementById('koordinat').value = koordinat || "";
     
     const btnRute = document.getElementById('btnRuteDetail');
@@ -577,12 +579,37 @@
     document.getElementById('inputNama').required = true;
     document.getElementById('nik').value = "";
     document.getElementById('nik').readOnly = false;
+    document.getElementById('nikWarning').style.display = 'none';
+    document.getElementById('nik').style.borderColor = 'var(--border-color)';
+    document.getElementById('nikCount').innerText = '0';
     document.getElementById('koordinat').value = "";
     
     inisialisasiPeta("", "Pasien Baru"); 
   }
 
   function tutupForm() { document.getElementById('listView').style.display = 'block'; document.getElementById('formView').style.display = 'none'; }
+
+  // --- FUNGSI VALIDASI NIK REAL-TIME ---
+  function validasiNIK(input) {
+    // Paksa hanya bisa mengetik angka (buang huruf/simbol)
+    input.value = input.value.replace(/[^0-9]/g, '');
+    
+    const nikLength = input.value.length;
+    const warning = document.getElementById('nikWarning');
+    const countSpan = document.getElementById('nikCount');
+    
+    // Hanya lakukan validasi peringatan jika sedang dalam mode Tambah Pasien (tidak readonly)
+    if (!input.readOnly) {
+      countSpan.innerText = nikLength;
+      if (nikLength > 0 && nikLength < 16) {
+        warning.style.display = 'block';
+        input.style.borderColor = 'var(--danger)'; // Ubah garis pinggir jadi merah
+      } else {
+        warning.style.display = 'none';
+        input.style.borderColor = 'var(--border-color)'; // Kembalikan ke warna normal
+      }
+    }
+  }
 
   function getGPS() {
     if (navigator.geolocation) {
@@ -603,8 +630,17 @@
   document.getElementById('formGeo').addEventListener('submit', (e) => {
     e.preventDefault();
     const action = document.getElementById('formAction').value;
+
+    // --- 1. WARNING NIK JIKA KURANG DARI 16 ---
+    const cekNik = document.getElementById('nik').value;
+    if (action === "tambah" && cekNik.length !== 16) {
+      alert("Peringatan: Gagal memproses! NIK wajib berjumlah tepat 16 digit angka.");
+      document.getElementById('nikWarning').style.display = 'block';
+      document.getElementById('nik').style.borderColor = 'var(--danger)';
+      return; // Sistem STOP di sini, tidak akan mengirim data apa pun!
+    }
     
-    // --- 1. CATAT WAKTU SAAT TOMBOL SIMPAN DITEKAN ---
+    // --- 2. CATAT WAKTU SAAT TOMBOL SIMPAN DITEKAN ---
     const now = new Date();
     const tgl = String(now.getDate()).padStart(2, '0');
     const bln = String(now.getMonth() + 1).padStart(2, '0');
@@ -613,7 +649,7 @@
     const mnt = String(now.getMinutes()).padStart(2, '0');
     const waktuGeotag = `${tgl}-${bln}-${thn} ${jam}:${mnt}`; // Hasil: 09-08-2026 19:30
 
-    // --- 2. SUSUN DATA YANG AKAN DIKIRIM ---
+    // --- 3. SUSUN DATA YANG AKAN DIKIRIM ---
     let data = { 
       action: action, 
       nik: document.getElementById('nik').value, 
@@ -657,7 +693,7 @@
       data.jenisKelamin = jenisKelaminFinal;
     }
 
-    // --- 3. KIRIM DATA KE DATABASE ---
+    // --- 4. KIRIM DATA KE DATABASE ---
     showLoader("Menyimpan & Sinkronisasi...");
     if (navigator.onLine) {
       fetch(GAS_URL, { method: "POST", body: JSON.stringify(data), mode: 'no-cors' })
