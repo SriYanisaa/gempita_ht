@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <title>PANDU - Sebaran Penyakit</title>
+  <title>PANDU - Puskesmas Klungkung I</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PANDU">
@@ -36,8 +36,9 @@
       --warning-text: #d97706;
     }
     
-    body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); padding-bottom: 40px; -webkit-tap-highlight-color: transparent;}
+    body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); padding-bottom: 40px; -webkit-tap-highlight-color: transparent; overflow-x: hidden;}
     
+    /* SPLASH SCREEN & LOADER */
     #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--header-bg); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease-out, visibility 0.6s ease-out;}
     #splashScreen.hidden { opacity: 0; visibility: hidden; }
     .splash-logo { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); animation: pulseSplash 1.8s infinite; margin-bottom: 25px; }
@@ -45,6 +46,13 @@
     .splash-subtitle { color: #94a3b8; font-size: 13px; font-weight: 500; margin-top: 8px; }
     @keyframes pulseSplash { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(20, 184, 166, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); } }
 
+    #loaderOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: opacity 0.3s; }
+    #loaderOverlay.active { visibility: visible; opacity: 1; }
+    .spinner { width: 45px; height: 45px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text { margin-top: 15px; font-weight: 700; color: var(--primary-dark); font-size: 14px; letter-spacing: 0.5px;}
+
+    /* LAYAR LOGIN */
     #loginView { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
     .login-box { background: var(--card-bg); width: 100%; max-width: 400px; padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; }
     .login-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3); }
@@ -56,29 +64,37 @@
     .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: color 0.2s;}
     .toggle-password:active { color: var(--primary); }
     .error-msg { color: var(--danger); font-size: 12px; font-weight: 700; margin-top: 5px; margin-bottom: 15px; display: none; }
-    
-    .btn-logout { background: rgba(225, 29, 72, 0.1); color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; margin-top: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.2s;}
-    .btn-logout:active { background: rgba(225, 29, 72, 0.2); }
 
-    #loaderOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: opacity 0.3s; }
-    #loaderOverlay.active { visibility: visible; opacity: 1; }
-    .spinner { width: 45px; height: 45px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-text { margin-top: 15px; font-weight: 700; color: var(--primary-dark); font-size: 14px; letter-spacing: 0.5px;}
-
+    /* HEADER & SIDEBAR MENU (BARU) */
     .header { background: var(--header-bg); padding: 35px 20px 45px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.15);}
     .header-text h1 { margin: 0; font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: 1px;}
     .header-text p { margin: 4px 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;}
-    .btn-sync { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: background 0.2s;}
-    .btn-sync:active { background: rgba(255, 255, 255, 0.2); }
+    .btn-menu { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; padding: 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; width: 42px; height: 42px; box-sizing: border-box;}
+    .btn-menu:active { background: rgba(255, 255, 255, 0.2); }
 
+    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9000; visibility: hidden; opacity: 0; transition: all 0.3s ease; backdrop-filter: blur(3px); }
+    .sidebar-overlay.active { visibility: visible; opacity: 1; }
+    .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: var(--card-bg); z-index: 9001; transition: left 0.3s ease; display: flex; flex-direction: column; box-shadow: 5px 0 25px rgba(0,0,0,0.15); }
+    .sidebar.active { left: 0; }
+    .sidebar-header { padding: 45px 20px 25px; background: var(--header-bg); border-bottom-right-radius: 30px; text-align: center; }
+    .sidebar-header img { width: 75px; height: 75px; border-radius: 50%; box-shadow: 0 0 15px rgba(20, 184, 166, 0.4); margin-bottom: 15px; }
+    .sidebar-header h3 { margin: 0; color: var(--primary); font-weight: 800; font-size: 22px; letter-spacing: 1px; }
+    .sidebar-header p { margin: 5px 0 0; color: #94a3b8; font-size: 12px; font-weight: 500; }
+    .sidebar-menu { flex: 1; padding: 20px 15px; overflow-y: auto; }
+    .menu-item { display: flex; align-items: center; gap: 14px; padding: 16px 15px; width: 100%; box-sizing: border-box; background: transparent; border: none; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--accent-navy); border-radius: 14px; cursor: pointer; transition: background 0.2s; text-align: left; margin-bottom: 6px; }
+    .menu-item:active { background: var(--input-bg); transform: scale(0.98); }
+    .menu-item svg { width: 22px; height: 22px; color: var(--primary-dark); }
+    .menu-item.danger { color: var(--danger); margin-top: 15px; background: var(--danger-bg); border: 1px solid rgba(225, 29, 72, 0.1); }
+    .menu-item.danger svg { color: var(--danger); }
+    .sidebar-footer { padding: 15px; text-align: center; font-size: 10px; color: var(--text-muted); font-weight: 700; border-top: 1px solid var(--border-color); letter-spacing: 0.5px; text-transform: uppercase;}
+
+    /* LIST & PENCARIAN */
     .search-wrapper { padding: 0 20px; margin-top: -25px; position: relative; z-index: 20; margin-bottom: 25px;}
     .search-box { position: relative; display: flex; align-items: center; background: var(--card-bg); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);}
     .search-box input { width: 100%; padding: 16px 50px 16px 45px; border: 2px solid transparent; border-radius: 16px; font-family: inherit; font-size: 14px; outline: none; background: transparent; color: var(--text-main); transition: border-color 0.3s;}
     .search-box input::placeholder { color: #94a3b8; }
     .search-box input:focus { border-color: var(--primary); }
     .search-icon { position: absolute; left: 15px; color: #94a3b8; font-size: 16px; }
-    
     .filter-btn { position: absolute; right: 8px; background: var(--input-bg); border: 1px solid var(--border-color); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.3s ease;}
     .filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3); }
 
@@ -86,20 +102,6 @@
     .filter-indicator.show { display: flex; }
     .filter-indicator-text { font-size: 12px; font-weight: 700; color: var(--warning-text); display: flex; align-items: center; gap: 6px;}
     .reset-btn { background: #ffffff; color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.2); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: background 0.2s;}
-
-    .fab-add { position: fixed; bottom: 85px; right: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4); cursor: pointer; z-index: 100; border: none; transition: transform 0.2s; }
-    .fab-add:active { transform: scale(0.92); }
-
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(3px);}
-    .modal-overlay.active { visibility: visible; opacity: 1; }
-    .modal-content { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); padding: 25px 25px 40px; box-sizing: border-box; border-top-left-radius: 25px; border-top-right-radius: 25px; transition: bottom 0.3s ease-out; box-shadow: 0 -10px 30px rgba(0,0,0,0.1);}
-    .modal-overlay.active .modal-content { bottom: 0; }
-    .modal-title { font-size: 18px; font-weight: 800; margin: 0 0 20px; display: flex; justify-content: space-between; color: var(--accent-navy);}
-    .close-modal { background: var(--input-bg); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;}
-    .filter-group { margin-bottom: 20px; }
-    .filter-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
-    .filter-group select { width: 100%; padding: 14px; border: 1.5px solid var(--border-color); border-radius: 12px; font-family: inherit; font-size: 14px; background: var(--input-bg); color: var(--text-main); font-weight: 600; outline: none; appearance: none;}
-    .filter-group select:focus { border-color: var(--primary); background: #ffffff;}
 
     .list-container { padding: 0 20px; }
     .patient-card { background: var(--card-bg); border-radius: 16px; padding: 18px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s;}
@@ -113,6 +115,18 @@
     .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
     .badge-done { background: var(--success-bg); color: var(--success); border: 1px solid rgba(5, 150, 105, 0.2);}
     .badge-pending { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.2);}
+
+    /* MODAL UMUM */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9500; visibility: hidden; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(3px);}
+    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-content { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); padding: 25px 25px 40px; box-sizing: border-box; border-top-left-radius: 25px; border-top-right-radius: 25px; transition: bottom 0.3s ease-out; box-shadow: 0 -10px 30px rgba(0,0,0,0.1);}
+    .modal-overlay.active .modal-content { bottom: 0; }
+    .modal-title { font-size: 18px; font-weight: 800; margin: 0 0 20px; display: flex; justify-content: space-between; color: var(--accent-navy);}
+    .close-modal { background: var(--input-bg); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;}
+
+    /* FORM & MAP INPUT */
+    .fab-add { position: fixed; bottom: 85px; right: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4); cursor: pointer; z-index: 100; border: none; transition: transform 0.2s; }
+    .fab-add:active { transform: scale(0.92); }
 
     #formView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg); z-index: 1000; overflow-y: auto; padding: 0; }
     .form-header { padding: 25px 20px; background: var(--card-bg); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);}
@@ -152,7 +166,6 @@
 
     #sysStatus { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); padding: 8px 18px; font-size: 11px; font-weight: 700; color: white; background: rgba(5, 150, 105, 0.95); border-radius: 20px; z-index: 2000; backdrop-filter: blur(4px); box-shadow: 0 4px 15px rgba(0,0,0,0.15);}
     #sysStatus.offline { background: rgba(225, 29, 72, 0.95); }
-  
     .watermark-it { text-align: center; padding: 15px 20px 80px 20px; font-size: 9px; font-weight: 700; color: var(--text-muted); opacity: 0.6; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.5; }
 
     /* LAYOUT PETA SEBARAN HIPERTENSI */
@@ -194,6 +207,58 @@
   <div class="watermark-it" style="position: static; margin-top: 40px; padding: 0;">App by Penata Kelola Sistem dan Teknologi Informasi<br>UPTD. Puskesmas Klungkung I</div>
 </div>
 
+<!-- SIDEBAR MENU NAVIGATION -->
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+<div id="sidebarMenu" class="sidebar">
+  <div class="sidebar-header">
+    <img src="logo_transparent.png?v=3" alt="PANDU">
+    <h3>PANDU</h3>
+    <p>Puskesmas Klungkung I</p>
+  </div>
+  <div class="sidebar-menu">
+    <button class="menu-item" onclick="keBeranda()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+      Beranda Utama
+    </button>
+    <button class="menu-item" onclick="bukaPetaSebaran()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+      Peta Sebaran Penyakit
+    </button>
+    <button class="menu-item" onclick="closeSidebar(); fetchDataPasien()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+      Segarkan Data Server
+    </button>
+    <button class="menu-item" onclick="bukaAbout()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      Tentang Aplikasi
+    </button>
+    <button class="menu-item danger" onclick="konfirmasiLogout()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+      Kunci & Keluar (Logout)
+    </button>
+  </div>
+  <div class="sidebar-footer">Aplikasi PANDU • v1.6</div>
+</div>
+
+<!-- MODAL TENTANG APLIKASI (ABOUT) -->
+<div id="aboutModal" class="modal-overlay">
+  <div class="modal-content" style="text-align: center; padding-bottom: 30px;">
+    <div class="modal-title" style="justify-content: flex-end;"><button class="close-modal" onclick="tutupAbout()">✕</button></div>
+    <img src="logo_transparent.png?v=3" style="width: 80px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3); border-radius: 50%;">
+    <h2 style="margin: 0 0 5px; color: var(--accent-navy); font-weight: 800;">PANDU</h2>
+    <p style="margin: 0 0 20px; font-size: 12px; color: var(--text-muted); font-weight: 700;">Aplikasi Pemetaan Kesehatan Masyarakat</p>
+    
+    <div style="background: var(--input-bg); padding: 20px; border-radius: 16px; font-size: 13px; line-height: 1.6; color: var(--accent-navy); font-weight: 500; text-align: left; border: 1px solid var(--border-color);">
+      Sistem tata kelola data geospasial yang dirancang khusus untuk memetakan episentrum penyakit secara akurat dan real-time di wilayah kerja <b>UPTD. Puskesmas Klungkung I</b>.<br><br>
+      <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">Dikembangkan Oleh:</div>
+      <b style="font-size: 14px; color: var(--primary-dark);">Komang Sri Yanisa Putri</b><br>
+      <span style="font-weight: 600;">Penata Kelola Sistem dan Teknologi Informasi</span>
+    </div>
+    
+    <button class="btn btn-submit" style="margin-top: 25px;" onclick="tutupAbout()">Tutup Halaman</button>
+  </div>
+</div>
+
 <!-- TAMPILAN DAFTAR UTAMA -->
 <div id="listView" style="display: none;">
   <div class="header">
@@ -201,11 +266,13 @@
       <img src="logo_transparent.png?v=3" alt="Logo PANDU" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 15px rgba(20, 184, 166, 0.3);">
       <div class="header-text">
         <h1>PANDU</h1>
-        <p>Aplikasi Pemetaan Kesehatan Masyarakat</p>
-        <button class="btn-logout" onclick="prosesLogout()">🔒 Keluar (Logout)</button>
+        <p>Pemetaan Kesehatan Masyarakat</p>
       </div>
     </div>
-    <button class="btn-sync" onclick="fetchDataPasien()">🔄 Segarkan</button>
+    <!-- Tombol Hamburger Menu -->
+    <button class="btn-menu" onclick="bukaSidebar()" title="Buka Menu Navigasi">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
   </div>
   
   <div class="search-wrapper">
@@ -217,11 +284,6 @@
       </button>
     </div>
     
-    <!-- TOMBOL BARU: BUKA PETA SEBARAN (EPISENTRUM) -->
-    <button class="btn btn-gps" style="width: 100%; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="bukaPetaSebaran()">
-      🗺️ Lihat Peta Sebaran Penyakit
-    </button>
-
     <div id="filterIndicator" class="filter-indicator">
       <div class="filter-indicator-text"><span>⚙️</span> Data sedang difilter</div>
       <button class="reset-btn" onclick="resetFilters()">Reset Filter</button>
@@ -235,14 +297,12 @@
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
     </svg>
   </button>
-  
-  <div class="watermark-it">App by Penata Kelola Sistem dan Teknologi Informasi<br>UPTD. Puskesmas Klungkung I</div>
 </div>
 
-<!-- TAMPILAN PETA SEBARAN PENYAKIT (FULLSCREEN) -->
+<!-- TAMPILAN PETA SEBARAN PENYAKIT -->
 <div id="distributionView">
   <div class="form-header">
-    <button class="nav-back" onclick="tutupPetaSebaran()">←</button>
+    <button class="nav-back" onclick="keBeranda()">←</button>
     <h2>Peta Sebaran Hipertensi</h2>
   </div>
   
@@ -261,7 +321,6 @@
       <option value="Kampung Gelgel">Kampung Gelgel</option>
     </select>
   </div>
-
   <div id="distMap"></div>
 </div>
 
@@ -359,7 +418,7 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzcp57xHiOczZayb9wpQwDNkAuBiJpGPGHsfuaxpB4CxyaPzsfTN2fU9VpECskx49lE/exec"; 
   let db; let dataPasienLokal = []; 
   let map, marker;
-  let distMap, distMarkersLayer; // Variabel untuk Peta Sebaran
+  let distMap, distMarkersLayer; 
 
   window.addEventListener('load', () => {
     setTimeout(() => {
@@ -368,6 +427,36 @@
       setTimeout(() => { splash.remove(); cekStatusLogin(); }, 600);
     }, 1500); 
   });
+
+  // --- KONTROL SIDEBAR MENU NAVIGASI ---
+  function bukaSidebar() {
+    document.getElementById('sidebarOverlay').classList.add('active');
+    document.getElementById('sidebarMenu').classList.add('active');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebarOverlay').classList.remove('active');
+    document.getElementById('sidebarMenu').classList.remove('active');
+  }
+  function keBeranda() {
+    closeSidebar();
+    sessionStorage.removeItem('pandu_last_view');
+    document.getElementById('listView').style.display = 'block';
+    document.getElementById('distributionView').style.display = 'none';
+    document.getElementById('formView').style.display = 'none';
+  }
+  function konfirmasiLogout() {
+    closeSidebar();
+    prosesLogout();
+  }
+  
+  // --- KONTROL HALAMAN ABOUT ---
+  function bukaAbout() {
+    closeSidebar();
+    document.getElementById('aboutModal').classList.add('active');
+  }
+  function tutupAbout() {
+    document.getElementById('aboutModal').classList.remove('active');
+  }
 
   function simpanDraft() {
     const draft = {
@@ -398,10 +487,7 @@
         let parts = draft.koordinat.split(',');
         let lat = parseFloat(parts[0].trim()); 
         let lng = parseFloat(parts[1].trim());
-        if(map && marker) {
-          map.setView([lat, lng], 17);
-          marker.setLatLng([lat, lng]);
-        }
+        if(map && marker) { map.setView([lat, lng], 17); marker.setLatLng([lat, lng]); }
       }
       
       const wrapper = document.getElementById('mapWrapper');
@@ -440,19 +526,16 @@
         } catch(e) { console.error("Gagal mendeskripsi data lokal."); }
       }
 
-      // Deteksi jejak layar terakhir sebelum di-refresh
       const lastView = sessionStorage.getItem('pandu_last_view');
       if (lastView === 'tambah') {
         bukaFormTambah(); 
         pulihkanDraft(); 
       } else if (lastView === 'detail') {
         const p = JSON.parse(sessionStorage.getItem('pandu_last_patient'));
-        if (p) {
-          bukaForm(p.nama, p.nik, p.koordinat);
-          pulihkanDraft(); 
-        } else { tutupForm(); }
+        if (p) { bukaForm(p.nama, p.nik, p.koordinat); pulihkanDraft(); } 
+        else { tutupForm(); }
       } else if (lastView === 'sebaran') {
-        bukaPetaSebaran(); // Panggil fungsi Peta Sebaran jika refresh di sana
+        bukaPetaSebaran(); 
       } else {
         document.getElementById('listView').style.display = 'block';
         document.getElementById('formView').style.display = 'none';
@@ -507,9 +590,8 @@
         }
         document.getElementById('loginError').style.display = 'block'; 
       }
-    } catch (error) {
-      alert("Gagal menghubungi server. Pastikan internet menyala.");
-    } finally { hideLoader(); }
+    } catch (error) { alert("Gagal menghubungi server. Pastikan internet menyala."); } 
+    finally { hideLoader(); }
   }
 
   function prosesLogout() {
@@ -552,7 +634,6 @@
       localStorage.setItem('pesona_data_secure', encryptedData);
       applyFilters(); 
       
-      // Update Peta Sebaran jika sedang terbuka
       if(document.getElementById('distributionView').style.display === 'flex') {
          renderPetaSebaran();
       }
@@ -622,16 +703,13 @@
     });
   }
 
-  // ==========================================
-  // FITUR PETA SEBARAN (EPISENTRUM PENYAKIT)
-  // ==========================================
   function bukaPetaSebaran() {
+    closeSidebar();
     sessionStorage.setItem('pandu_last_view', 'sebaran');
 
     document.getElementById('listView').style.display = 'none';
     document.getElementById('distributionView').style.display = 'flex';
     
-    // Inisialisasi peta hanya jika belum ada
     if (!distMap) {
       const batasKlungkung = L.latLngBounds([-8.9000, 115.3000], [-8.4000, 115.7000]);
       distMap = L.map('distMap', { maxBounds: batasKlungkung, maxBoundsViscosity: 1.0, minZoom: 11 }).setView([-8.5400, 115.4000], 13);
@@ -639,17 +717,7 @@
       distMarkersLayer = L.layerGroup().addTo(distMap);
     }
     
-    // Invalidasikan ukuran peta saat di-display flex
-    setTimeout(() => { 
-      distMap.invalidateSize(); 
-      renderPetaSebaran(); 
-    }, 300);
-  }
-
-  function tutupPetaSebaran() {
-    sessionStorage.removeItem('pandu_last_view');
-    document.getElementById('distributionView').style.display = 'none';
-    document.getElementById('listView').style.display = 'block';
+    setTimeout(() => { distMap.invalidateSize(); renderPetaSebaran(); }, 300);
   }
 
   function renderPetaSebaran() {
@@ -673,7 +741,6 @@
        return;
     }
 
-    // Gunakan icon titik merah kecil (tanpa gambar eksternal, anti-offline)
     const redDotIcon = L.divIcon({
       className: 'custom-div-icon',
       html: `<div style="background-color: var(--danger); width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"></div>`,
@@ -697,7 +764,6 @@
     }
   }
 
-  // --- FITUR CARI PATOKAN UNTUK FORM PETA (INPUT PASIEN) ---
   async function cariPatokanMap() {
     const query = document.getElementById('inputCariMap').value;
     if (!query) return;
