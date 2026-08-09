@@ -121,7 +121,6 @@
     .form-header h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--accent-navy);}
     .form-content { padding: 20px; background: var(--bg-color); min-height: 100vh;}
     
-    /* DESAIN PETA, FULLSCREEN & PENCARIAN DI DALAM PETA */
     .map-wrapper { position: relative; width: 100%; height: 260px; z-index: 10; transition: all 0.3s ease; margin-bottom: 12px;}
     .map-wrapper.fullscreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999; margin: 0; background: var(--bg-color); }
     #map { height: 100%; width: 100%; border-radius: 16px; border: 1px solid var(--border-color); z-index: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
@@ -267,15 +266,15 @@
     <form id="formGeo">
       <input type="hidden" id="formAction" value="update">
       
+      <!-- Ditambahkan event oninput untuk menyimpan draf teks -->
       <div class="input-group" id="groupNamaInput" style="display:none;">
         <label>Nama Pasien</label>
-        <input type="text" id="inputNama" placeholder="Masukkan nama lengkap pasien">
+        <input type="text" id="inputNama" placeholder="Masukkan nama lengkap pasien" oninput="simpanDraft()">
       </div>
 
       <div id="mapWrapper" class="map-wrapper">
-        <!-- FITUR PENCARIAN LOKASI DI DALAM PETA -->
         <div class="search-map-overlay" id="searchMapBox" style="display: none;">
-          <input type="text" id="inputCariMap" placeholder="🔍 Cari lokasi...">
+          <input type="text" id="inputCariMap" placeholder="🔍 Cari lokasi (misal: Jalan Flamboyan)">
           <button type="button" onclick="cariPatokanMap()">Cari</button>
         </div>
         
@@ -295,13 +294,13 @@
       
       <div class="input-group">
         <label>Nomor Induk Kependudukan</label>
-        <input type="text" id="nik" placeholder="Masukkan 16 digit angka NIK" maxlength="16" inputmode="numeric" oninput="validasiNIK(this)" readonly required>
+        <input type="text" id="nik" placeholder="Masukkan 16 digit angka NIK" maxlength="16" inputmode="numeric" oninput="validasiNIK(this); simpanDraft()" readonly required>
         <div id="nikWarning" class="error-msg" style="display: none; margin-top: 6px; text-transform: none; letter-spacing: 0;">⚠️ NIK wajib 16 digit! (Saat ini: <span id="nikCount">0</span> digit)</div>
       </div>
       
       <div class="input-group" id="groupAlamatInput" style="display:none;">
         <label>Wilayah / Desa</label>
-        <select id="inputAlamat">
+        <select id="inputAlamat" onchange="simpanDraft()">
           <option value="Satra">Satra</option>
           <option value="Kamasan">Kamasan</option>
           <option value="Semarapura Kauh">Semarapura Kauh</option>
@@ -332,6 +331,54 @@
     }, 1500); 
   });
 
+  // --- FITUR BARU: SIMPAN DRAF OTOMATIS (MENCEGAH HILANG SAAT REFRESH) ---
+  function simpanDraft() {
+    const draft = {
+      nama: document.getElementById('inputNama').value,
+      nik: document.getElementById('nik').value,
+      alamat: document.getElementById('inputAlamat').value,
+      koordinat: document.getElementById('koordinat').value,
+      isFullscreen: document.getElementById('mapWrapper').classList.contains('fullscreen')
+    };
+    sessionStorage.setItem('pandu_draft', JSON.stringify(draft));
+  }
+
+  // --- FITUR BARU: PULIHKAN DRAF SETELAH REFRESH ---
+  function pulihkanDraft() {
+    const draftStr = sessionStorage.getItem('pandu_draft');
+    if (!draftStr) return;
+    const draft = JSON.parse(draftStr);
+    
+    // Memberikan delay kecil agar peta termuat dahulu sebelum ditimpa
+    setTimeout(() => {
+      if (draft.nama) document.getElementById('inputNama').value = draft.nama;
+      if (draft.nik) {
+        document.getElementById('nik').value = draft.nik;
+        validasiNIK(document.getElementById('nik'));
+      }
+      if (draft.alamat) document.getElementById('inputAlamat').value = draft.alamat;
+      
+      if (draft.koordinat && draft.koordinat.includes(",")) {
+        document.getElementById('koordinat').value = draft.koordinat;
+        let parts = draft.koordinat.split(',');
+        let lat = parseFloat(parts[0].trim()); 
+        let lng = parseFloat(parts[1].trim());
+        if(map && marker) {
+          map.setView([lat, lng], 17);
+          marker.setLatLng([lat, lng]);
+        }
+      }
+      
+      const wrapper = document.getElementById('mapWrapper');
+      if (draft.isFullscreen && !wrapper.classList.contains('fullscreen')) {
+         wrapper.classList.add('fullscreen');
+         const icon = document.getElementById('fullscreenIcon');
+         icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 14h6m0 0v6m0-6l-7 7m17-11h-6m0 0V4m0 6l7-7m-7 17v-6m0 0h6m-6 0l7 7M10 4v6m0 0H4m6 0l-7-7" />`;
+         map.invalidateSize();
+      }
+    }, 400); 
+  }
+
   function togglePasswordVisibility() {
     const pinInput = document.getElementById('inputPin');
     const eyeIcon = document.getElementById('eyeIcon');
@@ -349,7 +396,6 @@
     if (token) {
       document.getElementById('loginView').style.display = 'none';
       
-      // Load data lokal terlebih dahulu
       const encryptedData = localStorage.getItem('pesona_data_secure');
       if (encryptedData) {
         try {
@@ -359,17 +405,17 @@
         } catch(e) { console.error("Gagal mendeskripsi data lokal."); }
       }
 
-      // --- FITUR ANTI-HILANG SAAT REFRESH (RESTORE STATE) ---
+      // --- LOGIKA CERDAS: MENDETEKSI JEJAK SEBELUM REFRESH ---
       const lastView = sessionStorage.getItem('pandu_last_view');
       if (lastView === 'tambah') {
-        bukaFormTambah(); // Otomatis kembalikan ke layar Tambah Pasien
+        bukaFormTambah(); 
+        pulihkanDraft(); // Ambil draf ketikan yang belum tersimpan
       } else if (lastView === 'detail') {
         const p = JSON.parse(sessionStorage.getItem('pandu_last_patient'));
         if (p) {
-          bukaForm(p.nama, p.nik, p.koordinat); // Otomatis kembalikan ke Detail Pasien
-        } else {
-          tutupForm();
-        }
+          bukaForm(p.nama, p.nik, p.koordinat);
+          pulihkanDraft(); // Ambil posisi pin peta yang belum tersimpan
+        } else { tutupForm(); }
       } else {
         document.getElementById('listView').style.display = 'block';
         document.getElementById('formView').style.display = 'none';
@@ -424,9 +470,7 @@
       }
     } catch (error) {
       alert("Gagal menghubungi server. Pastikan internet menyala.");
-    } finally {
-      hideLoader(); 
-    }
+    } finally { hideLoader(); }
   }
 
   function prosesLogout() {
@@ -471,9 +515,7 @@
     } catch(e) { 
       console.log("Mode offline aktif");
       applyFilters(); 
-    } finally { 
-      hideLoader(); 
-    }
+    } finally { hideLoader(); }
   }
 
   function applyFilters() {
@@ -535,7 +577,6 @@
     });
   }
 
-  // --- FUNGSI CARI PATOKAN MAPS YANG DIPERBAIKI ---
   async function cariPatokanMap() {
     const query = document.getElementById('inputCariMap').value;
     if (!query) return;
@@ -546,15 +587,10 @@
     btn.innerText = "⏳";
 
     try {
-      // 1. BIKIN PINTAR: Jangan tambah kata Klungkung kalau petugas sudah mengetiknya
       let kataKunci = query.trim();
-      if (!kataKunci.toLowerCase().includes('klungkung')) {
-         kataKunci += ', Klungkung';
-      }
+      if (!kataKunci.toLowerCase().includes('klungkung')) { kataKunci += ', Klungkung'; }
 
-      // 2. LONGGARKAN BATAS: Hapus atribut "bounded=1" yang terlalu kaku
       const urlTarget = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(kataKunci)}&viewbox=115.30,-8.40,115.70,-8.90&limit=1`;
-      
       const res = await fetch(urlTarget);
       const data = await res.json();
       
@@ -565,15 +601,12 @@
         map.setView([lat, lon], 17);
         marker.setLatLng([lat, lon]);
         document.getElementById('koordinat').value = `${lat}, ${lon}`;
+        simpanDraft(); // CATAT JEJAK PENCARIAN KE DRAF
       } else {
-        // 3. EDUKASI PETUGAS: Beri tahu cara mencari yang benar jika nama toko tidak ada
-        alert("Lokasi detail tidak ditemukan.\n\nTips: Peta ini (OpenStreetMap) kadang belum mencatat nama toko/bangunan baru. \n\nCobalah ketik NAMA JALAN, NAMA BANJAR, atau NAMA DESA terdekat sebagai patokan.");
+        alert("Lokasi detail tidak ditemukan.\n\nTips: Peta ini kadang belum mencatat nama toko/bangunan baru. \n\nCobalah ketik NAMA JALAN, NAMA BANJAR, atau NAMA DESA terdekat.");
       }
-    } catch(e) {
-      alert("Gagal mencari lokasi. Jaringan mungkin tidak stabil.");
-    } finally {
-      btn.innerText = originalText;
-    }
+    } catch(e) { alert("Gagal mencari lokasi."); } 
+    finally { btn.innerText = originalText; }
   }
 
   function toggleFullscreenMap() {
@@ -586,7 +619,7 @@
     } else {
       icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />`;
     }
-    setTimeout(() => { map.invalidateSize(); }, 300);
+    setTimeout(() => { map.invalidateSize(); simpanDraft(); }, 300); // CATAT JEJAK FULLSCREEN
   }
 
   function inisialisasiPeta(savedKoordinat, namaPasien) {
@@ -600,18 +633,10 @@
        isLocked = true; 
     }
 
-    const batasKlungkung = L.latLngBounds(
-      [-8.9000, 115.3000], 
-      [-8.4000, 115.7000]  
-    );
+    const batasKlungkung = L.latLngBounds( [-8.9000, 115.3000], [-8.4000, 115.7000] );
 
     if (!map) {
-      map = L.map('map', {
-        maxBounds: batasKlungkung,
-        maxBoundsViscosity: 1.0, 
-        minZoom: 11 
-      }).setView([lat, lng], zoomLvl);
-      
+      map = L.map('map', { maxBounds: batasKlungkung, maxBoundsViscosity: 1.0, minZoom: 11 }).setView([lat, lng], zoomLvl);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
       marker = L.marker([lat, lng]).addTo(map);
     } else {
@@ -645,10 +670,12 @@
       marker.on('dragend', function(e) { 
         const pos = marker.getLatLng(); 
         document.getElementById('koordinat').value = `${pos.lat}, ${pos.lng}`; 
+        simpanDraft(); // CATAT SETIAP KALI PIN DIGESER
       });
       map.on('click', function(e) { 
         marker.setLatLng(e.latlng); 
         document.getElementById('koordinat').value = `${e.latlng.lat}, ${e.latlng.lng}`; 
+        simpanDraft(); // CATAT SETIAP KALI PETA DIKLIK
       });
     }
     setTimeout(() => { map.invalidateSize(); }, 300);
@@ -673,7 +700,7 @@
   }
 
   function bukaForm(nama, nik, koordinat) {
-    // Simpan jejak memori data pasien yang sedang dilihat
+    // TANDAI BAHWA PETUGAS SEDANG BERADA DI FORM DETAIL PASIEN INI
     sessionStorage.setItem('pandu_last_view', 'detail');
     sessionStorage.setItem('pandu_last_patient', JSON.stringify({nama: nama, nik: nik, koordinat: koordinat}));
 
@@ -699,15 +726,13 @@
       const koorBersih = koordinat.replace(/\s/g, ''); 
       btnRute.href = `https://www.google.com/maps/dir/?api=1&destination=${koorBersih}`;
       btnRute.style.display = 'flex'; 
-    } else {
-      btnRute.style.display = 'none'; 
-    }
+    } else { btnRute.style.display = 'none'; }
 
     inisialisasiPeta(koordinat, nama);
   }
 
   function bukaFormTambah() {
-    // Simpan jejak memori bahwa petugas sedang berada di form Tambah
+    // TANDAI BAHWA PETUGAS SEDANG BERADA DI FORM TAMBAH PASIEN
     sessionStorage.setItem('pandu_last_view', 'tambah');
 
     document.getElementById('listView').style.display = 'none';
@@ -734,9 +759,10 @@
   }
 
   function tutupForm() { 
-    // Hapus jejak memori karena petugas sengaja keluar dari form
+    // HAPUS SEMUA JEJAK MEMORI JIKA PETUGAS SENGAJA KELUAR ATAU SUDAH SIMPAN DATA
     sessionStorage.removeItem('pandu_last_view');
     sessionStorage.removeItem('pandu_last_patient');
+    sessionStorage.removeItem('pandu_draft');
 
     document.getElementById('listView').style.display = 'block'; 
     document.getElementById('formView').style.display = 'none'; 
@@ -753,6 +779,7 @@
           const lat = pos.coords.latitude; const lng = pos.coords.longitude;
           document.getElementById('koordinat').value = `${lat}, ${lng}`;
           if(map && marker) { map.setView([lat, lng], 17); marker.setLatLng([lat, lng]); }
+          simpanDraft(); // CATAT KOORDINAT GPS KE DRAF
         },
         err => { hideLoader(); alert("Gagal ambil lokasi. Pastikan GPS HP menyala."); },
         { enableHighAccuracy: true }
@@ -760,7 +787,6 @@
     }
   }
 
-  // BLOK PENGIRIMAN DATA YANG SUDAH DIPERBAIKI (TIDAK ADA SINTAKS YANG HILANG)
   document.getElementById('formGeo').addEventListener('submit', (e) => {
     e.preventDefault();
     const action = document.getElementById('formAction').value;
@@ -817,19 +843,14 @@
 
     showLoader("Menyimpan Rahasia...");
     if (navigator.onLine) {
-      fetch(GAS_URL, { 
-        method: "POST", 
-        body: JSON.stringify(data)
-      })
+      fetch(GAS_URL, { method: "POST", body: JSON.stringify(data) })
       .then(res => res.json())
       .then(result => { 
         if(result.status === "success") {
           alert("Data berhasil disimpan ke Database!"); 
           fetchDataPasien(); 
-          tutupForm(); 
-        } else {
-          alert("Gagal: " + result.message);
-        }
+          tutupForm(); // Tutup form (dan bersihkan draf)
+        } else { alert("Gagal: " + result.message); }
       })
       .catch(() => { simpanOffline(data); })
       .finally(() => { hideLoader(); });
@@ -841,11 +862,10 @@
   function simpanOffline(data) { 
     const token = localStorage.getItem('pandu_token');
     const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), token).toString();
-    
     const tx = db.transaction("dataTunda", "readwrite"); 
     tx.objectStore("dataTunda").add({ payload: encryptedData }); 
     alert("Koneksi terputus! Data TERENKRIPSI disimpan di HP (Akan disinkronkan saat sinyal ada)."); 
-    tutupForm(); 
+    tutupForm(); // Tutup form (dan bersihkan draf)
   }
 
   function sinkronisasiDataTunda() {
@@ -857,12 +877,10 @@
       const dataNyangkut = e.target.result;
       if (dataNyangkut.length > 0) {
         showLoader(`Menyinkronkan ${dataNyangkut.length} data tertunda...`);
-        
         dataNyangkut.forEach((item, i) => { 
           try {
             const bytes = CryptoJS.AES.decrypt(item.payload, token);
             const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-            
             fetch(GAS_URL, { method: "POST", body: JSON.stringify(decryptedData) })
               .then(res => res.json())
               .then(result => {
@@ -879,7 +897,6 @@
 
   window.addEventListener('online', () => { document.getElementById('sysStatus').innerText = "SISTEM ONLINE"; document.getElementById('sysStatus').className = ""; sinkronisasiDataTunda(); });
   window.addEventListener('offline', () => { document.getElementById('sysStatus').innerText = "MODE OFFLINE"; document.getElementById('sysStatus').className = "offline"; });
-
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
