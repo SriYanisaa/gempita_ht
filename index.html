@@ -517,6 +517,7 @@
     });
   }
 
+  // --- FUNGSI CARI PATOKAN MAPS YANG DIPERBAIKI ---
   async function cariPatokanMap() {
     const query = document.getElementById('inputCariMap').value;
     if (!query) return;
@@ -527,7 +528,15 @@
     btn.innerText = "⏳";
 
     try {
-      const urlTarget = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Klungkung')}&viewbox=115.30,-8.40,115.70,-8.90&bounded=1&limit=1`;
+      // 1. BIKIN PINTAR: Jangan tambah kata Klungkung kalau petugas sudah mengetiknya
+      let kataKunci = query.trim();
+      if (!kataKunci.toLowerCase().includes('klungkung')) {
+         kataKunci += ', Klungkung';
+      }
+
+      // 2. LONGGARKAN BATAS: Hapus atribut "bounded=1" yang terlalu kaku
+      const urlTarget = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(kataKunci)}&viewbox=115.30,-8.40,115.70,-8.90&limit=1`;
+      
       const res = await fetch(urlTarget);
       const data = await res.json();
       
@@ -539,10 +548,11 @@
         marker.setLatLng([lat, lon]);
         document.getElementById('koordinat').value = `${lat}, ${lon}`;
       } else {
-        alert("Lokasi tidak ditemukan di area Kabupaten Klungkung. Pastikan nama jalan/patokan benar.");
+        // 3. EDUKASI PETUGAS: Beri tahu cara mencari yang benar jika nama toko tidak ada
+        alert("Lokasi detail tidak ditemukan.\n\nTips: Peta ini (OpenStreetMap) kadang belum mencatat nama toko/bangunan baru. \n\nCobalah ketik NAMA JALAN, NAMA BANJAR, atau NAMA DESA terdekat sebagai patokan.");
       }
     } catch(e) {
-      alert("Gagal mencari lokasi.");
+      alert("Gagal mencari lokasi. Jaringan mungkin tidak stabil.");
     } finally {
       btn.innerText = originalText;
     }
