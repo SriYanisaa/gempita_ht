@@ -348,7 +348,8 @@
     const token = localStorage.getItem('pandu_token');
     if (token) {
       document.getElementById('loginView').style.display = 'none';
-      document.getElementById('listView').style.display = 'block';
+      
+      // Load data lokal terlebih dahulu
       const encryptedData = localStorage.getItem('pesona_data_secure');
       if (encryptedData) {
         try {
@@ -357,6 +358,23 @@
           applyFilters();
         } catch(e) { console.error("Gagal mendeskripsi data lokal."); }
       }
+
+      // --- FITUR ANTI-HILANG SAAT REFRESH (RESTORE STATE) ---
+      const lastView = sessionStorage.getItem('pandu_last_view');
+      if (lastView === 'tambah') {
+        bukaFormTambah(); // Otomatis kembalikan ke layar Tambah Pasien
+      } else if (lastView === 'detail') {
+        const p = JSON.parse(sessionStorage.getItem('pandu_last_patient'));
+        if (p) {
+          bukaForm(p.nama, p.nik, p.koordinat); // Otomatis kembalikan ke Detail Pasien
+        } else {
+          tutupForm();
+        }
+      } else {
+        document.getElementById('listView').style.display = 'block';
+        document.getElementById('formView').style.display = 'none';
+      }
+
       if (navigator.onLine) fetchDataPasien();
     } else {
       document.getElementById('listView').style.display = 'none';
@@ -655,6 +673,10 @@
   }
 
   function bukaForm(nama, nik, koordinat) {
+    // Simpan jejak memori data pasien yang sedang dilihat
+    sessionStorage.setItem('pandu_last_view', 'detail');
+    sessionStorage.setItem('pandu_last_patient', JSON.stringify({nama: nama, nik: nik, koordinat: koordinat}));
+
     document.getElementById('listView').style.display = 'none';
     document.getElementById('formView').style.display = 'block';
     document.getElementById('formAction').value = "update";
@@ -685,6 +707,9 @@
   }
 
   function bukaFormTambah() {
+    // Simpan jejak memori bahwa petugas sedang berada di form Tambah
+    sessionStorage.setItem('pandu_last_view', 'tambah');
+
     document.getElementById('listView').style.display = 'none';
     document.getElementById('formView').style.display = 'block';
     document.getElementById('formAction').value = "tambah";
@@ -709,6 +734,10 @@
   }
 
   function tutupForm() { 
+    // Hapus jejak memori karena petugas sengaja keluar dari form
+    sessionStorage.removeItem('pandu_last_view');
+    sessionStorage.removeItem('pandu_last_patient');
+
     document.getElementById('listView').style.display = 'block'; 
     document.getElementById('formView').style.display = 'none'; 
     document.getElementById('mapWrapper').classList.remove('fullscreen');
