@@ -610,6 +610,46 @@
     if (action === "tambah") {
       data.nama = document.getElementById('inputNama').value;
       data.alamat = document.getElementById('inputAlamat').value;
+      
+      // ==========================================
+      // LOGIKA OTOMATIS EKSTRAKSI TGL LAHIR & GENDER
+      // NIK KTP: DD MM YY (Digit ke 7 sampai 12)
+      // ==========================================
+      const nikKtp = document.getElementById('nik').value;
+      let tglLahirFinal = "";
+      let jenisKelaminFinal = "";
+      
+      // Validasi NIK wajib 16 digit
+      if (nikKtp && nikKtp.length >= 16) {
+        let tgl = parseInt(nikKtp.substring(6, 8));
+        let bln = nikKtp.substring(8, 10);
+        let thnStr = nikKtp.substring(10, 12);
+        let thn = parseInt(thnStr);
+        
+        // Cek Gender dari Tanggal (Perempuan > 40)
+        if (tgl > 40) { 
+          jenisKelaminFinal = "Perempuan";
+          tgl = tgl - 40; // Kembalikan ke tanggal lahir asli
+        } else {
+          jenisKelaminFinal = "Laki-Laki";
+        }
+        
+        // Format angka tanggal agar selalu 2 digit (01, 02, dst)
+        let strTgl = tgl < 10 ? '0' + tgl : '' + tgl;
+        
+        // Aturan penentuan abad: Jika tahun > 26 dianggap kelahiran 19XX, selain itu 20XX
+        let strThn = (thn > 26) ? '19' + thnStr : '20' + thnStr;
+        
+        tglLahirFinal = strTgl + '-' + bln + '-' + strThn;
+      } else {
+        alert("Gagal memproses! NIK yang Anda masukkan belum lengkap (Wajib 16 digit).");
+        hideLoader();
+        return; // Hentikan pengiriman jika NIK kurang panjang
+      }
+
+      // Masukkan hasil ekstraksi otomatis ke data yang akan dikirim ke database
+      data.tanggalLahir = tglLahirFinal;
+      data.jenisKelamin = jenisKelaminFinal;
     }
 
     showLoader("Menyimpan & Sinkronisasi...");
