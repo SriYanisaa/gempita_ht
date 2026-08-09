@@ -14,8 +14,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  
-  <!-- LIBRARY KRIPTOGRAFI KEAMANAN (Menjawab Temuan Audit) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
   <style>
@@ -40,7 +38,6 @@
     
     body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); padding-bottom: 40px; -webkit-tap-highlight-color: transparent;}
     
-    /* =================== SPLASH SCREEN =================== */
     #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--header-bg); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease-out, visibility 0.6s ease-out;}
     #splashScreen.hidden { opacity: 0; visibility: hidden; }
     .splash-logo { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); animation: pulseSplash 1.8s infinite; margin-bottom: 25px; }
@@ -48,7 +45,6 @@
     .splash-subtitle { color: #94a3b8; font-size: 13px; font-weight: 500; margin-top: 8px; }
     @keyframes pulseSplash { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(20, 184, 166, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); } }
 
-    /* =================== LAYAR LOGIN =================== */
     #loginView { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
     .login-box { background: var(--card-bg); width: 100%; max-width: 400px; padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; }
     .login-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3); }
@@ -64,7 +60,6 @@
     .btn-logout { background: rgba(225, 29, 72, 0.1); color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; margin-top: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.2s;}
     .btn-logout:active { background: rgba(225, 29, 72, 0.2); }
 
-    /* =================== UI UMUM =================== */
     #loaderOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: opacity 0.3s; }
     #loaderOverlay.active { visibility: visible; opacity: 1; }
     .spinner { width: 45px; height: 45px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
@@ -127,13 +122,23 @@
     .form-content { padding: 20px; background: var(--bg-color); min-height: 100vh;}
     
     /* =================== DESAIN PETA & FULLSCREEN =================== */
-    .map-wrapper { position: relative; width: 100%; height: 260px; margin-bottom: 12px; z-index: 10; transition: all 0.3s ease; }
+    .map-wrapper { position: relative; width: 100%; height: 260px; z-index: 10; transition: all 0.3s ease; }
     .map-wrapper.fullscreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999; margin: 0; background: var(--bg-color); }
     #map { height: 100%; width: 100%; border-radius: 16px; border: 1px solid var(--border-color); z-index: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .map-wrapper.fullscreen #map { border-radius: 0; border: none; }
     
     .btn-fullscreen { position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--text-main); transition: background 0.2s; }
     .btn-fullscreen:active { background: var(--bg-color); }
+
+    /* DESAIN PENCARIAN PETA & PERBAIKAN JARAK */
+    .search-map-box { display: flex; gap: 8px; margin-bottom: 12px; }
+    .search-map-box input { flex: 1; padding: 14px 16px; border: 1.5px solid var(--border-color); border-radius: 12px; font-family: inherit; font-size: 13px; outline: none; background: var(--card-bg); transition: border-color 0.3s; color: var(--text-main); font-weight: 600;}
+    .search-map-box input:focus { border-color: var(--primary); }
+    .search-map-box button { background: var(--primary); color: white; border: none; padding: 0 18px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 13px; transition: transform 0.2s, box-shadow 0.2s;}
+    .search-map-box button:active { transform: scale(0.95); }
+    
+    /* Jarak Teks Pin Diperlebar */
+    .map-hint { font-size: 12px; color: var(--primary-dark); text-align: center; margin-top: 14px; margin-bottom: 25px; font-weight: 600;}
     
     .input-group { margin-bottom: 20px; }
     .input-group label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -269,7 +274,13 @@
         <input type="text" id="inputNama" placeholder="Masukkan nama lengkap pasien">
       </div>
 
-     <div id="mapWrapper" class="map-wrapper">
+      <!-- FITUR BARU: Pencarian Lokasi Peta (Hanya saat pin tidak terkunci) -->
+      <div class="search-map-box" id="searchMapBox" style="display: none;">
+        <input type="text" id="inputCariMap" placeholder="🔍 Cari patokan (misal: Pasar Satra)">
+        <button type="button" onclick="cariPatokanMap()">Cari</button>
+      </div>
+
+      <div id="mapWrapper" class="map-wrapper">
         <div id="map"></div>
         <button type="button" class="btn-fullscreen" onclick="toggleFullscreenMap()" title="Perbesar/Perkecil Peta">
           <svg id="fullscreenIcon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -277,13 +288,13 @@
           </svg>
         </button>
       </div>
+      
       <div class="map-hint">💡 Geser pin biru untuk menandai lokasi akurat.</div>
       
       <a href="#" target="_blank" id="btnRuteDetail" class="btn btn-rute-detail" style="display: none;">🗺️ Buka Rute di Google Maps</a>
       
       <div class="input-group"><label>Koordinat Terpilih</label><input type="text" id="koordinat" placeholder="Belum ada koordinat" readonly required></div>
       
-      <!-- Input NIK dengan Validasi Real-time -->
       <div class="input-group">
         <label>Nomor Induk Kependudukan</label>
         <input type="text" id="nik" placeholder="Masukkan 16 digit angka NIK" maxlength="16" inputmode="numeric" oninput="validasiNIK(this)" readonly required>
@@ -335,23 +346,18 @@
     }
   }
 
-  // --- CEK LOGIN & ENKRIPSI DATA LOCAL ---
   function cekStatusLogin() {
     const token = localStorage.getItem('pandu_token');
-    
     if (token) {
       document.getElementById('loginView').style.display = 'none';
       document.getElementById('listView').style.display = 'block';
-      
       const encryptedData = localStorage.getItem('pesona_data_secure');
       if (encryptedData) {
         try {
           const bytes = CryptoJS.AES.decrypt(encryptedData, token);
           dataPasienLokal = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
           applyFilters();
-        } catch(e) {
-          console.error("Gagal mendeskripsi data lokal.");
-        }
+        } catch(e) { console.error("Gagal mendeskripsi data lokal."); }
       }
       if (navigator.onLine) fetchDataPasien();
     } else {
@@ -361,12 +367,10 @@
     }
   }
 
-  // --- PROSES LOGIN (ANTI BRUTE-FORCE & HASH PIN) ---
   async function prosesLogin() {
     const pinInput = document.getElementById('inputPin').value;
     if (!pinInput) return; 
 
-    // Cek Anti Brute-Force (Terkunci 3 Menit)
     let lockout = localStorage.getItem('pandu_lockout');
     if (lockout && Date.now() < parseInt(lockout)) {
        let sisaWaktu = Math.ceil((parseInt(lockout) - Date.now()) / 60000);
@@ -377,28 +381,25 @@
 
     document.getElementById('loginError').style.display = 'none';
     showLoader("Memverifikasi Keamanan..."); 
-
-    // Mengubah PIN menjadi Hash agar sangat aman
     const hashedPin = CryptoJS.SHA256(pinInput).toString();
 
     try {
       const response = await fetch(GAS_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'login', pin: hashedPin }) // Mengirim secara tersembunyi (POST)
+        body: JSON.stringify({ action: 'login', pin: hashedPin })
       });
       const result = await response.json();
 
       if (result.status === "success") {
-        localStorage.setItem('pandu_token', hashedPin); // Simpan Hash, bukan PIN asli
-        localStorage.setItem('pandu_attempts', '0'); // Reset percobaan salah
+        localStorage.setItem('pandu_token', hashedPin); 
+        localStorage.setItem('pandu_attempts', '0'); 
         document.getElementById('inputPin').value = ''; 
         cekStatusLogin(); 
       } else {
-        // Logika Brute Force
         let attempts = parseInt(localStorage.getItem('pandu_attempts') || '0') + 1;
         localStorage.setItem('pandu_attempts', attempts);
         if (attempts >= 3) {
-           localStorage.setItem('pandu_lockout', Date.now() + 3 * 60 * 1000); // Kunci 3 menit
+           localStorage.setItem('pandu_lockout', Date.now() + 3 * 60 * 1000); 
            document.getElementById('loginError').innerText = "Anda salah 3 kali. Aplikasi terkunci 3 menit.";
         } else {
            document.getElementById('loginError').innerText = "PIN salah! Sisa percobaan: " + (3 - attempts);
@@ -415,7 +416,7 @@
   function prosesLogout() {
     if(confirm("Apakah Anda yakin ingin mengunci dan menghapus data sesi aplikasi?")) {
       localStorage.removeItem('pandu_token'); 
-      localStorage.removeItem('pesona_data_secure'); // Hapus data terenkripsi demi keamanan total
+      localStorage.removeItem('pesona_data_secure'); 
       cekStatusLogin(); 
     }
   }
@@ -425,12 +426,10 @@
   function toggleFilter() { document.getElementById('filterModal').classList.toggle('active'); }
   function resetFilters() { document.getElementById('searchInput').value = ""; document.getElementById('filterStatus').value = "all"; document.getElementById('filterAlamat').value = "all"; applyFilters(); }
 
-  // Database Offline (IndexedDB)
   const request = indexedDB.open("DatabasePESONA_Secure", 2);
   request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("dataTunda", { autoIncrement: true }); };
   request.onsuccess = (e) => { db = e.target.result; if (navigator.onLine) sinkronisasiDataTunda(); };
 
-  // --- PENGAMBILAN DATA (MENGGUNAKAN POST AGAR PIN TIDAK BOCOR DI URL) ---
   async function fetchDataPasien() {
     const token = localStorage.getItem('pandu_token');
     if (!token) return; 
@@ -450,7 +449,6 @@
       }
 
       dataPasienLokal = data;
-      // Enkripsi Data sebelum disimpan di HP
       const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), token).toString();
       localStorage.setItem('pesona_data_secure', encryptedData);
       applyFilters(); 
@@ -521,6 +519,51 @@
     });
   }
 
+  // --- FUNGSI CARI PATOKAN LOKASI ---
+  async function cariPatokanMap() {
+    const query = document.getElementById('inputCariMap').value;
+    if (!query) return;
+    if (!navigator.onLine) { alert("Pencarian lokasi butuh koneksi internet."); return; }
+
+    const btn = document.querySelector('#searchMapBox button');
+    const originalText = btn.innerText;
+    btn.innerText = "⏳";
+
+    try {
+      // Menggunakan OpenStreetMap Nominatim secara aman & gratis (dipertajam untuk area Bali)
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bali')}&limit=1`);
+      const data = await res.json();
+      
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        
+        map.setView([lat, lon], 17);
+        marker.setLatLng([lat, lon]);
+        document.getElementById('koordinat').value = `${lat}, ${lon}`;
+      } else {
+        alert("Lokasi tidak ditemukan. Coba gunakan nama desa atau patokan yang lebih umum.");
+      }
+    } catch(e) {
+      alert("Gagal mencari lokasi.");
+    } finally {
+      btn.innerText = originalText;
+    }
+  }
+
+  function toggleFullscreenMap() {
+    const wrapper = document.getElementById('mapWrapper');
+    const icon = document.getElementById('fullscreenIcon');
+    wrapper.classList.toggle('fullscreen');
+
+    if (wrapper.classList.contains('fullscreen')) {
+      icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 14h6m0 0v6m0-6l-7 7m17-11h-6m0 0V4m0 6l7-7m-7 17v-6m0 0h6m-6 0l7 7M10 4v6m0 0H4m6 0l-7-7" />`;
+    } else {
+      icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />`;
+    }
+    setTimeout(() => { map.invalidateSize(); }, 300);
+  }
+
   function inisialisasiPeta(savedKoordinat, namaPasien) {
     let lat = -8.5333; let lng = 115.4000; let zoomLvl = 13; 
     let isLocked = false;
@@ -548,18 +591,21 @@
     const btnGps = document.querySelector('.btn-gps');
     const btnSubmit = document.querySelector('.btn-submit');
     const mapHint = document.querySelector('.map-hint');
+    const searchBox = document.getElementById('searchMapBox');
 
     if (isLocked) {
       marker.dragging.disable(); 
       mapHint.style.display = 'none'; 
       btnGps.style.display = 'none'; 
       btnSubmit.style.display = 'none'; 
+      searchBox.style.display = 'none'; // Matikan fitur pencarian jika sudah dikunci
       marker.bindPopup(`<div style="text-align:center;"><b>${namaPasien}</b><br><span style="color:var(--danger); font-size:10px; font-weight:800;">📍 LOKASI TERKUNCI</span></div>`);
     } else {
       marker.dragging.enable(); 
       mapHint.style.display = 'block'; 
       btnGps.style.display = 'block'; 
       btnSubmit.style.display = 'block'; 
+      searchBox.style.display = 'flex'; // Hidupkan kolom pencarian peta
 
       marker.on('dragend', function(e) { 
         const pos = marker.getLatLng(); 
@@ -573,27 +619,6 @@
     setTimeout(() => { map.invalidateSize(); }, 300);
   }
 
-  // --- FUNGSI PERBESAR / PERKECIL PETA ---
-  function toggleFullscreenMap() {
-    const wrapper = document.getElementById('mapWrapper');
-    const icon = document.getElementById('fullscreenIcon');
-    
-    // Aktifkan / Matikan class fullscreen
-    wrapper.classList.toggle('fullscreen');
-
-    if (wrapper.classList.contains('fullscreen')) {
-      // Ganti ikon menjadi "Perkecil" (Panah ke dalam)
-      icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 14h6m0 0v6m0-6l-7 7m17-11h-6m0 0V4m0 6l7-7m-7 17v-6m0 0h6m-6 0l7 7M10 4v6m0 0H4m6 0l-7-7" />`;
-    } else {
-      // Ganti ikon menjadi "Perbesar" (Panah ke luar)
-      icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />`;
-    }
-
-    // Refresh ukuran peta agar ubin OpenStreetMap menyesuaikan layar penuh
-    setTimeout(() => { map.invalidateSize(); }, 300);
-  }
-
-  // Validasi NIK
   function validasiNIK(input) {
     input.value = input.value.replace(/[^0-9]/g, '');
     const nikLength = input.value.length;
@@ -625,6 +650,7 @@
     document.getElementById('nik').value = nik;
     document.getElementById('nik').readOnly = true;
     document.getElementById('koordinat').value = koordinat || "";
+    document.getElementById('inputCariMap').value = ""; // Bersihkan kolom pencarian
     
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
@@ -656,6 +682,7 @@
     document.getElementById('nik').value = "";
     document.getElementById('nik').readOnly = false;
     document.getElementById('koordinat').value = "";
+    document.getElementById('inputCariMap').value = ""; // Bersihkan kolom pencarian
     
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
@@ -667,8 +694,6 @@
   function tutupForm() { 
     document.getElementById('listView').style.display = 'block'; 
     document.getElementById('formView').style.display = 'none'; 
-    
-    // Kembalikan peta ke ukuran normal saat form ditutup
     document.getElementById('mapWrapper').classList.remove('fullscreen');
     document.getElementById('fullscreenIcon').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />`;
   }
@@ -694,7 +719,6 @@
     const action = document.getElementById('formAction').value;
     const cekNik = document.getElementById('nik').value;
     
-    // Validasi 16 Digit Absolute
     if (action === "tambah" && cekNik.length !== 16) {
       alert("Peringatan: Gagal memproses! NIK wajib berjumlah tepat 16 digit angka.");
       document.getElementById('nikWarning').style.display = 'block';
@@ -714,7 +738,7 @@
       action: action, 
       nik: cekNik, 
       koordinat: document.getElementById('koordinat').value,
-      pin: localStorage.getItem('pandu_token'), // MENGGUNAKAN HASH PIN
+      pin: localStorage.getItem('pandu_token'), 
       tanggalGeotagging: waktuGeotag
     };
     
@@ -746,7 +770,6 @@
 
     showLoader("Menyimpan Rahasia...");
     if (navigator.onLine) {
-      // PENGIRIMAN DATA MENGGUNAKAN POST, BUKAN URL PARAMETER (SANGAT AMAN)
       fetch(GAS_URL, { 
         method: "POST", 
         body: JSON.stringify(data)
@@ -768,10 +791,8 @@
     }
   });
 
-  // --- ENKRIPSI DATA TUNDA (OFFLINE) ---
   function simpanOffline(data) { 
     const token = localStorage.getItem('pandu_token');
-    // Enkripsi sebelum masuk IndexedDB HP
     const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), token).toString();
     
     const tx = db.transaction("dataTunda", "readwrite"); 
@@ -791,7 +812,6 @@
         showLoader(`Menyinkronkan ${dataNyangkut.length} data tertunda...`);
         
         dataNyangkut.forEach((item, i) => { 
-          // Buka gembok data yang tersangkut
           try {
             const bytes = CryptoJS.AES.decrypt(item.payload, token);
             const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
@@ -803,9 +823,7 @@
                    db.transaction("dataTunda", "readwrite").objectStore("dataTunda").delete(store.getAllKeys().result[i]);
                  }
               });
-          } catch (err) {
-            console.error("Gagal membaca data offline yang terenkripsi");
-          }
+          } catch (err) { console.error("Gagal membaca data offline yang terenkripsi"); }
         });
         setTimeout(() => { fetchDataPasien(); hideLoader(); }, 4000);
       }
