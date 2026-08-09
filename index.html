@@ -306,9 +306,6 @@
   
   let db; let dataPasienLokal = []; let map, marker;
 
-  // === PENGATURAN PIN APLIKASI ===
-  const PIN_APLIKASI = "PuskKlk1"; 
-
   // Logika Menghilangkan Splash Screen & Cek Login
   window.addEventListener('load', () => {
     setTimeout(() => {
@@ -358,16 +355,30 @@
     }
   }
 
-  // Fungsi Memproses Input PIN
-  function prosesLogin() {
+  // Fungsi Memproses Input PIN ke Database Server (Sangat Aman)
+  async function prosesLogin() {
     const pinInput = document.getElementById('inputPin').value;
-    if (pinInput === PIN_APLIKASI) {
-      localStorage.setItem('pandu_logged_in', 'true'); // Simpan sesi di HP
-      document.getElementById('loginError').style.display = 'none';
-      document.getElementById('inputPin').value = ''; // Kosongkan input
-      cekStatusLogin(); // Buka aplikasi
-    } else {
-      document.getElementById('loginError').style.display = 'block'; // Tampilkan pesan error
+    if (!pinInput) return; // Jangan proses jika kotak kosong
+
+    document.getElementById('loginError').style.display = 'none';
+    showLoader("Memverifikasi Keamanan..."); // Tampilkan layar loading
+
+    try {
+      // Mengirim PIN yang diketik ke Google Apps Script secara diam-diam
+      const response = await fetch(GAS_URL + "?action=login&pin=" + pinInput);
+      const result = await response.json();
+
+      if (result.status === "success") {
+        localStorage.setItem('pandu_logged_in', 'true'); // Jika server menjawab benar, simpan sesi
+        document.getElementById('inputPin').value = ''; // Kosongkan layar input
+        cekStatusLogin(); // Buka gembok aplikasi
+      } else {
+        document.getElementById('loginError').style.display = 'block'; // Server menjawab salah
+      }
+    } catch (error) {
+      alert("Gagal menghubungi server Puskesmas. Pastikan internet Anda menyala saat login pertama kali.");
+    } finally {
+      hideLoader(); // Matikan layar loading
     }
   }
 
