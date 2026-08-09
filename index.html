@@ -529,7 +529,11 @@
     btn.innerText = "⏳";
 
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Bali')}&limit=1`);
+      // FITUR BARU: Pencarian dikunci ketat HANYA di area Kabupaten Klungkung
+      // Menggunakan Parameter Bounded Viewbox (Kiri, Atas, Kanan, Bawah)
+      const urlTarget = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Klungkung')}&viewbox=115.30,-8.40,115.70,-8.90&bounded=1&limit=1`;
+      
+      const res = await fetch(urlTarget);
       const data = await res.json();
       
       if (data && data.length > 0) {
@@ -540,7 +544,7 @@
         marker.setLatLng([lat, lon]);
         document.getElementById('koordinat').value = `${lat}, ${lon}`;
       } else {
-        alert("Lokasi tidak ditemukan. Coba gunakan nama desa atau patokan yang lebih umum.");
+        alert("Lokasi tidak ditemukan di area Kabupaten Klungkung. Pastikan nama jalan/patokan benar.");
       }
     } catch(e) {
       alert("Gagal mencari lokasi.");
@@ -573,14 +577,61 @@
        isLocked = true; 
     }
 
+    // FITUR BARU: Batas Kaku Peta Klungkung (Daratan s/d Nusa Penida)
+    const batasKlungkung = L.latLngBounds(
+      [-8.9000, 115.3000], // Titik Paling Selatan & Barat
+      [-8.4000, 115.7000]  // Titik Paling Utara & Timur
+    );
+
     if (!map) {
-      map = L.map('map').setView([lat, lng], zoomLvl);
+      // Menerapkan aturan batas dan kunci Zoom Out ke dalam Peta
+      map = L.map('map', {
+        maxBounds: batasKlungkung,
+        maxBoundsViscosity: 1.0, // Peta membal dengan keras jika ditarik keluar batas
+        minZoom: 11 // Kunci Zoom-out agar tidak bisa lihat seluruh dunia
+      }).setView([lat, lng], zoomLvl);
+      
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
       marker = L.marker([lat, lng]).addTo(map);
     } else {
       map.setView([lat, lng], zoomLvl);
       marker.setLatLng([lat, lng]);
     }
+
+    map.off('click');
+    marker.off('dragend');
+    marker.unbindPopup(); 
+
+    const btnGps = document.querySelector('.btn-gps');
+    const btnSubmit = document.querySelector('.btn-submit');
+    const mapHint = document.querySelector('.map-hint');
+    const searchBox = document.getElementById('searchMapBox');
+
+    if (isLocked) {
+      marker.dragging.disable(); 
+      mapHint.style.display = 'none'; 
+      btnGps.style.display = 'none'; 
+      btnSubmit.style.display = 'none'; 
+      searchBox.style.display = 'none'; 
+      marker.bindPopup(`<div style="text-align:center;"><b>${namaPasien}</b><br><span style="color:var(--danger); font-size:10px; font-weight:800;">📍 LOKASI TERKUNCI</span></div>`);
+    } else {
+      marker.dragging.enable(); 
+      mapHint.style.display = 'block'; 
+      btnGps.style.display = 'block'; 
+      btnSubmit.style.display = 'block'; 
+      searchBox.style.display = 'flex'; 
+
+      marker.on('dragend', function(e) { 
+        const pos = marker.getLatLng(); 
+        document.getElementById('koordinat').value = `${pos.lat}, ${pos.lng}`; 
+      });
+      map.on('click', function(e) { 
+        marker.setLatLng(e.latlng); 
+        document.getElementById('koordinat').value = `${e.latlng.lat}, ${e.latlng.lng}`; 
+      });
+    }
+    setTimeout(() => { map.invalidateSize(); }, 300);
+  }
 
     map.off('click');
     marker.off('dragend');
