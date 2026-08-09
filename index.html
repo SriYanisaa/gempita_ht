@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <title>PANDU</title>
+  <title>PANDU - Sebaran Penyakit</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PANDU">
@@ -115,7 +115,7 @@
     .badge-pending { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.2);}
 
     #formView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card-bg); z-index: 1000; overflow-y: auto; padding: 0; }
-    .form-header { padding: 25px 20px; background: var(--card-bg); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;}
+    .form-header { padding: 25px 20px; background: var(--card-bg); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);}
     .nav-back { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; width: 42px; height: 42px; font-size: 20px; color: var(--text-main); cursor: pointer; transition: background 0.2s;}
     .nav-back:active { background: var(--border-color); }
     .form-header h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--accent-navy);}
@@ -154,6 +154,11 @@
     #sysStatus.offline { background: rgba(225, 29, 72, 0.95); }
   
     .watermark-it { text-align: center; padding: 15px 20px 80px 20px; font-size: 9px; font-weight: 700; color: var(--text-muted); opacity: 0.6; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.5; }
+
+    /* LAYOUT PETA SEBARAN HIPERTENSI */
+    #distributionView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1500; flex-direction: column; }
+    .dist-filter-box { padding: 15px 20px; background: var(--card-bg); z-index: 10; border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+    #distMap { flex: 1; width: 100%; z-index: 1;}
   </style>
 </head>
 <body>
@@ -189,7 +194,7 @@
   <div class="watermark-it" style="position: static; margin-top: 40px; padding: 0;">App by Penata Kelola Sistem dan Teknologi Informasi<br>UPTD. Puskesmas Klungkung I</div>
 </div>
 
-<!-- TAMPILAN DAFTAR -->
+<!-- TAMPILAN DAFTAR UTAMA -->
 <div id="listView" style="display: none;">
   <div class="header">
     <div style="display: flex; align-items: center; gap: 15px;">
@@ -211,6 +216,12 @@
         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
       </button>
     </div>
+    
+    <!-- TOMBOL BARU: BUKA PETA SEBARAN (EPISENTRUM) -->
+    <button class="btn btn-gps" style="width: 100%; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="bukaPetaSebaran()">
+      🗺️ Lihat Peta Sebaran Penyakit
+    </button>
+
     <div id="filterIndicator" class="filter-indicator">
       <div class="filter-indicator-text"><span>⚙️</span> Data sedang difilter</div>
       <button class="reset-btn" onclick="resetFilters()">Reset Filter</button>
@@ -228,7 +239,33 @@
   <div class="watermark-it">App by Penata Kelola Sistem dan Teknologi Informasi<br>UPTD. Puskesmas Klungkung I</div>
 </div>
 
-<!-- FILTER MODAL -->
+<!-- TAMPILAN PETA SEBARAN PENYAKIT (FULLSCREEN) -->
+<div id="distributionView">
+  <div class="form-header">
+    <button class="nav-back" onclick="tutupPetaSebaran()">←</button>
+    <h2>Peta Sebaran Hipertensi</h2>
+  </div>
+  
+  <div class="dist-filter-box">
+    <label style="font-size:12px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px; text-transform:uppercase;">Filter Berdasarkan Wilayah</label>
+    <select id="filterDistWilayah" onchange="renderPetaSebaran()" style="width:100%; padding:14px; border:1.5px solid var(--border-color); border-radius:12px; font-family:inherit; font-size:14px; background:var(--input-bg); color:var(--text-main); font-weight:700; outline:none; appearance:none;">
+      <option value="all">🌐 Semua Wilayah</option>
+      <option value="Satra">Satra</option>
+      <option value="Kamasan">Kamasan</option>
+      <option value="Semarapura Kauh">Semarapura Kauh</option>
+      <option value="Gelgel">Gelgel</option>
+      <option value="Tojan">Tojan</option>
+      <option value="Tangkas">Tangkas</option>
+      <option value="Semarapura Klod">Semarapura Klod</option>
+      <option value="Semarapura Klod Kangin">Semarapura Klod Kangin</option>
+      <option value="Kampung Gelgel">Kampung Gelgel</option>
+    </select>
+  </div>
+
+  <div id="distMap"></div>
+</div>
+
+<!-- FILTER MODAL (UNTUK LIST VIEW) -->
 <div id="filterModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-title"><span>⚙️ Filter Spesifik</span><button class="close-modal" onclick="toggleFilter()">✕</button></div>
@@ -259,14 +296,13 @@
   </div>
 </div>
 
-<!-- TAMPILAN FORM (Update & Tambah) -->
+<!-- TAMPILAN FORM TAMBAH/UPDATE PASIEN -->
 <div id="formView">
   <div class="form-header"><button class="nav-back" onclick="tutupForm()">←</button><h2 id="subtitleNama">Nama</h2></div>
   <div class="form-content">
     <form id="formGeo">
       <input type="hidden" id="formAction" value="update">
       
-      <!-- Ditambahkan event oninput untuk menyimpan draf teks -->
       <div class="input-group" id="groupNamaInput" style="display:none;">
         <label>Nama Pasien</label>
         <input type="text" id="inputNama" placeholder="Masukkan nama lengkap pasien" oninput="simpanDraft()">
@@ -321,7 +357,9 @@
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzcp57xHiOczZayb9wpQwDNkAuBiJpGPGHsfuaxpB4CxyaPzsfTN2fU9VpECskx49lE/exec"; 
-  let db; let dataPasienLokal = []; let map, marker;
+  let db; let dataPasienLokal = []; 
+  let map, marker;
+  let distMap, distMarkersLayer; // Variabel untuk Peta Sebaran
 
   window.addEventListener('load', () => {
     setTimeout(() => {
@@ -331,7 +369,6 @@
     }, 1500); 
   });
 
-  // --- FITUR BARU: SIMPAN DRAF OTOMATIS (MENCEGAH HILANG SAAT REFRESH) ---
   function simpanDraft() {
     const draft = {
       nama: document.getElementById('inputNama').value,
@@ -343,13 +380,11 @@
     sessionStorage.setItem('pandu_draft', JSON.stringify(draft));
   }
 
-  // --- FITUR BARU: PULIHKAN DRAF SETELAH REFRESH ---
   function pulihkanDraft() {
     const draftStr = sessionStorage.getItem('pandu_draft');
     if (!draftStr) return;
     const draft = JSON.parse(draftStr);
     
-    // Memberikan delay kecil agar peta termuat dahulu sebelum ditimpa
     setTimeout(() => {
       if (draft.nama) document.getElementById('inputNama').value = draft.nama;
       if (draft.nik) {
@@ -405,26 +440,30 @@
         } catch(e) { console.error("Gagal mendeskripsi data lokal."); }
       }
 
-      // --- LOGIKA CERDAS: MENDETEKSI JEJAK SEBELUM REFRESH ---
+      // Deteksi jejak layar terakhir sebelum di-refresh
       const lastView = sessionStorage.getItem('pandu_last_view');
       if (lastView === 'tambah') {
         bukaFormTambah(); 
-        pulihkanDraft(); // Ambil draf ketikan yang belum tersimpan
+        pulihkanDraft(); 
       } else if (lastView === 'detail') {
         const p = JSON.parse(sessionStorage.getItem('pandu_last_patient'));
         if (p) {
           bukaForm(p.nama, p.nik, p.koordinat);
-          pulihkanDraft(); // Ambil posisi pin peta yang belum tersimpan
+          pulihkanDraft(); 
         } else { tutupForm(); }
+      } else if (lastView === 'sebaran') {
+        bukaPetaSebaran(); // Panggil fungsi Peta Sebaran jika refresh di sana
       } else {
         document.getElementById('listView').style.display = 'block';
         document.getElementById('formView').style.display = 'none';
+        document.getElementById('distributionView').style.display = 'none';
       }
 
       if (navigator.onLine) fetchDataPasien();
     } else {
       document.getElementById('listView').style.display = 'none';
       document.getElementById('formView').style.display = 'none';
+      document.getElementById('distributionView').style.display = 'none';
       document.getElementById('loginView').style.display = 'flex';
     }
   }
@@ -512,6 +551,12 @@
       const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), token).toString();
       localStorage.setItem('pesona_data_secure', encryptedData);
       applyFilters(); 
+      
+      // Update Peta Sebaran jika sedang terbuka
+      if(document.getElementById('distributionView').style.display === 'flex') {
+         renderPetaSebaran();
+      }
+      
     } catch(e) { 
       console.log("Mode offline aktif");
       applyFilters(); 
@@ -577,6 +622,82 @@
     });
   }
 
+  // ==========================================
+  // FITUR PETA SEBARAN (EPISENTRUM PENYAKIT)
+  // ==========================================
+  function bukaPetaSebaran() {
+    sessionStorage.setItem('pandu_last_view', 'sebaran');
+
+    document.getElementById('listView').style.display = 'none';
+    document.getElementById('distributionView').style.display = 'flex';
+    
+    // Inisialisasi peta hanya jika belum ada
+    if (!distMap) {
+      const batasKlungkung = L.latLngBounds([-8.9000, 115.3000], [-8.4000, 115.7000]);
+      distMap = L.map('distMap', { maxBounds: batasKlungkung, maxBoundsViscosity: 1.0, minZoom: 11 }).setView([-8.5400, 115.4000], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(distMap);
+      distMarkersLayer = L.layerGroup().addTo(distMap);
+    }
+    
+    // Invalidasikan ukuran peta saat di-display flex
+    setTimeout(() => { 
+      distMap.invalidateSize(); 
+      renderPetaSebaran(); 
+    }, 300);
+  }
+
+  function tutupPetaSebaran() {
+    sessionStorage.removeItem('pandu_last_view');
+    document.getElementById('distributionView').style.display = 'none';
+    document.getElementById('listView').style.display = 'block';
+  }
+
+  function renderPetaSebaran() {
+    if(!distMap || !distMarkersLayer) return;
+    distMarkersLayer.clearLayers(); 
+    
+    const wilayahFilter = document.getElementById('filterDistWilayah').value;
+    
+    const dataSebaran = dataPasienLokal.filter(p => {
+      const isSelesai = p.status.toLowerCase().includes("sudah") && p.koordinat && p.koordinat.includes(',');
+      let matchAlamat = true;
+      if (wilayahFilter !== 'all') {
+        const alamatDb = p.alamat ? p.alamat.toLowerCase() : "";
+        matchAlamat = alamatDb.includes(wilayahFilter.toLowerCase());
+      }
+      return isSelesai && matchAlamat;
+    });
+
+    if (dataSebaran.length === 0) {
+       distMap.setView([-8.5400, 115.4000], 13);
+       return;
+    }
+
+    // Gunakan icon titik merah kecil (tanpa gambar eksternal, anti-offline)
+    const redDotIcon = L.divIcon({
+      className: 'custom-div-icon',
+      html: `<div style="background-color: var(--danger); width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"></div>`,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+
+    const bounds = [];
+    dataSebaran.forEach(p => {
+      const parts = p.koordinat.split(',');
+      const lat = parseFloat(parts[0].trim());
+      const lng = parseFloat(parts[1].trim());
+      
+      const marker = L.marker([lat, lng], {icon: redDotIcon}).bindPopup(`<b>${p.nama}</b><br>NIK: ${p.nik}<br>Desa: ${p.alamat}`);
+      distMarkersLayer.addLayer(marker);
+      bounds.push([lat, lng]);
+    });
+
+    if (bounds.length > 0) {
+       distMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 });
+    }
+  }
+
+  // --- FITUR CARI PATOKAN UNTUK FORM PETA (INPUT PASIEN) ---
   async function cariPatokanMap() {
     const query = document.getElementById('inputCariMap').value;
     if (!query) return;
@@ -590,7 +711,7 @@
       let kataKunci = query.trim();
       if (!kataKunci.toLowerCase().includes('klungkung')) { kataKunci += ', Klungkung'; }
 
-      const urlTarget = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(kataKunci)}&viewbox=115.30,-8.40,115.70,-8.90&limit=1`;
+      const urlTarget = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(kataKunci)}&limit=1`;
       const res = await fetch(urlTarget);
       const data = await res.json();
       
@@ -601,7 +722,7 @@
         map.setView([lat, lon], 17);
         marker.setLatLng([lat, lon]);
         document.getElementById('koordinat').value = `${lat}, ${lon}`;
-        simpanDraft(); // CATAT JEJAK PENCARIAN KE DRAF
+        simpanDraft(); 
       } else {
         alert("Lokasi detail tidak ditemukan.\n\nTips: Peta ini kadang belum mencatat nama toko/bangunan baru. \n\nCobalah ketik NAMA JALAN, NAMA BANJAR, atau NAMA DESA terdekat.");
       }
@@ -619,7 +740,7 @@
     } else {
       icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />`;
     }
-    setTimeout(() => { map.invalidateSize(); simpanDraft(); }, 300); // CATAT JEJAK FULLSCREEN
+    setTimeout(() => { map.invalidateSize(); simpanDraft(); }, 300); 
   }
 
   function inisialisasiPeta(savedKoordinat, namaPasien) {
@@ -670,12 +791,12 @@
       marker.on('dragend', function(e) { 
         const pos = marker.getLatLng(); 
         document.getElementById('koordinat').value = `${pos.lat}, ${pos.lng}`; 
-        simpanDraft(); // CATAT SETIAP KALI PIN DIGESER
+        simpanDraft(); 
       });
       map.on('click', function(e) { 
         marker.setLatLng(e.latlng); 
         document.getElementById('koordinat').value = `${e.latlng.lat}, ${e.latlng.lng}`; 
-        simpanDraft(); // CATAT SETIAP KALI PETA DIKLIK
+        simpanDraft(); 
       });
     }
     setTimeout(() => { map.invalidateSize(); }, 300);
@@ -700,7 +821,6 @@
   }
 
   function bukaForm(nama, nik, koordinat) {
-    // TANDAI BAHWA PETUGAS SEDANG BERADA DI FORM DETAIL PASIEN INI
     sessionStorage.setItem('pandu_last_view', 'detail');
     sessionStorage.setItem('pandu_last_patient', JSON.stringify({nama: nama, nik: nik, koordinat: koordinat}));
 
@@ -732,7 +852,6 @@
   }
 
   function bukaFormTambah() {
-    // TANDAI BAHWA PETUGAS SEDANG BERADA DI FORM TAMBAH PASIEN
     sessionStorage.setItem('pandu_last_view', 'tambah');
 
     document.getElementById('listView').style.display = 'none';
@@ -759,7 +878,6 @@
   }
 
   function tutupForm() { 
-    // HAPUS SEMUA JEJAK MEMORI JIKA PETUGAS SENGAJA KELUAR ATAU SUDAH SIMPAN DATA
     sessionStorage.removeItem('pandu_last_view');
     sessionStorage.removeItem('pandu_last_patient');
     sessionStorage.removeItem('pandu_draft');
@@ -779,7 +897,7 @@
           const lat = pos.coords.latitude; const lng = pos.coords.longitude;
           document.getElementById('koordinat').value = `${lat}, ${lng}`;
           if(map && marker) { map.setView([lat, lng], 17); marker.setLatLng([lat, lng]); }
-          simpanDraft(); // CATAT KOORDINAT GPS KE DRAF
+          simpanDraft(); 
         },
         err => { hideLoader(); alert("Gagal ambil lokasi. Pastikan GPS HP menyala."); },
         { enableHighAccuracy: true }
@@ -849,7 +967,7 @@
         if(result.status === "success") {
           alert("Data berhasil disimpan ke Database!"); 
           fetchDataPasien(); 
-          tutupForm(); // Tutup form (dan bersihkan draf)
+          tutupForm(); 
         } else { alert("Gagal: " + result.message); }
       })
       .catch(() => { simpanOffline(data); })
@@ -865,7 +983,7 @@
     const tx = db.transaction("dataTunda", "readwrite"); 
     tx.objectStore("dataTunda").add({ payload: encryptedData }); 
     alert("Koneksi terputus! Data TERENKRIPSI disimpan di HP (Akan disinkronkan saat sinyal ada)."); 
-    tutupForm(); // Tutup form (dan bersihkan draf)
+    tutupForm(); 
   }
 
   function sinkronisasiDataTunda() {
