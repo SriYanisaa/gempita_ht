@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <title>PANDU - Puskesmas Klungkung I</title>
+  <title>PANDU - UPTD. Puskesmas Klungkung I</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PANDU">
@@ -189,7 +189,7 @@
 <div id="splashScreen">
   <img src="logo_transparent.png?v=3" alt="Logo PANDU" class="splash-logo">
   <h1 class="splash-title">PANDU</h1>
-  <div class="splash-subtitle">Puskesmas Klungkung I</div>
+  <div class="splash-subtitle">UPTD. Puskesmas Klungkung I</div>
 </div>
 
 <div id="loaderOverlay"><div class="spinner"></div><div class="loader-text" id="loaderText">Memproses...</div></div>
@@ -221,7 +221,7 @@
   <div class="sidebar-header">
     <img src="logo_transparent.png?v=3" alt="PANDU">
     <h3>PANDU</h3>
-    <p>Puskesmas Klungkung I</p>
+    <p>UPTD. Puskesmas Klungkung I</p>
   </div>
   <div class="sidebar-menu">
     <div class="menu-section-title">Menu Utama</div>
@@ -243,10 +243,6 @@
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.25c-2.485 5.372-5.25 8.23-5.25 11.25a5.25 5.25 0 0010.5 0c0-3.02-2.765-5.878-5.25-11.25z"></path></svg>
       Diabetes Melitus (DM)
     </button>
-    <button class="menu-item" onclick="bukaUnderDevelopment('Tuberkulosis (TBC)')">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
-      Tuberkulosis (TBC)
-    </button>
 
     <div class="menu-section-title" style="margin-top: 10px;">Sistem</div>
     <button class="menu-item" onclick="bukaAbout()">
@@ -258,7 +254,7 @@
       Kunci & Keluar (Logout)
     </button>
   </div>
-  <div class="sidebar-footer">Aplikasi PANDU • v2.0</div>
+  <div class="sidebar-footer">Aplikasi PANDU • v1.0</div>
 </div>
 
 <!-- MODAL TENTANG APLIKASI (ABOUT) -->
@@ -267,13 +263,14 @@
     <div class="modal-title" style="justify-content: flex-end;"><button class="close-modal" onclick="tutupAbout()">✕</button></div>
     <img src="logo_transparent.png?v=3" style="width: 80px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3); border-radius: 50%;">
     <h2 style="margin: 0 0 5px; color: var(--accent-navy); font-weight: 800;">PANDU</h2>
-    <p style="margin: 0 0 20px; font-size: 12px; color: var(--text-muted); font-weight: 700;">Aplikasi Pemetaan Kesehatan Masyarakat</p>
+    <p style="margin: 0 0 20px; font-size: 12px; color: var(--text-muted); font-weight: 700;">Pemetaaan Area dan Navigasi Data Unit</p>
+    <p style="margin: 0 0 20px; font-size: 12px; color: var(--text-muted); font-weight: 700;">UPTD. Puskesmas Klungkung I</p>
     
     <div style="background: var(--input-bg); padding: 20px; border-radius: 16px; font-size: 13px; line-height: 1.6; color: var(--accent-navy); font-weight: 500; text-align: left; border: 1px solid var(--border-color);">
       Sistem tata kelola data geospasial yang dirancang khusus untuk memetakan episentrum penyakit secara akurat dan real-time di wilayah kerja <b>UPTD. Puskesmas Klungkung I</b>.<br><br>
       <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">Dikembangkan Oleh:</div>
-      <b style="font-size: 14px; color: var(--primary-dark);">Komang Sri Yanisa Putri</b><br>
-      <span style="font-weight: 600;">Penata Kelola Sistem dan Teknologi Informasi</span>
+      <b style="font-size: 14px; color: var(--primary-dark);">Penata Kelola Sistem dan Teknologi Informasi</b><br>
+      <span style="font-weight: 600;">UPTD. Puskesmas Klungkung I</span>
     </div>
     
     <button class="btn btn-submit" style="margin-top: 25px;" onclick="tutupAbout()">Tutup Halaman</button>
@@ -287,7 +284,7 @@
       <img src="logo_transparent.png?v=3" alt="Logo PANDU" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 15px rgba(20, 184, 166, 0.3);">
       <div class="header-text">
         <h1>PANDU</h1>
-        <p>Pemetaan Kesehatan Masyarakat</p>
+        <p>Pemetaaan Area dan Navigasi Data Unit</p>
       </div>
     </div>
     <!-- Tombol Hamburger Menu -->
@@ -668,7 +665,7 @@
     const token = localStorage.getItem('pandu_token');
     if (!token) return; 
 
-    setTimeout(() => showLoader("Mengambil data rahasia..."), 1500);
+    setTimeout(() => showLoader("Mengambil data..."), 1500);
     try {
       const response = await fetch(GAS_URL, {
         method: 'POST',
@@ -1079,7 +1076,7 @@
       data.jenisKelamin = jenisKelaminFinal;
     }
 
-    showLoader("Menyimpan Rahasia...");
+    showLoader("Menyimpan data...");
     if (navigator.onLine) {
       fetch(GAS_URL, { method: "POST", body: JSON.stringify(data) })
       .then(res => res.json())
