@@ -995,7 +995,10 @@
     const btnRute = document.getElementById('btnRuteDetail');
     if (koordinat && koordinat.trim() !== "") {
       const koorBersih = koordinat.replace(/\s/g, ''); 
-      btnRute.href = `https://www.google.com/maps/dir/?api=1&destination=${koorBersih}`;
+      
+      // Tautan baru yang memaksa Google Maps masuk ke Mode Navigasi (Mulai)
+      btnRute.href = `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${koorBersih}&dir_action=navigate`;
+      
       btnRute.style.display = 'flex'; 
     } else { btnRute.style.display = 'none'; }
 
