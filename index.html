@@ -894,12 +894,25 @@
 
     const batasKlungkung = L.latLngBounds( [-8.9000, 115.3000], [-8.4000, 115.7000] );
 
+    // --- SOLUSI PIN HILANG: BUAT PIN VEKTOR SVG MURNI ---
+    const svgPinBiru = L.divIcon({
+      className: '', // Dikosongkan agar tidak ada kotak putih bawaan Leaflet
+      // Kode bentuk Pin dengan warna biru elegan dan bayangan (drop-shadow)
+      html: `<svg width="36" height="36" viewBox="0 0 24 24" fill="#0ea5e9" stroke="white" stroke-width="1.5" style="filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.3));"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 36], // Titik tumpu persis di ujung lancip bawah pin
+      popupAnchor: [0, -36]
+    });
+
     if (!map) {
       map = L.map('map', { maxBounds: batasKlungkung, maxBoundsViscosity: 1.0, minZoom: 11 }).setView([lat, lng], zoomLvl);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-      marker = L.marker([lat, lng]).addTo(map);
+      // Terapkan icon vektor saat membuat marker
+      marker = L.marker([lat, lng], {icon: svgPinBiru}).addTo(map);
     } else {
       map.setView([lat, lng], zoomLvl);
+      // Pastikan icon vektor diterapkan lagi saat peta di-refresh
+      marker.setIcon(svgPinBiru);
       marker.setLatLng([lat, lng]);
     }
 
