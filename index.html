@@ -996,8 +996,8 @@
     if (koordinat && koordinat.trim() !== "") {
       const koorBersih = koordinat.replace(/\s/g, ''); 
       
-      // Tautan baru yang memaksa Google Maps masuk ke Mode Navigasi (Mulai)
-      btnRute.href = `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${koorBersih}&dir_action=navigate`;
+      // Hapus &dir_action=navigate agar berhenti di layar pratinjau rute
+      btnRute.href = `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${koorBersih}`;
       
       btnRute.style.display = 'flex'; 
     } else { btnRute.style.display = 'none'; }
