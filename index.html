@@ -459,7 +459,11 @@
       </div>
 
       <button type="button" class="btn btn-gps" onclick="getGPS()">📍 Cari Otomatis Via Satelit GPS</button>
-      <button type="submit" class="btn btn-submit">Simpan & Sinkronkan</button>
+
+      <div style="display: flex; gap: 10px;">
+        <button type="button" id="btnHapusPasien" class="btn" style="flex: 1; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.3); display: none;" onclick="hapusPasien()">🗑️ Hapus</button>
+        <button type="submit" class="btn btn-submit" style="flex: 2;">Simpan Data</button>
+      </div>
     </form>
   </div>
 </div>
@@ -991,6 +995,7 @@
     
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
+    document.getElementById('btnHapusPasien').style.display = 'block';
     
     const btnRute = document.getElementById('btnRuteDetail');
     if (koordinat && koordinat.trim() !== "") {
@@ -1027,6 +1032,7 @@
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
     document.getElementById('nikCount').innerText = '0';
+    document.getElementById('btnHapusPasien').style.display = 'none';
     
     inisialisasiPeta("", "Pasien Baru"); 
   }
@@ -1130,6 +1136,40 @@
       simpanOffline(data); hideLoader(); 
     }
   });
+
+  // --- FUNGSI HAPUS PASIEN PERMANEN ---
+  function hapusPasien() {
+    const cekNik = document.getElementById('nik').value;
+    const namaPasien = document.getElementById('subtitleNama').innerText;
+
+    // Beri peringatan ganda agar petugas tidak salah klik
+    if(confirm(`PERINGATAN!\n\nApakah Anda yakin ingin menghapus data pasien ${namaPasien} (NIK: ${cekNik}) secara permanen dari database?\n\nTindakan ini tidak dapat dibatalkan.`)) {
+
+      showLoader("Menghapus data...");
+
+      let data = { 
+        action: "hapus", 
+        nik: cekNik, 
+        pin: localStorage.getItem('pandu_token')
+      };
+
+      if (navigator.onLine) {
+        fetch(GAS_URL, { method: "POST", body: JSON.stringify(data) })
+        .then(res => res.json())
+        .then(result => { 
+          if(result.status === "success") {
+            alert("Data pasien berhasil dihapus dari sistem!"); 
+            fetchDataPasien(); 
+            tutupForm(); 
+          } else { alert("Gagal: " + result.message); }
+        })
+        .catch(() => { simpanOffline(data); })
+        .finally(() => { hideLoader(); });
+      } else { 
+        simpanOffline(data); hideLoader(); 
+      }
+    }
+  }
 
   function simpanOffline(data) { 
     const token = localStorage.getItem('pandu_token');
