@@ -165,8 +165,17 @@
     .btn-gps { background: #ccfbf1; color: var(--primary-dark); border: 1px solid rgba(20, 184, 166, 0.3);}
     .btn-submit { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 8px 20px rgba(20, 184, 166, 0.25);}
     
-    .btn-rute-detail { background: #f0f9ff; color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.3); text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.15); margin-bottom: 25px; padding: 16px; border-radius: 14px; font-weight: 800;}
+    /* GAYA TOMBOL ACTION RUTE & STREET VIEW */
+    .action-buttons-row { display: none; gap: 10px; margin-bottom: 25px; }
+    .btn-rute-detail { flex: 1; background: #f0f9ff; color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.3); text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.15); padding: 14px; border-radius: 14px; font-weight: 800; font-size: 13px; text-align: center;}
     .btn-rute-detail:active { background: #e0f2fe; }
+    .btn-street-view { flex: 1; background: #fff7ed; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.3); text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(217, 119, 6, 0.15); padding: 14px; border-radius: 14px; font-weight: 800; font-size: 13px; text-align: center;}
+    .btn-street-view:active { background: #ffedd5; }
+
+    /* LAYOUT PENCATATAN MEDIS (BARU) */
+    .medis-card { background: #e0f2fe; border: 1.5px solid #bae6fd; padding: 20px; border-radius: 18px; margin-top: 30px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.08); }
+    .medis-card .input-group input, .medis-card .input-group select { background: #ffffff; border-color: #bae6fd; }
+    .btn-medis { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25); }
 
     /* LAYOUT PETA SEBARAN HIPERTENSI */
     #distributionView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1500; flex-direction: column; }
@@ -184,7 +193,7 @@
 
     #sysStatus { 
       position: fixed; 
-      bottom: 45px; /* Dinaikkan agar bebas dari garis bawah layar iPhone */
+      bottom: 45px; 
       left: 50%; 
       transform: translateX(-50%); 
       padding: 8px 18px; 
@@ -193,7 +202,7 @@
       color: white; 
       background: rgba(5, 150, 105, 0.95); 
       border-radius: 20px; 
-      z-index: 99999; /* Dipaksa tampil di layer paling depan (mengalahkan elemen lain) */
+      z-index: 99999; 
       backdrop-filter: blur(4px); 
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
@@ -284,7 +293,7 @@
     <div class="modal-title" style="justify-content: flex-end;"><button class="close-modal" onclick="tutupAbout()">✕</button></div>
     <img src="logo_transparent.png?v=3" style="width: 80px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3); border-radius: 50%;">
     <h2 style="margin: 0 0 5px; color: var(--accent-navy); font-weight: 800;">PANDU</h2>
-    <p style="margin: 0 0 20px; font-size: 12px; color: var(--text-muted); font-weight: 700;">Pemetaan Area dan Navigasi Terpadu</p>
+    <p style="margin: 0 0 20px; font-size: 12px; color: var(--text-muted); font-weight: 700;">Pemetaaan Area dan Navigasi Data Unit</p>
     <p style="margin: 0 0 20px; font-size: 12px; color: var(--text-muted); font-weight: 700;">UPTD. Puskesmas Klungkung I</p>
     
     <div style="background: var(--input-bg); padding: 20px; border-radius: 16px; font-size: 13px; line-height: 1.6; color: var(--accent-navy); font-weight: 500; text-align: left; border: 1px solid var(--border-color);">
@@ -305,7 +314,7 @@
       <img src="logo_transparent.png?v=3" alt="Logo PANDU" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 15px rgba(20, 184, 166, 0.3);">
       <div class="header-text">
         <h1>PANDU</h1>
-        <p>Pemetaaan Area dan Navigasi Terpadu</p>
+        <p>Pemetaaan Area dan Navigasi Data Unit</p>
       </div>
     </div>
     <!-- Tombol Hamburger Menu -->
@@ -433,7 +442,16 @@
       
       <div class="map-hint">💡 Geser pin biru untuk menandai lokasi akurat.</div>
       
-      <a href="#" target="_blank" id="btnRuteDetail" class="btn btn-rute-detail" style="display: none;">🗺️ Buka Rute di Google Maps</a>
+      <!-- TEKS PETUNJUK STREET VIEW MUNCUL SAAT MODE EDIT/TAMBAH -->
+      <div id="streetViewHint" style="display:none; font-size:11px; color:var(--primary-dark); text-align:center; margin-top:-15px; margin-bottom:15px; font-weight:800;">
+        *Jika posisi rumah di Street View meleset, kembali ke PANDU dan geser pin biru lagi.
+      </div>
+
+      <!-- TOMBOL BUKA RUTE DAN STREET VIEW -->
+      <div class="action-buttons-row" id="actionButtonsRow">
+        <a href="#" target="_blank" id="btnRuteDetail" class="btn-rute-detail">🗺️ Mulai Navigasi</a>
+        <a href="#" target="_blank" id="btnStreetView" class="btn-street-view">📸 Cek Street View</a>
+      </div>
       
       <div class="input-group"><label>Koordinat Terpilih</label><input type="text" id="koordinat" placeholder="Belum ada koordinat" readonly required></div>
       
@@ -459,12 +477,48 @@
       </div>
 
       <button type="button" class="btn btn-gps" onclick="getGPS()">📍 Cari Otomatis Via Satelit GPS</button>
-
+      
       <div style="display: flex; gap: 10px;">
         <button type="button" id="btnHapusPasien" class="btn" style="flex: 1; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.3); display: none;" onclick="hapusPasien()">🗑️ Hapus</button>
-        <button type="submit" class="btn btn-submit" style="flex: 2;">Simpan Data</button>
+        <button type="submit" class="btn btn-submit" style="flex: 2;">Simpan & Sinkronkan</button>
       </div>
     </form>
+
+    <!-- KARTU PENCATATAN MEDIS BULANAN (BARU) -->
+    <div id="sectionMedis" class="medis-card" style="display: none;">
+      <h3 style="font-size: 15px; color: var(--accent-navy); margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+        📝 Pencatatan Medis & Terapi
+      </h3>
+      <form id="formMedis">
+        <div class="input-group">
+          <label>Bulan Kunjungan</label>
+          <select id="inputBulan">
+            <option value="Januari">Januari</option>
+            <option value="Pebruari">Pebruari</option>
+            <option value="Maret">Maret</option>
+            <option value="April">April</option>
+            <option value="Mei">Mei</option>
+            <option value="Juni">Juni</option>
+            <option value="Juli">Juli</option>
+            <option value="Agustus">Agustus</option>
+            <option value="September">September</option>
+            <option value="Oktober">Oktober</option>
+            <option value="November">November</option>
+            <option value="Desember">Desember</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Tekanan Darah (mmHg)</label>
+          <input type="text" id="inputTD" placeholder="Contoh: 120/80">
+        </div>
+        <div class="input-group">
+          <label>Terapi (Obat, Dosis, Jumlah)</label>
+          <input type="text" id="inputTherapi" placeholder="Contoh: Amlodipine 10 Mg (30 tab)">
+        </div>
+        <button type="button" class="btn btn-medis" style="margin-bottom: 0;" onclick="simpanDataMedis()">Simpan Data Medis</button>
+      </form>
+    </div>
+
   </div>
 </div>
 
@@ -482,7 +536,6 @@
     }, 1500); 
   });
 
-  // --- KONTROL SIDEBAR MENU NAVIGASI ---
   function bukaSidebar() {
     document.getElementById('sidebarOverlay').classList.add('active');
     document.getElementById('sidebarMenu').classList.add('active');
@@ -505,7 +558,6 @@
     prosesLogout();
   }
   
-  // --- KONTROL HALAMAN TENTANG (ABOUT) ---
   function bukaAbout() {
     closeSidebar();
     document.getElementById('aboutModal').classList.add('active');
@@ -514,7 +566,6 @@
     document.getElementById('aboutModal').classList.remove('active');
   }
 
-  // --- KONTROL HALAMAN UNDER DEVELOPMENT (BARU) ---
   function bukaUnderDevelopment(namaPenyakit) {
     closeSidebar();
     sessionStorage.setItem('pandu_last_view', 'underdev');
@@ -526,6 +577,43 @@
     document.getElementById('underDevView').style.display = 'flex';
 
     document.getElementById('underDevTitle').innerText = 'Peta Sebaran ' + namaPenyakit;
+  }
+
+  function updateTautanPeta(koordinat) {
+    const btnRow = document.getElementById('actionButtonsRow');
+    const btnRute = document.getElementById('btnRuteDetail');
+    const btnStreet = document.getElementById('btnStreetView');
+    const hint = document.getElementById('streetViewHint');
+    
+    const isLocked = document.getElementById('nik').readOnly;
+
+    if (koordinat && koordinat.trim() !== "") {
+      const koorBersih = koordinat.replace(/\s/g, ''); 
+      const parts = koorBersih.split(',');
+      const lat = parts[0];
+      const lng = parts[1];
+      
+      btnRute.href = `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${koorBersih}`;
+      btnStreet.href = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+      
+      btnRow.style.display = 'flex';
+
+      if (isLocked) {
+         btnRute.style.display = 'flex'; 
+         btnStreet.style.display = 'flex';
+         btnStreet.innerHTML = "📸 Lihat Street View";
+         if(hint) hint.style.display = 'none';
+      } else {
+         btnRute.style.display = 'none'; 
+         btnStreet.style.display = 'flex';
+         btnStreet.innerHTML = "📸 Cek Akurasi via Street View";
+         if(hint) hint.style.display = 'block';
+      }
+
+    } else {
+      btnRow.style.display = 'none';
+      if(hint) hint.style.display = 'none';
+    }
   }
 
   function simpanDraft() {
@@ -558,6 +646,7 @@
         let lat = parseFloat(parts[0].trim()); 
         let lng = parseFloat(parts[1].trim());
         if(map && marker) { map.setView([lat, lng], 17); marker.setLatLng([lat, lng]); }
+        updateTautanPeta(draft.koordinat); 
       }
       
       const wrapper = document.getElementById('mapWrapper');
@@ -863,7 +952,9 @@
         
         map.setView([lat, lon], 17);
         marker.setLatLng([lat, lon]);
-        document.getElementById('koordinat').value = `${lat}, ${lon}`;
+        const k = `${lat}, ${lon}`;
+        document.getElementById('koordinat').value = k;
+        updateTautanPeta(k);
         simpanDraft(); 
       } else {
         alert("Lokasi detail tidak ditemukan.\n\nTips: Peta ini kadang belum mencatat nama toko/bangunan baru. \n\nCobalah ketik NAMA JALAN, NAMA BANJAR, atau NAMA DESA terdekat.");
@@ -898,24 +989,20 @@
 
     const batasKlungkung = L.latLngBounds( [-8.9000, 115.3000], [-8.4000, 115.7000] );
 
-    // --- SOLUSI PIN HILANG: BUAT PIN VEKTOR SVG MURNI ---
     const svgPinBiru = L.divIcon({
-      className: '', // Dikosongkan agar tidak ada kotak putih bawaan Leaflet
-      // Kode bentuk Pin dengan warna biru elegan dan bayangan (drop-shadow)
+      className: '', 
       html: `<svg width="36" height="36" viewBox="0 0 24 24" fill="#0ea5e9" stroke="white" stroke-width="1.5" style="filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.3));"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`,
       iconSize: [36, 36],
-      iconAnchor: [18, 36], // Titik tumpu persis di ujung lancip bawah pin
+      iconAnchor: [18, 36], 
       popupAnchor: [0, -36]
     });
 
     if (!map) {
       map = L.map('map', { maxBounds: batasKlungkung, maxBoundsViscosity: 1.0, minZoom: 11 }).setView([lat, lng], zoomLvl);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-      // Terapkan icon vektor saat membuat marker
       marker = L.marker([lat, lng], {icon: svgPinBiru}).addTo(map);
     } else {
       map.setView([lat, lng], zoomLvl);
-      // Pastikan icon vektor diterapkan lagi saat peta di-refresh
       marker.setIcon(svgPinBiru);
       marker.setLatLng([lat, lng]);
     }
@@ -945,12 +1032,16 @@
 
       marker.on('dragend', function(e) { 
         const pos = marker.getLatLng(); 
-        document.getElementById('koordinat').value = `${pos.lat}, ${pos.lng}`; 
+        const k = `${pos.lat}, ${pos.lng}`;
+        document.getElementById('koordinat').value = k;
+        updateTautanPeta(k); 
         simpanDraft(); 
       });
       map.on('click', function(e) { 
         marker.setLatLng(e.latlng); 
-        document.getElementById('koordinat').value = `${e.latlng.lat}, ${e.latlng.lng}`; 
+        const k = `${e.latlng.lat}, ${e.latlng.lng}`;
+        document.getElementById('koordinat').value = k;
+        updateTautanPeta(k); 
         simpanDraft(); 
       });
     }
@@ -995,18 +1086,18 @@
     
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
-    document.getElementById('btnHapusPasien').style.display = 'block';
     
-    const btnRute = document.getElementById('btnRuteDetail');
-    if (koordinat && koordinat.trim() !== "") {
-      const koorBersih = koordinat.replace(/\s/g, ''); 
-      
-      // Hapus &dir_action=navigate agar berhenti di layar pratinjau rute
-      btnRute.href = `https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${koorBersih}`;
-      
-      btnRute.style.display = 'flex'; 
-    } else { btnRute.style.display = 'none'; }
+    document.getElementById('btnHapusPasien').style.display = 'block';
+    document.getElementById('sectionMedis').style.display = 'block'; // Tampilkan form medis
 
+    // Set otomatis bulan ini di form medis
+    const currentMonth = new Date().getMonth();
+    const monthNames = ["Januari", "Pebruari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    document.getElementById('inputBulan').value = monthNames[currentMonth];
+    document.getElementById('inputTD').value = "";
+    document.getElementById('inputTherapi').value = "";
+    
+    updateTautanPeta(koordinat); 
     inisialisasiPeta(koordinat, nama);
   }
 
@@ -1020,7 +1111,6 @@
     
     document.getElementById('groupNamaInput').style.display = 'block';
     document.getElementById('groupAlamatInput').style.display = 'block';
-    document.getElementById('btnRuteDetail').style.display = 'none';
     
     document.getElementById('inputNama').value = "";
     document.getElementById('inputNama').required = true;
@@ -1032,8 +1122,11 @@
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
     document.getElementById('nikCount').innerText = '0';
-    document.getElementById('btnHapusPasien').style.display = 'none';
     
+    document.getElementById('btnHapusPasien').style.display = 'none';
+    document.getElementById('sectionMedis').style.display = 'none'; // Sembunyikan form medis saat tambah baru
+
+    updateTautanPeta(""); 
     inisialisasiPeta("", "Pasien Baru"); 
   }
 
@@ -1055,13 +1148,82 @@
         pos => {
           hideLoader();
           const lat = pos.coords.latitude; const lng = pos.coords.longitude;
-          document.getElementById('koordinat').value = `${lat}, ${lng}`;
+          const k = `${lat}, ${lng}`;
+          document.getElementById('koordinat').value = k;
           if(map && marker) { map.setView([lat, lng], 17); marker.setLatLng([lat, lng]); }
+          updateTautanPeta(k);
           simpanDraft(); 
         },
         err => { hideLoader(); alert("Gagal ambil lokasi. Pastikan GPS HP menyala."); },
         { enableHighAccuracy: true }
       );
+    }
+  }
+
+  // --- FUNGSI HAPUS PASIEN PERMANEN ---
+  function hapusPasien() {
+    const cekNik = document.getElementById('nik').value;
+    const namaPasien = document.getElementById('subtitleNama').innerText;
+
+    if(confirm(`PERINGATAN!\n\nApakah Anda yakin ingin menghapus data pasien ${namaPasien} (NIK: ${cekNik}) secara permanen dari database?\n\nTindakan ini tidak dapat dibatalkan.`)) {
+      showLoader("Menghapus data...");
+      let data = { action: "hapus", nik: cekNik, pin: localStorage.getItem('pandu_token') };
+
+      if (navigator.onLine) {
+        fetch(GAS_URL, { method: "POST", body: JSON.stringify(data) })
+        .then(res => res.json())
+        .then(result => { 
+          if(result.status === "success") {
+            alert("Data pasien berhasil dihapus dari sistem!"); 
+            fetchDataPasien(); 
+            tutupForm(); 
+          } else { alert("Gagal: " + result.message); }
+        })
+        .catch(() => { simpanOffline(data); })
+        .finally(() => { hideLoader(); });
+      } else { simpanOffline(data); hideLoader(); }
+    }
+  }
+
+  // --- FUNGSI SIMPAN DATA MEDIS ---
+  function simpanDataMedis() {
+    const nik = document.getElementById('nik').value;
+    const bulan = document.getElementById('inputBulan').value;
+    const td = document.getElementById('inputTD').value;
+    const therapi = document.getElementById('inputTherapi').value;
+
+    if (!nik || nik.length !== 16) {
+      alert("Sistem membutuhkan NIK yang valid."); return;
+    }
+    if (!td && !therapi) {
+      alert("Harap isi Tekanan Darah atau Terapi terlebih dahulu."); return;
+    }
+
+    let dataMedis = {
+      action: "update_medis",
+      nik: nik,
+      bulan: bulan,
+      tekananDarah: td,
+      therapi: therapi,
+      pin: localStorage.getItem('pandu_token')
+    };
+
+    showLoader("Menyimpan Data Medis...");
+    if (navigator.onLine) {
+      fetch(GAS_URL, { method: "POST", body: JSON.stringify(dataMedis) })
+      .then(res => res.json())
+      .then(result => {
+        if(result.status === "success") {
+          alert(`Data Medis (${bulan}) berhasil disimpan!`);
+          document.getElementById('inputTD').value = "";
+          document.getElementById('inputTherapi').value = "";
+        } else { alert("Gagal: " + result.message); }
+      })
+      .catch(() => { simpanOffline(dataMedis); })
+      .finally(() => { hideLoader(); });
+    } else {
+      simpanOffline(dataMedis);
+      hideLoader();
     }
   }
 
@@ -1137,47 +1299,20 @@
     }
   });
 
-  // --- FUNGSI HAPUS PASIEN PERMANEN ---
-  function hapusPasien() {
-    const cekNik = document.getElementById('nik').value;
-    const namaPasien = document.getElementById('subtitleNama').innerText;
-
-    // Beri peringatan ganda agar petugas tidak salah klik
-    if(confirm(`PERINGATAN!\n\nApakah Anda yakin ingin menghapus data pasien ${namaPasien} (NIK: ${cekNik}) secara permanen dari database?\n\nTindakan ini tidak dapat dibatalkan.`)) {
-
-      showLoader("Menghapus data...");
-
-      let data = { 
-        action: "hapus", 
-        nik: cekNik, 
-        pin: localStorage.getItem('pandu_token')
-      };
-
-      if (navigator.onLine) {
-        fetch(GAS_URL, { method: "POST", body: JSON.stringify(data) })
-        .then(res => res.json())
-        .then(result => { 
-          if(result.status === "success") {
-            alert("Data pasien berhasil dihapus dari sistem!"); 
-            fetchDataPasien(); 
-            tutupForm(); 
-          } else { alert("Gagal: " + result.message); }
-        })
-        .catch(() => { simpanOffline(data); })
-        .finally(() => { hideLoader(); });
-      } else { 
-        simpanOffline(data); hideLoader(); 
-      }
-    }
-  }
-
   function simpanOffline(data) { 
     const token = localStorage.getItem('pandu_token');
     const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), token).toString();
     const tx = db.transaction("dataTunda", "readwrite"); 
     tx.objectStore("dataTunda").add({ payload: encryptedData }); 
-    alert("Koneksi terputus! Data TERENKRIPSI disimpan di HP (Akan disinkronkan saat sinyal ada)."); 
-    tutupForm(); 
+    
+    if (data.action === "update_medis") {
+       alert("Koneksi terputus! Data Medis tersimpan di HP (Akan dikirim saat sinyal ada).");
+       document.getElementById('inputTD').value = "";
+       document.getElementById('inputTherapi').value = "";
+    } else {
+       alert("Koneksi terputus! Data TERENKRIPSI disimpan di HP (Akan disinkronkan saat sinyal ada)."); 
+       tutupForm(); 
+    }
   }
 
   function sinkronisasiDataTunda() {
