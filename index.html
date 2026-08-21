@@ -38,7 +38,6 @@
     
     body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); padding-bottom: 40px; -webkit-tap-highlight-color: transparent; overflow-x: hidden;}
     
-    /* SPLASH SCREEN & LOADER */
     #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--header-bg); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease-out, visibility 0.6s ease-out;}
     #splashScreen.hidden { opacity: 0; visibility: hidden; }
     .splash-logo { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); animation: pulseSplash 1.8s infinite; margin-bottom: 25px; }
@@ -52,7 +51,6 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loader-text { margin-top: 15px; font-weight: 700; color: var(--primary-dark); font-size: 14px; letter-spacing: 0.5px;}
 
-    /* LAYAR LOGIN */
     #loginView { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
     .login-box { background: var(--card-bg); width: 100%; max-width: 400px; padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; }
     .login-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3); }
@@ -68,7 +66,6 @@
     .btn-logout { background: rgba(225, 29, 72, 0.1); color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; margin-top: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.2s;}
     .btn-logout:active { background: rgba(225, 29, 72, 0.2); }
 
-    /* HEADER & SIDEBAR MENU */
     .header { background: var(--header-bg); padding: 35px 20px 45px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.15);}
     .header-text h1 { margin: 0; font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: 1px;}
     .header-text p { margin: 4px 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;}
@@ -92,7 +89,6 @@
     .menu-item.danger svg { color: var(--danger); }
     .sidebar-footer { padding: 15px; text-align: center; font-size: 10px; color: var(--text-muted); font-weight: 700; border-top: 1px solid var(--border-color); letter-spacing: 0.5px; text-transform: uppercase;}
 
-    /* LIST & PENCARIAN */
     .search-wrapper { padding: 0 20px; margin-top: -25px; position: relative; z-index: 20; margin-bottom: 25px;}
     .search-box { position: relative; display: flex; align-items: center; background: var(--card-bg); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);}
     .search-box input { width: 100%; padding: 16px 50px 16px 45px; border: 2px solid transparent; border-radius: 16px; font-family: inherit; font-size: 14px; outline: none; background: transparent; color: var(--text-main); transition: border-color 0.3s;}
@@ -119,14 +115,12 @@
     .badge-done { background: var(--success-bg); color: var(--success); border: 1px solid rgba(5, 150, 105, 0.2);}
     .badge-pending { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.2);}
 
-    /* TOMBOL AKSI PADA KARTU PASIEN */
     .card-actions { display: flex; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); }
     .btn-card { flex: 1; border: none; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px;}
     .btn-card:active { transform: scale(0.95); }
     .btn-c-peta { background: #ccfbf1; color: var(--primary-dark); }
     .btn-c-medis { background: #e0f2fe; color: #0284c7; }
 
-    /* MODAL UMUM */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9500; visibility: hidden; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(3px);}
     .modal-overlay.active { visibility: visible; opacity: 1; }
     .modal-content { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); padding: 25px 25px 40px; box-sizing: border-box; border-top-left-radius: 25px; border-top-right-radius: 25px; transition: bottom 0.3s ease-out; box-shadow: 0 -10px 30px rgba(0,0,0,0.1);}
@@ -134,7 +128,6 @@
     .modal-title { font-size: 18px; font-weight: 800; margin: 0 0 20px; display: flex; justify-content: space-between; color: var(--accent-navy);}
     .close-modal { background: var(--input-bg); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;}
 
-    /* LAYAR TAMBAH/UPDATE GEOTAGGING */
     .fab-add { position: fixed; bottom: 30px; right: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4); cursor: pointer; z-index: 100; border: none; transition: transform 0.2s; }
     .fab-add:active { transform: scale(0.92); }
 
@@ -177,7 +170,6 @@
     .btn-street-view { flex: 1; background: #fff7ed; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.3); text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(217, 119, 6, 0.15); padding: 14px; border-radius: 14px; font-weight: 800; font-size: 13px; text-align: center;}
     .btn-street-view:active { background: #ffedd5; }
 
-    /* LAYAR PENCATATAN MEDIS (BARU) */
     .medis-profile-box { background: white; border: 1px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);}
     .medis-profile-box h3 { margin: 0 0 5px 0; color: var(--accent-navy); font-size: 18px; font-weight: 800;}
     .medis-profile-box p { margin: 0; color: var(--primary-dark); font-size: 12px; font-weight: 700; letter-spacing: 0.5px;}
@@ -185,12 +177,10 @@
     .medis-row-3 { display: flex; gap: 10px; }
     .medis-row-3 .input-group { flex: 1; }
 
-    /* LAYOUT PETA SEBARAN HIPERTENSI */
     #distributionView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1500; flex-direction: column; }
     .dist-filter-box { padding: 15px 20px; background: var(--card-bg); z-index: 10; border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
     #distMap { flex: 1; width: 100%; z-index: 1;}
 
-    /* LAYAR UNDER DEVELOPMENT (MASIH DIKEMBANGKAN) */
     #underDevView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1500; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
     .under-dev-icon { font-size: 65px; margin-bottom: 15px; animation: bounce 2s infinite; }
     @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
@@ -205,7 +195,6 @@
 </head>
 <body>
 
-<!-- SPLASH SCREEN -->
 <div id="splashScreen">
   <img src="logo_transparent.png?v=3" alt="Logo PANDU" class="splash-logo">
   <h1 class="splash-title">PANDU</h1>
@@ -215,7 +204,6 @@
 <div id="loaderOverlay"><div class="spinner"></div><div class="loader-text" id="loaderText">Memproses...</div></div>
 <div id="sysStatus">SISTEM ONLINE</div>
 
-<!-- LAYAR LOGIN -->
 <div id="loginView" style="display: none;">
   <div class="login-box">
     <img src="logo_transparent.png?v=3" alt="Logo PANDU" class="login-logo">
@@ -236,7 +224,6 @@
   <div style="text-align: center; padding: 15px 20px 80px 20px; font-size: 9px; font-weight: 700; color: var(--text-muted); opacity: 0.6; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.5; margin-top: 40px;">App by Penata Kelola Sistem dan Teknologi Informasi<br>UPTD. Puskesmas Klungkung I</div>
 </div>
 
-<!-- SIDEBAR MENU NAVIGATION -->
 <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 <div id="sidebarMenu" class="sidebar">
   <div class="sidebar-header">
@@ -278,7 +265,6 @@
   <div class="sidebar-footer">Aplikasi PANDU • v2.0</div>
 </div>
 
-<!-- MODAL TENTANG APLIKASI (ABOUT) -->
 <div id="aboutModal" class="modal-overlay">
   <div class="modal-content" style="text-align: center; padding-bottom: 30px;">
     <div class="modal-title" style="justify-content: flex-end;"><button class="close-modal" onclick="tutupAbout()">✕</button></div>
@@ -319,7 +305,6 @@
         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
       </button>
     </div>
-    
     <div id="filterIndicator" class="filter-indicator">
       <div class="filter-indicator-text"><span>⚙️</span> Data sedang difilter</div>
       <button class="reset-btn" onclick="resetFilters()">Reset Filter</button>
@@ -360,7 +345,6 @@
   <div id="distMap"></div>
 </div>
 
-<!-- LAYAR MASIH DIKEMBANGKAN -->
 <div id="underDevView">
   <div class="under-dev-icon">🚧</div>
   <div class="under-dev-title" id="underDevTitle">Peta Sebaran</div>
@@ -419,7 +403,6 @@
           <input type="text" id="inputCariMap" placeholder="🔍 Cari lokasi (misal: Jalan Flamboyan)">
           <button type="button" onclick="cariPatokanMap()">Cari</button>
         </div>
-        
         <div id="map"></div>
         <button type="button" class="btn-fullscreen" onclick="toggleFullscreenMap()" title="Perbesar/Perkecil Peta">
           <svg id="fullscreenIcon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -465,13 +448,13 @@
       
       <div style="display: flex; gap: 10px;">
         <button type="button" id="btnHapusPasien" class="btn" style="flex: 1; background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.3); display: none;" onclick="hapusPasien()">🗑️ Hapus</button>
-        <button type="submit" class="btn btn-submit" style="flex: 2;">Simpan & Sinkronkan</button>
+        <button type="submit" class="btn btn-submit" style="flex: 2;">Simpan Peta</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- TAMPILAN FORM PENCATATAN MEDIS (BARU) -->
+<!-- TAMPILAN FORM PENCATATAN MEDIS KHUSUS (BARU) -->
 <div id="medisView">
   <div class="form-header"><button class="nav-back" onclick="tutupFormMedis()">←</button><h2>Pencatatan Medis Bulanan</h2></div>
   <div class="form-content">
@@ -486,7 +469,7 @@
       
       <div class="input-group">
         <label>Bulan Kunjungan</label>
-        <select id="inputBulan">
+        <select id="inputBulan" onchange="gantiBulanMedis()">
           <option value="Januari">Januari</option>
           <option value="Pebruari">Pebruari</option>
           <option value="Maret">Maret</option>
@@ -511,17 +494,19 @@
         <label style="display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Terapi yang diberikan</label>
         
         <div class="input-group">
-          <input type="text" id="inputObat" placeholder="Nama Obat (Misal: Amlodipine)" style="background: var(--bg-color);">
+          <input type="text" id="inputObat" placeholder="Daftar Obat Lengkap" style="background: var(--bg-color);">
         </div>
         
-        <div class="medis-row-3">
+        <!-- Kolom Dosis dan Jumlah disembunyikan agar data lama aman, petugas cukup ketik di form Obat -->
+        <div class="medis-row-3" style="display:none;">
           <div class="input-group" style="margin-bottom: 0;">
-            <input type="text" id="inputDosis" placeholder="Dosis (Misal: 10 Mg)" style="background: var(--bg-color);">
+            <input type="text" id="inputDosis" placeholder="Dosis" style="background: var(--bg-color);">
           </div>
           <div class="input-group" style="margin-bottom: 0;">
-            <input type="number" id="inputJumlah" placeholder="Jumlah Tab" style="background: var(--bg-color);">
+            <input type="number" id="inputJumlah" placeholder="Jumlah" style="background: var(--bg-color);">
           </div>
         </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin: 0; line-height: 1.4;">Jika obat lebih dari 1, pisahkan dengan koma. Contoh: <b>Amlodipine 10 Mg (30), Captopril 25 Mg (15)</b></p>
       </div>
 
       <button type="button" class="btn btn-medis" onclick="simpanDataMedis()">Simpan Data Medis</button>
@@ -534,6 +519,7 @@
   let db; let dataPasienLokal = []; 
   let map, marker;
   let distMap, distMarkersLayer; 
+  let currentMedisData = null; // Menyimpan data medis sementara
 
   window.addEventListener('load', () => {
     setTimeout(() => {
@@ -543,7 +529,6 @@
     }, 1500); 
   });
 
-  // --- KONTROL SIDEBAR MENU NAVIGASI ---
   function bukaSidebar() {
     document.getElementById('sidebarOverlay').classList.add('active');
     document.getElementById('sidebarMenu').classList.add('active');
@@ -860,7 +845,6 @@
       const item = document.createElement('div');
       item.className = `patient-card`;
       
-      // DESAIN KARTU BARU DENGAN 2 TOMBOL AKSI TERPISAH
       item.innerHTML = `
         <div class="card-top"><div><h3 class="p-name">${p.nama}</h3><div class="p-nik">NIK: ${p.nik}</div></div></div>
         <div class="card-bottom">
@@ -1077,7 +1061,6 @@
     }
   }
 
-  // --- FUNGSI UNTUK MEMBUKA FORM GEOTAGGING (PETA) ---
   function bukaForm(nama, nik, koordinat) {
     sessionStorage.setItem('pandu_last_view', 'detail');
     sessionStorage.setItem('pandu_last_patient', JSON.stringify({nama: nama, nik: nik, koordinat: koordinat}));
@@ -1144,7 +1127,7 @@
     document.getElementById('fullscreenIcon').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />`;
   }
 
-  // --- FUNGSI UNTUK MEMBUKA FORM PENCATATAN MEDIS KHUSUS ---
+  // --- KONTROL PENCATATAN MEDIS CERDAS ---
   function bukaFormMedis(nama, nik) {
     sessionStorage.setItem('pandu_last_view', 'medis');
     sessionStorage.setItem('pandu_last_medis', JSON.stringify({nama: nama, nik: nik}));
@@ -1157,16 +1140,23 @@
     document.getElementById('medisSubtitleNik').innerText = "NIK: " + nik;
     document.getElementById('medisNik').value = nik;
 
-    // Set otomatis bulan ini
+    const patient = dataPasienLokal.find(p => p.nik === nik);
+    currentMedisData = patient && patient.medis ? patient.medis : {};
+
     const currentMonth = new Date().getMonth();
     const monthNames = ["Januari", "Pebruari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-    document.getElementById('inputBulan').value = monthNames[currentMonth];
+    const selectedBulan = monthNames[currentMonth];
+    document.getElementById('inputBulan').value = selectedBulan;
     
-    // Kosongkan input agar bersih setiap kali dibuka
-    document.getElementById('inputTD').value = "";
-    document.getElementById('inputObat').value = "";
-    document.getElementById('inputDosis').value = "";
-    document.getElementById('inputJumlah').value = "";
+    // Tampilkan data yang sudah ada di database ke form
+    document.getElementById('inputTD').value = currentMedisData[selectedBulan] || "";
+    document.getElementById('inputObat').value = currentMedisData['therapi'] || "";
+  }
+
+  function gantiBulanMedis() {
+    if (!currentMedisData) return;
+    const selectedBulan = document.getElementById('inputBulan').value;
+    document.getElementById('inputTD').value = currentMedisData[selectedBulan] || "";
   }
 
   function tutupFormMedis() {
@@ -1176,26 +1166,17 @@
     document.getElementById('listView').style.display = 'block';
   }
 
-  // --- FUNGSI SIMPAN DATA MEDIS (AUTO-CONCATENATE) ---
   function simpanDataMedis() {
     const nik = document.getElementById('medisNik').value;
     const bulan = document.getElementById('inputBulan').value;
     const td = document.getElementById('inputTD').value.trim();
-    
     const obat = document.getElementById('inputObat').value.trim();
-    const dosis = document.getElementById('inputDosis').value.trim();
-    const jumlah = document.getElementById('inputJumlah').value.trim();
 
-    if (!td && !obat) {
-      alert("Harap isi Tekanan Darah atau Nama Obat terlebih dahulu."); return;
+    if (!nik || nik.length !== 16) {
+      alert("Sistem membutuhkan NIK yang valid."); return;
     }
-
-    // Menggabungkan 3 kolom Terapi menjadi 1 string untuk Database
-    let therapiString = "";
-    if (obat) {
-       therapiString = obat;
-       if (dosis) therapiString += " " + dosis;
-       if (jumlah) therapiString += " (" + jumlah + " tab)";
+    if (!td && !obat) {
+      alert("Harap isi Tekanan Darah atau Terapi terlebih dahulu."); return;
     }
 
     let dataMedis = {
@@ -1203,7 +1184,7 @@
       nik: nik,
       bulan: bulan,
       tekananDarah: td,
-      therapi: therapiString,
+      therapi: obat,
       pin: localStorage.getItem('pandu_token')
     };
 
@@ -1214,6 +1195,7 @@
       .then(result => {
         if(result.status === "success") {
           alert(`Data Medis (${bulan}) berhasil disimpan!`);
+          fetchDataPasien();
           tutupFormMedis();
         } else { alert("Gagal: " + result.message); }
       })
@@ -1246,25 +1228,6 @@
         .catch(() => { simpanOffline(data); })
         .finally(() => { hideLoader(); });
       } else { simpanOffline(data); hideLoader(); }
-    }
-  }
-
-  function getGPS() {
-    if (navigator.geolocation) {
-      showLoader("Mencari lokasi satelit...");
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          hideLoader();
-          const lat = pos.coords.latitude; const lng = pos.coords.longitude;
-          const k = `${lat}, ${lng}`;
-          document.getElementById('koordinat').value = k;
-          if(map && marker) { map.setView([lat, lng], 17); marker.setLatLng([lat, lng]); }
-          updateTautanPeta(k);
-          simpanDraft(); 
-        },
-        err => { hideLoader(); alert("Gagal ambil lokasi. Pastikan GPS HP menyala."); },
-        { enableHighAccuracy: true }
-      );
     }
   }
 
