@@ -189,7 +189,22 @@
     .btn-back-dev { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; padding: 14px 24px; border-radius: 14px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3); transition: transform 0.2s;}
     .btn-back-dev:active { transform: scale(0.95); }
 
-    #sysStatus { position: fixed; bottom: 45px; left: 50%; transform: translateX(-50%); padding: 8px 18px; font-size: 11px; font-weight: 700; color: white; background: rgba(5, 150, 105, 0.95); border-radius: 20px; z-index: 99999; backdrop-filter: blur(4px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
+    #sysStatus { 
+      position: fixed; 
+      bottom: 45px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      padding: 8px 18px; 
+      font-size: 11px; 
+      font-weight: 700; 
+      color: white; 
+      background: rgba(5, 150, 105, 0.95); 
+      border-radius: 20px; 
+      z-index: 99999; 
+      backdrop-filter: blur(4px); 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+      pointer-events: none; /* AJAIB: MENCEGAH LABEL MEMBLOKIR KLIK TOMBOL DI BAWAHNYA */
+    }
     #sysStatus.offline { background: rgba(225, 29, 72, 0.95); }
   </style>
 </head>
@@ -282,7 +297,6 @@
   </div>
 </div>
 
-<!-- TAMPILAN DAFTAR UTAMA -->
 <div id="listView" style="display: none;">
   <div class="header">
     <div style="display: flex; align-items: center; gap: 15px;">
@@ -320,7 +334,6 @@
   </button>
 </div>
 
-<!-- TAMPILAN PETA SEBARAN PENYAKIT -->
 <div id="distributionView">
   <div class="form-header">
     <button class="nav-back" onclick="keBeranda()">←</button>
@@ -355,7 +368,6 @@
   </button>
 </div>
 
-<!-- FILTER MODAL -->
 <div id="filterModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-title"><span>⚙️ Filter Spesifik</span><button class="close-modal" onclick="toggleFilter()">✕</button></div>
@@ -386,7 +398,6 @@
   </div>
 </div>
 
-<!-- TAMPILAN FORM GEOTAGGING (PETA) -->
 <div id="formView">
   <div class="form-header"><button class="nav-back" onclick="tutupForm()">←</button><h2 id="subtitleNama">Nama</h2></div>
   <div class="form-content">
@@ -454,7 +465,7 @@
   </div>
 </div>
 
-<!-- TAMPILAN FORM PENCATATAN MEDIS KHUSUS (BARU) -->
+<!-- TAMPILAN FORM PENCATATAN MEDIS KHUSUS -->
 <div id="medisView">
   <div class="form-header"><button class="nav-back" onclick="tutupFormMedis()">←</button><h2>Pencatatan Medis Bulanan</h2></div>
   <div class="form-content">
@@ -494,19 +505,18 @@
         <label style="display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Terapi yang diberikan</label>
         
         <div class="input-group">
-          <input type="text" id="inputObat" placeholder="Daftar Obat Lengkap" style="background: var(--bg-color);">
+          <input type="text" id="inputObat" placeholder="Nama Obat Utama (Cth: Amlodipine)" style="background: var(--bg-color);">
         </div>
         
-        <!-- Kolom Dosis dan Jumlah disembunyikan agar data lama aman, petugas cukup ketik di form Obat -->
-        <div class="medis-row-3" style="display:none;">
+        <div class="medis-row-3">
           <div class="input-group" style="margin-bottom: 0;">
-            <input type="text" id="inputDosis" placeholder="Dosis" style="background: var(--bg-color);">
+            <input type="text" id="inputDosis" placeholder="Dosis (10 Mg)" style="background: var(--bg-color);">
           </div>
           <div class="input-group" style="margin-bottom: 0;">
-            <input type="number" id="inputJumlah" placeholder="Jumlah" style="background: var(--bg-color);">
+            <input type="number" id="inputJumlah" placeholder="Jumlah Tab" style="background: var(--bg-color);">
           </div>
         </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin: 0; line-height: 1.4;">Jika obat lebih dari 1, pisahkan dengan koma. Contoh: <b>Amlodipine 10 Mg (30), Captopril 25 Mg (15)</b></p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 12px; line-height: 1.4;">Jika ada obat tambahan, Anda bisa menuliskannya menyambung di kotak 'Nama Obat Utama'.</p>
       </div>
 
       <button type="button" class="btn btn-medis" onclick="simpanDataMedis()">Simpan Data Medis</button>
@@ -519,7 +529,7 @@
   let db; let dataPasienLokal = []; 
   let map, marker;
   let distMap, distMarkersLayer; 
-  let currentMedisData = null; // Menyimpan data medis sementara
+  let currentMedisData = null; 
 
   window.addEventListener('load', () => {
     setTimeout(() => {
@@ -1011,6 +1021,7 @@
     const mapHint = document.querySelector('.map-hint');
     const searchBox = document.getElementById('searchMapBox');
 
+    // MENGHILANGKAN TOMBOL SAAT KUNCI
     if (isLocked) {
       marker.dragging.disable(); 
       mapHint.style.display = 'none'; 
@@ -1127,108 +1138,55 @@
     document.getElementById('fullscreenIcon').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />`;
   }
 
-  // --- KONTROL PENCATATAN MEDIS CERDAS ---
-  function bukaFormMedis(nama, nik) {
-    sessionStorage.setItem('pandu_last_view', 'medis');
-    sessionStorage.setItem('pandu_last_medis', JSON.stringify({nama: nama, nik: nik}));
+  // --- FUNGSI MENCARI GPS YANG DI-UPGRADE (ANTI HANG) ---
+  function getGPS() {
+    // Memberikan pemberitahuan instan bahwa tombol benar-benar telah diklik
+    showLoader("Mencari Sinyal Satelit GPS...");
 
-    document.getElementById('listView').style.display = 'none';
-    document.getElementById('formView').style.display = 'none';
-    document.getElementById('medisView').style.display = 'block';
-    
-    document.getElementById('medisSubtitleNama').innerText = nama;
-    document.getElementById('medisSubtitleNik').innerText = "NIK: " + nik;
-    document.getElementById('medisNik').value = nik;
-
-    const patient = dataPasienLokal.find(p => p.nik === nik);
-    currentMedisData = patient && patient.medis ? patient.medis : {};
-
-    const currentMonth = new Date().getMonth();
-    const monthNames = ["Januari", "Pebruari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-    const selectedBulan = monthNames[currentMonth];
-    document.getElementById('inputBulan').value = selectedBulan;
-    
-    // Tampilkan data yang sudah ada di database ke form
-    document.getElementById('inputTD').value = currentMedisData[selectedBulan] || "";
-    document.getElementById('inputObat').value = currentMedisData['therapi'] || "";
-  }
-
-  function gantiBulanMedis() {
-    if (!currentMedisData) return;
-    const selectedBulan = document.getElementById('inputBulan').value;
-    document.getElementById('inputTD').value = currentMedisData[selectedBulan] || "";
-  }
-
-  function tutupFormMedis() {
-    sessionStorage.removeItem('pandu_last_view');
-    sessionStorage.removeItem('pandu_last_medis');
-    document.getElementById('medisView').style.display = 'none';
-    document.getElementById('listView').style.display = 'block';
-  }
-
-  function simpanDataMedis() {
-    const nik = document.getElementById('medisNik').value;
-    const bulan = document.getElementById('inputBulan').value;
-    const td = document.getElementById('inputTD').value.trim();
-    const obat = document.getElementById('inputObat').value.trim();
-
-    if (!nik || nik.length !== 16) {
-      alert("Sistem membutuhkan NIK yang valid."); return;
-    }
-    if (!td && !obat) {
-      alert("Harap isi Tekanan Darah atau Terapi terlebih dahulu."); return;
+    // Pengecekan dasar browser
+    if (!navigator.geolocation) {
+      hideLoader();
+      alert("Browser atau HP Anda tidak mendukung fitur GPS Satelit.");
+      return;
     }
 
-    let dataMedis = {
-      action: "update_medis",
-      nik: nik,
-      bulan: bulan,
-      tekananDarah: td,
-      therapi: obat,
-      pin: localStorage.getItem('pandu_token')
+    // Opsi ketat dengan batas waktu (timeout) 15 detik
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 15000, 
+      maximumAge: 0
     };
 
-    showLoader("Menyimpan Data Medis...");
-    if (navigator.onLine) {
-      fetch(GAS_URL, { method: "POST", body: JSON.stringify(dataMedis) })
-      .then(res => res.json())
-      .then(result => {
-        if(result.status === "success") {
-          alert(`Data Medis (${bulan}) berhasil disimpan!`);
-          fetchDataPasien();
-          tutupFormMedis();
-        } else { alert("Gagal: " + result.message); }
-      })
-      .catch(() => { simpanOffline(dataMedis); })
-      .finally(() => { hideLoader(); });
-    } else {
-      simpanOffline(dataMedis);
-      hideLoader();
-    }
-  }
-
-  function hapusPasien() {
-    const cekNik = document.getElementById('nik').value;
-    const namaPasien = document.getElementById('subtitleNama').innerText;
-
-    if(confirm(`PERINGATAN!\n\nApakah Anda yakin ingin menghapus data pasien ${namaPasien} (NIK: ${cekNik}) secara permanen dari database?\n\nTindakan ini tidak dapat dibatalkan.`)) {
-      showLoader("Menghapus data...");
-      let data = { action: "hapus", nik: cekNik, pin: localStorage.getItem('pandu_token') };
-
-      if (navigator.onLine) {
-        fetch(GAS_URL, { method: "POST", body: JSON.stringify(data) })
-        .then(res => res.json())
-        .then(result => { 
-          if(result.status === "success") {
-            alert("Data pasien berhasil dihapus dari sistem!"); 
-            fetchDataPasien(); 
-            tutupForm(); 
-          } else { alert("Gagal: " + result.message); }
-        })
-        .catch(() => { simpanOffline(data); })
-        .finally(() => { hideLoader(); });
-      } else { simpanOffline(data); hideLoader(); }
-    }
+    navigator.geolocation.getCurrentPosition(
+      // JIKA BERHASIL (SUCCESS)
+      pos => {
+        hideLoader();
+        const lat = pos.coords.latitude; 
+        const lng = pos.coords.longitude;
+        const k = `${lat}, ${lng}`;
+        document.getElementById('koordinat').value = k;
+        if(map && marker) { 
+          map.setView([lat, lng], 17); 
+          marker.setLatLng([lat, lng]); 
+        }
+        updateTautanPeta(k);
+        simpanDraft(); 
+      },
+      // JIKA GAGAL (ERROR)
+      err => { 
+        hideLoader(); 
+        let pesanError = "Gagal mengambil lokasi GPS.";
+        if (err.code === 1) {
+          pesanError = "AKSES DITOLAK!\n\nChrome memblokir permintaan lokasi ini. Harap buka Pengaturan (Settings) Chrome > Setelan Situs (Site Settings) > Lokasi (Location), lalu izinkan untuk situs ini.";
+        } else if (err.code === 2) {
+          pesanError = "Sinyal GPS tidak tersedia atau terlalu lemah. Cobalah bergeser sedikit ke luar ruangan.";
+        } else if (err.code === 3) {
+          pesanError = "TIMEOUT!\n\nWaktu pencarian satelit GPS habis (koneksi terlalu lambat). Pastikan GPS/Lokasi HP sudah menyala.";
+        }
+        alert(pesanError); 
+      },
+      options
+    );
   }
 
   document.getElementById('formGeo').addEventListener('submit', (e) => {
