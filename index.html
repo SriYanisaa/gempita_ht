@@ -1009,9 +1009,21 @@
       const lat = parseFloat(parts[0].trim());
       const lng = parseFloat(parts[1].trim());
       
-      // Mengambil warna sesuai alamat pasien, jika tidak ada, beri abu-abu gelap
-      const alamatDb = p.alamat ? p.alamat : "";
-      const warnaPin = regionColors[alamatDb] || "#64748b"; 
+      // --- LOGIKA PENCARIAN WARNA PINTAR (ANTI-MElESET) ---
+      let alamatDbLower = (p.alamat || "").toLowerCase();
+      let warnaPin = "#64748b"; // Warna default abu-abu jika benar-benar tidak ada nama desa
+      
+      // Kita urutkan nama desa dari yang hurufnya paling panjang ke paling pendek.
+      // Ini sangat KURSial agar "Kampung Gelgel" dicek duluan sebelum "Gelgel", 
+      // dan "Semarapura Klod Kangin" dicek sebelum "Semarapura Klod".
+      const listDesa = Object.keys(regionColors).sort((a, b) => b.length - a.length);
+      
+      for (let i = 0; i < listDesa.length; i++) {
+        if (alamatDbLower.includes(listDesa[i].toLowerCase())) {
+          warnaPin = regionColors[listDesa[i]];
+          break; // Berhenti mencari jika sudah menemukan kecocokan desa
+        }
+      }
       
       // Mendesain Titik (Pin) dengan Warna yang Tepat
       const customDot = L.divIcon({
