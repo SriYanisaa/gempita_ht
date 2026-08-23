@@ -112,7 +112,8 @@
     .list-container { padding: 0 20px; }
     .patient-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; display: flex; flex-direction: column; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: var(--shadow-sm); transition: box-shadow 0.3s, transform 0.2s;}
     .patient-card:active { transform: scale(0.98); background: var(--primary-light); border-color: var(--primary);}
-    .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; border-radius: 8px; transition: background 0.2s; padding: 5px;}
+    .card-top:active { background: var(--input-bg); }
     .p-name { margin: 0 0 6px 0; font-size: 17px; font-weight: 800; color: var(--accent-navy); letter-spacing: -0.3px;}
     .p-nik { font-size: 11px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; background: var(--input-bg); padding: 4px 8px; border-radius: 6px; display: inline-block;}
     .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px;}
@@ -925,16 +926,21 @@
       const item = document.createElement('div');
       item.className = `patient-card`;
       
+      // Perhatikan tambahan onclick pada card-top dan card-bottom
       item.innerHTML = `
-        <div class="card-top"><div><h3 class="p-name">${p.nama}</h3><div class="p-nik">NIK: ${p.nik}</div></div></div>
-        <div class="card-bottom">
+        <div class="card-top" onclick="bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}')">
+          <div><h3 class="p-name">${p.nama}</h3><div class="p-nik">NIK: ${p.nik}</div></div>
+          <svg width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24" style="opacity:0.5; margin-top:5px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+        </div>
+        
+        <div class="card-bottom" onclick="bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}')" style="cursor: pointer;">
           <p class="p-address">${svgPin} <span>${alamat}</span></p>
           <span class="status-badge ${badgeClass}">${badgeText}</span>
         </div>
+        
         <div class="card-actions">
-          <button class="btn-card btn-c-peta" onclick="bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}')" style="flex: 1;">📍 Peta & Edit</button>
-          <button class="btn-card btn-c-medis" onclick="bukaFormMedis('${p.nama}', '${p.nik}')" style="flex: 1;">📝 Catat Medis</button>
-          <button class="btn-card" style="background: var(--danger-bg); color: var(--danger); flex: 0.3; padding: 12px 0;" onclick="hapusPasien('${p.nik}', '${p.nama}')" title="Hapus Pasien Permanen">🗑️</button>
+          <button class="btn-card btn-c-medis" onclick="bukaFormMedis('${p.nama}', '${p.nik}')" style="flex: 1; padding: 14px; font-size: 13px;">📝 Catat Medis Kunjungan</button>
+          <button class="btn-card" style="background: var(--danger-bg); color: var(--danger); flex: 0.2; padding: 14px 0;" onclick="hapusPasien('${p.nik}', '${p.nama}')" title="Hapus Pasien Permanen">🗑️</button>
         </div>
       `;
       container.appendChild(item);
@@ -1656,11 +1662,17 @@
 
     daftarBelumKontrol.forEach(p => {
       const item = document.createElement('div');
-      item.style.cssText = "background: white; padding: 18px; border-radius: 14px; margin-bottom: 12px; border-left: 5px solid var(--danger); box-shadow: var(--shadow-sm);";
+      item.style.cssText = "background: white; padding: 18px; border-radius: 14px; margin-bottom: 12px; border-left: 5px solid var(--danger); box-shadow: var(--shadow-sm); position: relative;";
       item.innerHTML = `
-        <h3 style="margin: 0 0 5px 0; font-size: 15px; font-weight: 800; color: var(--accent-navy);">${p.nama}</h3>
-        <p style="margin: 0 0 12px 0; font-size: 11px; color: var(--text-muted); font-weight: 700;">NIK: ${p.nik} • ${p.alamat || 'Tanpa Alamat'}</p>
-        <button onclick="document.getElementById('notifView').style.display='none'; bukaFormMedis('${p.nama}', '${p.nik}');" style="background: var(--danger-bg); color: var(--danger); border: none; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; transition: transform 0.2s;">Catat Medis Sekarang</button>
+        <!-- Membungkus nama dan NIK agar bisa diklik menuju Peta & Edit -->
+        <div onclick="document.getElementById('notifView').style.display='none'; bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}');" style="cursor: pointer; padding-bottom: 8px;">
+          <h3 style="margin: 0 0 5px 0; font-size: 15px; font-weight: 800; color: var(--accent-navy);">${p.nama}</h3>
+          <p style="margin: 0; font-size: 11px; color: var(--text-muted); font-weight: 700;">NIK: ${p.nik} • ${p.alamat || 'Tanpa Alamat'}</p>
+        </div>
+        
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+          <button onclick="document.getElementById('notifView').style.display='none'; bukaFormMedis('${p.nama}', '${p.nik}');" style="background: var(--danger-bg); color: var(--danger); border: none; padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; transition: transform 0.2s; width: 100%;">📝 Catat Medis Sekarang</button>
+        </div>
       `;
       container.appendChild(item);
     });
