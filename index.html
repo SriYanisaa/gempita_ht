@@ -1322,58 +1322,6 @@
     }
   }
 
-    // SATUKAN SEMUA BARIS OBAT MENJADI 1 KALIMAT
-    let obatRows = document.querySelectorAll('.obat-row');
-    let therapiArr = [];
-    
-    obatRows.forEach(row => {
-      let nm = row.querySelector('.input-obat-nama').value.trim();
-      let ds = row.querySelector('.input-obat-dosis').value.trim();
-      let jm = row.querySelector('.input-obat-jumlah').value.trim();
-      
-      if(nm !== "") {
-        let gabung = nm;
-        if(ds !== "") gabung += " - " + ds;
-        if(jm !== "") gabung += " - " + jm + " Tab";
-        therapiArr.push(gabung);
-      }
-    });
-    
-    // UBAH DISINI: Hasil gabungan antar obat dipisah dengan ENTER (\n)
-    let therapiString = therapiArr.join("\n"); 
-
-    if (!td && therapiString === "") {
-      alert("Harap isi Tekanan Darah atau Minimal 1 Terapi Obat."); return;
-    }
-
-    let dataMedis = {
-      action: "update_medis",
-      nik: nik,
-      bulan: bulan,
-      tekananDarah: td,
-      therapi: therapiString,
-      pin: localStorage.getItem('pandu_token')
-    };
-
-    showLoader("Menyimpan Data Medis...");
-    if (navigator.onLine) {
-      fetch(GAS_URL, { method: "POST", body: JSON.stringify(dataMedis) })
-      .then(res => res.json())
-      .then(result => {
-        if(result.status === "success") {
-          alert(`Data Medis (${bulan}) berhasil disimpan!`);
-          fetchDataPasien();
-          tutupFormMedis();
-        } else { alert("Gagal: " + result.message); }
-      })
-      .catch(() => { simpanOffline(dataMedis); })
-      .finally(() => { hideLoader(); });
-    } else {
-      simpanOffline(dataMedis);
-      hideLoader();
-    }
-  }
-
   function getGPS() {
     showLoader("Mencari Sinyal Satelit GPS...");
 
