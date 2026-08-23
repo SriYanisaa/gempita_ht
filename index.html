@@ -344,12 +344,12 @@
   </button>
 </div>
 
-<div id="distributionView">
+<div id="distributionView" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: var(--bg-color); z-index: 1500; flex-direction: column;">
   <div class="form-header">
     <button class="nav-back" onclick="keBeranda()">←</button>
     <h2>Peta Sebaran Hipertensi</h2>
   </div>
-  <div class="dist-filter-box">
+  <div class="dist-filter-box" style="flex-shrink: 0;">
     <label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px; text-transform:uppercase; letter-spacing: 0.5px;">Filter Berdasarkan Wilayah</label>
     <select id="filterDistWilayah" onchange="renderPetaSebaran()" style="width:100%; padding:16px; border:2px solid var(--border-color); border-radius:14px; font-family:inherit; font-size:14px; background:var(--input-bg); color:var(--accent-navy); font-weight:700; outline:none; appearance:none;">
       <option value="all">🌐 Semua Wilayah</option>
@@ -365,7 +365,26 @@
       <option value="Jumpai">Jumpai</option>
     </select>
   </div>
-  <div id="distMap"></div>
+  
+  <!-- PERBAIKAN WADAH PETA ANTI BLANK & LEGENDA WARNA -->
+  <div style="position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; min-height: 0;">
+    <div id="distMap" style="flex: 1; width: 100%; z-index: 1;"></div>
+    
+    <!-- KOTAK LEGENDA WILAYAH -->
+    <div id="mapLegend" style="position: absolute; bottom: 20px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px 16px; border-radius: 12px; z-index: 1000; font-size: 11px; font-weight: 600; color: var(--accent-navy); box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.05); max-height: 40vh; overflow-y: auto; backdrop-filter: blur(4px);">
+      <div style="font-weight: 800; margin-bottom: 8px; font-size: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; text-transform: uppercase;">Legenda Wilayah</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#ef4444; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> Satra</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#3b82f6; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> Kamasan</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#10b981; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> Semarapura Kauh</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#f59e0b; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> Gelgel</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#8b5cf6; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> Tojan</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#ec4899; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> Tangkas</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#06b6d4; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> Semarapura Klod</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#f97316; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> S. Klod Kangin</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#6366f1; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> Kampung Gelgel</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#84cc16; border:1px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div> Jumpai</div>
+    </div>
+  </div>
 </div>
 
 <div id="underDevView">
@@ -922,7 +941,10 @@
     document.getElementById('underDevView').style.display = 'none';
     document.getElementById('formView').style.display = 'none';
     document.getElementById('medisView').style.display = 'none';
-    document.getElementById('distributionView').style.display = 'flex';
+    if(document.getElementById('notifView')) document.getElementById('notifView').style.display = 'none';
+    
+    const distView = document.getElementById('distributionView');
+    distView.style.display = 'flex';
     
     if (!distMap) {
       const batasKlungkung = L.latLngBounds([-8.9000, 115.3000], [-8.4000, 115.7000]);
@@ -931,7 +953,11 @@
       distMarkersLayer = L.layerGroup().addTo(distMap);
     }
     
-    setTimeout(() => { distMap.invalidateSize(); renderPetaSebaran(); }, 300);
+    // PERBAIKAN BLANK PETA: Beri jeda agak lama agar peramban (browser) selesai membuka layar
+    setTimeout(() => { 
+      distMap.invalidateSize(); 
+      renderPetaSebaran(); 
+    }, 400);
   }
 
   function renderPetaSebaran() {
@@ -955,12 +981,19 @@
        return;
     }
 
-    const redDotIcon = L.divIcon({
-      className: 'custom-div-icon',
-      html: `<div style="background-color: var(--danger); width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"></div>`,
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
-    });
+    // MEMBUAT KAMUS WARNA (MENCOCOKKAN DENGAN LEGENDA)
+    const regionColors = {
+      "Satra": "#ef4444",
+      "Kamasan": "#3b82f6",
+      "Semarapura Kauh": "#10b981",
+      "Gelgel": "#f59e0b",
+      "Tojan": "#8b5cf6",
+      "Tangkas": "#ec4899",
+      "Semarapura Klod": "#06b6d4",
+      "Semarapura Klod Kangin": "#f97316",
+      "Kampung Gelgel": "#6366f1",
+      "Jumpai": "#84cc16"
+    };
 
     const bounds = [];
     dataSebaran.forEach(p => {
@@ -968,7 +1001,19 @@
       const lat = parseFloat(parts[0].trim());
       const lng = parseFloat(parts[1].trim());
       
-      const marker = L.marker([lat, lng], {icon: redDotIcon}).bindPopup(`<b>${p.nama}</b><br>NIK: ${p.nik}<br>Desa: ${p.alamat}`);
+      // Mengambil warna sesuai alamat pasien, jika tidak ada, beri abu-abu gelap
+      const alamatDb = p.alamat ? p.alamat : "";
+      const warnaPin = regionColors[alamatDb] || "#64748b"; 
+      
+      // Mendesain Titik (Pin) dengan Warna yang Tepat
+      const customDot = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="background-color: ${warnaPin}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"></div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+
+      const marker = L.marker([lat, lng], {icon: customDot}).bindPopup(`<b>${p.nama}</b><br>NIK: ${p.nik}<br>Desa: ${p.alamat}`);
       distMarkersLayer.addLayer(marker);
       bounds.push([lat, lng]);
     });
