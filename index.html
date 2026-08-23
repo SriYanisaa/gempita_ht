@@ -340,12 +340,18 @@
       <img src="logo_transparent.png?v=3" alt="Logo PANDU" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);">
       <div class="header-text">
         <h1 style="color: white;">PANDU</h1>
-        <p style="color: rgba(255,255,255,0.8);">Kesehatan Masyarakat Terpadu</p>
+        <p style="color: rgba(255,255,255,0.8);">Pemetaan Area dan Navigasi Data Unit Terpadu</p>
       </div>
     </div>
-    <button class="btn-menu" onclick="bukaSidebar()" title="Buka Menu Navigasi">
-      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-    </button>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn-menu" onclick="bukaNotifikasi()" style="position: relative;" title="Peringatan Kontrol">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+        <span id="notifBadge" style="position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 10px; display: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">0</span>
+      </button>
+      <button class="btn-menu" onclick="bukaSidebar()" title="Buka Menu Navigasi">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      </button>
+    </div>
   </div>
   
   <div class="search-wrapper">
@@ -436,6 +442,34 @@
   </div>
 </div>
 
+<!-- LAYAR NOTIFIKASI KONTROL (BARU) -->
+<div id="notifView" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1000; overflow-y: auto; padding: 0;">
+  <div class="form-header"><button class="nav-back" onclick="keBeranda()">←</button><h2>Peringatan Kontrol</h2></div>
+  <div class="dist-filter-box" style="position: sticky; top: 94px; z-index: 10;">
+    <label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px; text-transform:uppercase;">Filter Wilayah Pustu</label>
+    <select id="filterNotifWilayah" onchange="renderNotifikasi()" style="width:100%; padding:14px; border:2px solid var(--border-color); border-radius:14px; font-family:inherit; font-size:14px; background:var(--input-bg); color:var(--accent-navy); font-weight:700; outline:none; appearance:none;">
+      <option value="all">🌐 Semua Wilayah</option>
+      <option value="Satra">Satra</option>
+      <option value="Kamasan">Kamasan</option>
+      <option value="Semarapura Kauh">Semarapura Kauh</option>
+      <option value="Gelgel">Gelgel</option>
+      <option value="Tojan">Tojan</option>
+      <option value="Tangkas">Tangkas</option>
+      <option value="Semarapura Klod">Semarapura Klod</option>
+      <option value="Semarapura Klod Kangin">Semarapura Klod Kangin</option>
+      <option value="Kampung Gelgel">Kampung Gelgel</option>
+      <option value="Jumpai">Jumpai</option>
+    </select>
+  </div>
+  <div class="form-content" style="padding-top: 15px;">
+    <div style="background: var(--danger-bg); border: 1px solid rgba(225, 29, 72, 0.2); padding: 15px; border-radius: 14px; margin-bottom: 20px;">
+      <h4 style="margin: 0 0 5px 0; color: var(--danger); font-size: 14px; display: flex; align-items: center; gap: 6px;">🚨 Perhatian!</h4>
+      <p style="margin: 0; font-size: 12px; color: var(--text-main); line-height: 1.5;">Daftar pasien di bawah ini terdeteksi <b>belum melakukan kontrol</b> pada bulan <b id="namaBulanLalu">Lalu</b>.</p>
+    </div>
+    <div id="notifListContainer"></div>
+  </div>
+</div>
+  
 <!-- TAMPILAN FORM GEOTAGGING (PETA) -->
 <div id="formView">
   <div class="form-header"><button class="nav-back" onclick="tutupForm()">←</button><h2 id="subtitleNama">Nama</h2></div>
@@ -594,6 +628,7 @@
     document.getElementById('formView').style.display = 'none';
     document.getElementById('medisView').style.display = 'none';
     document.getElementById('underDevView').style.display = 'none';
+    if(document.getElementById('notifView')) document.getElementById('notifView').style.display = 'none';
   }
   function konfirmasiLogout() { closeSidebar(); prosesLogout(); }
   function bukaAbout() { closeSidebar(); document.getElementById('aboutModal').classList.add('active'); }
@@ -871,6 +906,7 @@
       return matchKeyword && matchStatus && matchAlamat;
     });
     renderList(filteredData, isFilterActive);
+    if(typeof renderNotifikasi === 'function') renderNotifikasi();
   }
 
   function renderList(data, isFilterActive) {
@@ -1520,6 +1556,74 @@
         setTimeout(() => { fetchDataPasien(); hideLoader(); }, 4000);
       }
     };
+  }
+
+  // --- FITUR NOTIFIKASI KONTROL ---
+  function bukaNotifikasi() {
+    closeSidebar();
+    document.getElementById('listView').style.display = 'none';
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('medisView').style.display = 'none';
+    document.getElementById('distributionView').style.display = 'none';
+    document.getElementById('underDevView').style.display = 'none';
+    document.getElementById('notifView').style.display = 'block';
+    renderNotifikasi();
+  }
+
+  function renderNotifikasi() {
+    const monthNames = ["Januari", "Pebruari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    const currentMonthIndex = new Date().getMonth();
+    // Mendeteksi otomatis bulan kemarin
+    let prevMonthIndex = currentMonthIndex === 0 ? 11 : currentMonthIndex - 1;
+    let prevMonthName = monthNames[prevMonthIndex];
+    
+    if(document.getElementById('namaBulanLalu')) {
+       document.getElementById('namaBulanLalu').innerText = prevMonthName;
+    }
+    
+    const wilayahFilter = document.getElementById('filterNotifWilayah') ? document.getElementById('filterNotifWilayah').value : 'all';
+    
+    // Menyaring daftar pasien yang belum isi data bulan lalu
+    let daftarBelumKontrol = dataPasienLokal.filter(p => {
+      let matchAlamat = true;
+      if (wilayahFilter !== 'all') {
+        const alamatDb = p.alamat ? p.alamat.toLowerCase() : "";
+        matchAlamat = alamatDb.includes(wilayahFilter.toLowerCase());
+      }
+      let medis = p.medis || {};
+      let tdBulanLalu = medis[prevMonthName] || "";
+      return matchAlamat && tdBulanLalu === ""; // Kosong = belum kontrol
+    });
+    
+    // Update lencana (Badge) Notifikasi Merah
+    const badge = document.getElementById('notifBadge');
+    let totalBelumSemua = dataPasienLokal.filter(p => (p.medis || {})[prevMonthName] === "").length;
+    
+    if (badge) {
+       if (totalBelumSemua > 0) { badge.style.display = 'block'; badge.innerText = totalBelumSemua; } 
+       else { badge.style.display = 'none'; }
+    }
+
+    // Merender Daftar Merah ke layar HP
+    const container = document.getElementById('notifListContainer');
+    if(!container) return;
+    container.innerHTML = "";
+    
+    if (daftarBelumKontrol.length === 0) {
+      container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--success); font-weight:700; background: white; border-radius: 14px; border: 1px solid var(--success-bg);">🎉 Luar biasa! Semua pasien di wilayah ini sudah kontrol bulan lalu.</div>`;
+      return;
+    }
+
+    daftarBelumKontrol.forEach(p => {
+      const item = document.createElement('div');
+      item.style.cssText = "background: white; padding: 18px; border-radius: 14px; margin-bottom: 12px; border-left: 5px solid var(--danger); box-shadow: var(--shadow-sm);";
+      item.innerHTML = `
+        <h3 style="margin: 0 0 5px 0; font-size: 15px; font-weight: 800; color: var(--accent-navy);">${p.nama}</h3>
+        <p style="margin: 0 0 12px 0; font-size: 11px; color: var(--text-muted); font-weight: 700;">NIK: ${p.nik} • ${p.alamat || 'Tanpa Alamat'}</p>
+        <button onclick="document.getElementById('notifView').style.display='none'; bukaFormMedis('${p.nama}', '${p.nik}');" style="background: var(--danger-bg); color: var(--danger); border: none; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; transition: transform 0.2s;">Catat Medis Sekarang</button>
+      `;
+      container.appendChild(item);
+    });
   }
 
   window.addEventListener('online', () => { document.getElementById('sysStatus').innerText = "SISTEM ONLINE"; document.getElementById('sysStatus').className = ""; sinkronisasiDataTunda(); });
