@@ -128,11 +128,26 @@
     .badge-done { background: var(--success-bg); color: var(--success); border: 1px solid rgba(5, 150, 105, 0.2);}
     .badge-pending { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.2);}
 
-    .card-actions { display: flex; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color); }
-    .btn-card { flex: 1; border: none; padding: 14px; border-radius: 14px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
+    /* TAMPILAN KARTU PASIEN BARU */
+    .card-actions { display: flex; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); }
+    .btn-card { flex: 1; border: none; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px;}
     .btn-card:active { transform: scale(0.95); }
-    .btn-c-peta { background: var(--primary-light); color: var(--primary-dark); border: 1px solid rgba(13, 148, 136, 0.2);}
-    .btn-c-medis { background: #eff6ff; color: #0369a1; border: 1px solid rgba(3, 105, 161, 0.2);}
+    .btn-c-peta { background: #ccfbf1; color: var(--primary-dark); }
+    .btn-c-medis { background: #e0f2fe; color: #0284c7; }
+
+    /* LAYOUT PENCATATAN MEDIS KHUSUS */
+    .medis-profile-box { background: linear-gradient(135deg, #0f766e, #0d9488); padding: 25px 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.2); color: white;}
+    .medis-profile-box h3 { margin: 0 0 8px 0; font-size: 20px; font-weight: 800; color: white;}
+    .medis-profile-box p { margin: 0; font-size: 13px; font-weight: 600; opacity: 0.9; letter-spacing: 1px; background: rgba(0,0,0,0.2); display: inline-block; padding: 4px 10px; border-radius: 8px;}
+    
+    /* DESAIN FORM OBAT DINAMIS */
+    .obat-container { background: #ffffff; border: 1px solid var(--border-color); padding: 20px; border-radius: 14px; margin-bottom: 20px;}
+    .obat-container-title { font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
+    
+    .obat-row { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 12px; position: relative;}
+    .obat-row .input-group { margin-bottom: 10px;}
+    .medis-row-3 { display: flex; gap: 10px; align-items: center;}
+    .medis-row-3 .input-group { flex: 1; margin-bottom: 0;}
 
     /* MODAL UMUM */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9500; visibility: hidden; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(4px);}
@@ -505,7 +520,7 @@
       <p id="medisSubtitleNik">NIK: 0000000000000000</p>
     </div>
 
-    <form id="formMedis" class="form-card">
+    <form id="formMedis">
       <input type="hidden" id="medisNik" value="">
       
       <div class="input-group">
@@ -526,25 +541,23 @@
         </select>
       </div>
       
+      <!-- WAJIB ISI TEKANAN DARAH -->
       <div class="input-group">
-        <label>Tekanan Darah (mmHg)</label>
+        <label>Tekanan Darah (mmHg) <span style="color:var(--danger)">*Wajib</span></label>
         <input type="text" id="inputTD" placeholder="Contoh: 120/80">
       </div>
 
       <!-- KOTAK KHUSUS TERAPI DINAMIS -->
       <div class="obat-container">
-        <div class="obat-container-title">💊 Terapi yang diberikan</div>
+        <div class="obat-container-title">💊 Terapi yang diberikan <span style="color:var(--danger); font-size:10px;">*Wajib (Min 1 Obat)</span></div>
         
-        <!-- Wadah baris obat yang bisa bertambah -->
+        <!-- Wadah baris obat yang bisa bertambah otomatis -->
         <div id="obatListContainer"></div>
         
-        <button type="button" class="btn-add-obat" onclick="tambahBarisObat()">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-          Tambah Obat Lain
-        </button>
+        <button type="button" onclick="tambahBarisObat()" style="width: 100%; padding: 12px; border-radius: 10px; border: 2px dashed var(--primary); background: transparent; color: var(--primary); font-weight: 800; cursor: pointer; margin-top: 5px; font-family: inherit; font-size: 13px;">+ Tambah Obat Lain (Opsional)</button>
       </div>
 
-      <button type="button" class="btn btn-medis" onclick="simpanDataMedis()">Simpan Data Medis</button>
+      <button type="button" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);" onclick="simpanDataMedis()">Simpan Data Medis</button>
     </form>
   </div>
 </div>
@@ -887,7 +900,7 @@
           <span class="status-badge ${badgeClass}">${badgeText}</span>
         </div>
         <div class="card-actions">
-          <button class="btn-card btn-c-peta" onclick="bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}')">📍 Geotag</button>
+          <button class="btn-card btn-c-peta" onclick="bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}')">📍 Geotagging</button>
           <button class="btn-card btn-c-medis" onclick="bukaFormMedis('${p.nama}', '${p.nik}')">📝 Catat Medis</button>
         </div>
       `;
@@ -1190,6 +1203,34 @@
     container.appendChild(row);
   }
 
+  // --- FUNGSI MENCIPTAKAN KOTAK OBAT DINAMIS ---
+  function tambahBarisObat(nama = '', dosis = '', jml = '') {
+    const container = document.getElementById('obatListContainer');
+    const rowCount = container.children.length;
+    
+    const row = document.createElement('div');
+    row.className = 'obat-row';
+    
+    // Tombol silang (X) hanya muncul pada obat ke-2, ke-3, dst
+    const btnHapusHTML = rowCount > 0 ? `<button type="button" onclick="this.parentElement.remove()" style="position: absolute; top: -10px; right: -5px; background: var(--danger); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">✕</button>` : ``;
+
+    row.innerHTML = `
+      ${btnHapusHTML}
+      <div class="input-group">
+        <input type="text" class="input-obat-nama" placeholder="Nama Obat (Cth: Amlodipine)" value="${nama}">
+      </div>
+      <div class="medis-row-3">
+        <div class="input-group" style="margin-bottom: 0;">
+          <input type="text" class="input-obat-dosis" placeholder="Dosis (1x2)" value="${dosis}">
+        </div>
+        <div class="input-group" style="margin-bottom: 0;">
+          <input type="number" class="input-obat-jumlah" placeholder="Jml Tab" value="${jml}">
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+  }
+
   function bukaFormMedis(nama, nik) {
     sessionStorage.setItem('pandu_last_view', 'medis');
     sessionStorage.setItem('pandu_last_medis', JSON.stringify({nama: nama, nik: nik}));
@@ -1218,26 +1259,91 @@
     const selectedBulan = document.getElementById('inputBulan').value;
     document.getElementById('inputTD').value = currentMedisData[selectedBulan] || "";
     
-    // Kosongkan container obat
-    document.getElementById('obatListContainer').innerHTML = '';
+    document.getElementById('obatListContainer').innerHTML = ''; // Kosongkan wadah
     
-    // BONGKAR KEMBALI KALIMAT TERAPI DARI DATABASE
     let terapiAsli = currentMedisData['therapi'] || "";
     
     if(terapiAsli.trim() !== "") {
-      // UBAH DISINI: Membongkar kalimat berdasarkan ENTER (\n)
+      // Bongkar kalimat panjang dari Excel berdasarkan ENTER (\n)
       let obatArray = terapiAsli.split('\n');
-      
       obatArray.forEach(obatStr => {
+        // Bongkar lagi berdasarkan strip (-)
         let parts = obatStr.split(' - ');
         let nm = parts[0] ? parts[0].trim() : "";
         let ds = parts[1] ? parts[1].trim() : "";
-        let jm = parts[2] ? parts[2].replace(/[^0-9]/g, '') : "";
+        let jm = parts[2] ? parts[2].replace(/[^0-9]/g, '') : ""; // Hapus teks non-angka
         tambahBarisObat(nm, ds, jm);
       });
     } else {
-      // Jika kosong, berikan 1 baris input default
-      tambahBarisObat();
+      // Jika data terapi di Excel kosong, tampilkan 1 kotak obat kosong
+      tambahBarisObat(); 
+    }
+  }
+
+  function simpanDataMedis() {
+    const nik = document.getElementById('medisNik').value;
+    const bulan = document.getElementById('inputBulan').value;
+    const td = document.getElementById('inputTD').value.trim();
+    
+    if (!nik || nik.length !== 16) { alert("Sistem membutuhkan NIK yang valid."); return; }
+    
+    // VALIDASI WAJIB TEKANAN DARAH
+    if (td === "") {
+       alert("Peringatan: Tekanan Darah wajib diisi!");
+       document.getElementById('inputTD').focus();
+       return;
+    }
+
+    let obatRows = document.querySelectorAll('.obat-row');
+    let therapiArr = [];
+    
+    obatRows.forEach(row => {
+      let nm = row.querySelector('.input-obat-nama').value.trim();
+      let ds = row.querySelector('.input-obat-dosis').value.trim();
+      let jm = row.querySelector('.input-obat-jumlah').value.trim();
+      
+      if(nm !== "") {
+        let gabung = nm;
+        if(ds !== "") gabung += " - " + ds;
+        if(jm !== "") gabung += " - " + jm + " Tab";
+        therapiArr.push(gabung);
+      }
+    });
+    
+    // Gabung dengan ENTER (\n) agar tersusun ke bawah di Excel
+    let therapiString = therapiArr.join("\n"); 
+
+    // VALIDASI WAJIB MINIMAL 1 OBAT
+    if (therapiArr.length === 0) {
+      alert("Peringatan: Minimal 1 Terapi Obat wajib diisi!"); 
+      return;
+    }
+
+    let dataMedis = {
+      action: "update_medis",
+      nik: nik,
+      bulan: bulan,
+      tekananDarah: td,
+      therapi: therapiString,
+      pin: localStorage.getItem('pandu_token')
+    };
+
+    showLoader("Menyimpan Data Medis...");
+    if (navigator.onLine) {
+      fetch(GAS_URL, { method: "POST", body: JSON.stringify(dataMedis) })
+      .then(res => res.json())
+      .then(result => {
+        if(result.status === "success") {
+          alert(`Data Medis (${bulan}) berhasil disimpan!`);
+          fetchDataPasien();
+          tutupFormMedis();
+        } else { alert("Gagal: " + result.message); }
+      })
+      .catch(() => { simpanOffline(dataMedis); })
+      .finally(() => { hideLoader(); });
+    } else {
+      simpanOffline(dataMedis);
+      hideLoader();
     }
   }
 
@@ -1247,15 +1353,6 @@
     document.getElementById('medisView').style.display = 'none';
     document.getElementById('listView').style.display = 'block';
   }
-
-  function simpanDataMedis() {
-    const nik = document.getElementById('medisNik').value;
-    const bulan = document.getElementById('inputBulan').value;
-    const td = document.getElementById('inputTD').value.trim();
-    
-    if (!nik || nik.length !== 16) {
-      alert("Sistem membutuhkan NIK yang valid."); return;
-    }
 
     // SATUKAN SEMUA BARIS OBAT MENJADI 1 KALIMAT
     let obatRows = document.querySelectorAll('.obat-row');
