@@ -1220,35 +1220,44 @@
     const patient = dataPasienLokal.find(p => p.nik === nik);
     currentMedisData = patient && patient.medis ? patient.medis : {};
 
-    const currentMonth = new Date().getMonth();
+    // 1. OTOMATIS AMBIL BULAN BERJALAN SAAT INI
+    const currentMonth = new Date().getMonth(); // Agutus = index 7
     const monthNames = ["Januari", "Pebruari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-    const selectedBulan = monthNames[currentMonth];
-    document.getElementById('inputBulan').value = selectedBulan;
     
-    gantiBulanMedis(); 
+    const selectBulan = document.getElementById('inputBulan');
+    
+    // 2. DISABLE BULAN DEPAN (Belum Waktunya)
+    for (let i = 0; i < selectBulan.options.length; i++) {
+      if (i > currentMonth) {
+        selectBulan.options[i].disabled = true;
+        selectBulan.options[i].text = monthNames[i] + " (Belum Masuk)";
+        selectBulan.options[i].style.color = "#cbd5e1"; // Warnakan abu-abu pudar
+      } else {
+        selectBulan.options[i].disabled = false;
+        selectBulan.options[i].text = monthNames[i];
+        selectBulan.options[i].style.color = "var(--accent-navy)";
+      }
+    }
+
+    // Set dropdown menunjuk ke bulan saat ini
+    const selectedBulan = monthNames[currentMonth];
+    selectBulan.value = selectedBulan;
+    
+    // 3. KOSONGKAN FORM (Ulang dari awal sesuai permintaan Anda)
+    document.getElementById('inputTD').value = ""; // Tensi kosong
+    document.getElementById('obatListContainer').innerHTML = ''; // Daftar obat dibersihkan
+    tambahBarisObat(); // Berikan 1 kotak obat kosong siap ketik
   }
-  
+
   function gantiBulanMedis() {
     if (!currentMedisData) return;
     const selectedBulan = document.getElementById('inputBulan').value;
+    
+    // Jika petugas mundur memilih bulan sebelumnya, tampilkan data Tekanan Darah bulan tersebut (jika ada)
     document.getElementById('inputTD').value = currentMedisData[selectedBulan] || "";
     
-    document.getElementById('obatListContainer').innerHTML = ''; 
-    
-    let terapiAsli = currentMedisData['therapi'] || "";
-    
-    if(terapiAsli.trim() !== "") {
-      let obatArray = terapiAsli.split('\n');
-      obatArray.forEach(obatStr => {
-        let parts = obatStr.split(' - ');
-        let nm = parts[0] ? parts[0].trim() : "";
-        let ds = parts[1] ? parts[1].trim() : "";
-        let jm = parts[2] ? parts[2].replace(/[^0-9]/g, '') : ""; 
-        tambahBarisObat(nm, ds, jm);
-      });
-    } else {
-      tambahBarisObat(); 
-    }
+    // Catatan: Kotak obat sengaja tidak saya reset saat ganti bulan, 
+    // agar jika petugas salah klik bulan, teks obat yang sudah terlanjur mereka ketik tidak hilang.
   }
 
   function tutupFormMedis() {
