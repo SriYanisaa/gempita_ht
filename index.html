@@ -437,6 +437,33 @@
   </div>
 </div>
 
+<!-- POP-UP PERINGATAN NIK GANDA -->
+<div id="duplicateModal" class="modal-overlay">
+  <div class="modal-content" style="text-align: center; padding-bottom: 30px;">
+    <div class="modal-title" style="justify-content: flex-end;"><button type="button" class="close-modal" onclick="tutupDuplicateModal()">✕</button></div>
+    
+    <div style="background: var(--danger-bg); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.2);">
+      <svg width="32" height="32" fill="none" stroke="var(--danger)" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    </div>
+    
+    <h2 style="margin: 0 0 10px; color: var(--accent-navy); font-weight: 800; font-size: 20px;">NIK Sudah Terdaftar!</h2>
+    <p style="margin: 0 0 20px; font-size: 13px; color: var(--text-muted); line-height: 1.5; font-weight: 500;">Pasien dengan NIK tersebut sudah ada di dalam database. Berikut adalah detailnya:</p>
+    
+    <div style="background: var(--input-bg); padding: 18px; border-radius: 16px; text-align: left; margin-bottom: 25px; border: 1px dashed var(--border-color);">
+      <div style="font-size: 10px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Nama Pasien Terdaftar</div>
+      <div id="dupNama" style="font-size: 16px; font-weight: 800; color: var(--accent-navy); margin-bottom: 12px; letter-spacing: -0.3px;">-</div>
+      
+      <div style="font-size: 10px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Nomor Induk Kependudukan</div>
+      <div id="dupNik" style="font-size: 14px; font-weight: 700; color: var(--primary-dark); margin-bottom: 12px;">-</div>
+      
+      <div style="font-size: 10px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Wilayah / Desa</div>
+      <div id="dupAlamat" style="font-size: 14px; font-weight: 600; color: var(--text-main);"></div>
+    </div>
+    
+    <button type="button" class="btn btn-submit" style="margin-bottom: 0;" onclick="tutupDuplicateModal()">Mengerti & Kembali</button>
+  </div>
+</div>
+
 <!-- LAYAR NOTIFIKASI KONTROL (BARU) -->
 <div id="notifView" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1000; overflow-y: auto; padding: 0;">
   <div class="form-header"><button class="nav-back" onclick="keBeranda()">←</button><h2>Peringatan Kontrol</h2></div>
@@ -1464,6 +1491,21 @@
     e.preventDefault();
     const action = document.getElementById('formAction').value;
     const cekNik = document.getElementById('nik').value;
+
+    // --- FITUR BARU: CEGAH NIK GANDA ---
+    if (action === "tambah") {
+      const pasienSudahAda = dataPasienLokal.find(p => p.nik === cekNik);
+      if (pasienSudahAda) {
+        // Jika NIK ditemukan, isi pop-up dengan data pasien tersebut
+        document.getElementById('dupNama').innerText = pasienSudahAda.nama;
+        document.getElementById('dupNik').innerText = pasienSudahAda.nik;
+        document.getElementById('dupAlamat').innerText = pasienSudahAda.alamat || "Alamat tidak tercatat";
+        
+        // Munculkan Pop-up dan Batal Simpan
+        document.getElementById('duplicateModal').classList.add('active');
+        return; 
+      }
+    }
     
     // --- PENAMBAHAN: WARNING JIKA KOORDINAT KOSONG SAAT NAMBAH PASIEN BARU ---
     const cekKoordinat = document.getElementById('koordinat').value.trim();
@@ -1560,6 +1602,10 @@
         .finally(() => { hideLoader(); });
       } else { simpanOffline(data); hideLoader(); }
     }
+  }
+
+  function tutupDuplicateModal() {
+    document.getElementById('duplicateModal').classList.remove('active');
   }
 
   function simpanOffline(data) { 
