@@ -612,7 +612,7 @@
 
     document.getElementById('underDevTitle').innerText = 'Peta Sebaran ' + namaPenyakit;
   }
-
+  
   function updateTautanPeta(koordinat) {
     const btnRow = document.getElementById('actionButtonsRow');
     const btnRute = document.getElementById('btnRuteDetail');
@@ -648,7 +648,7 @@
       if(hint) hint.style.display = 'none';
     }
   }
-
+  
   function simpanDraft() {
     const draft = {
       nama: document.getElementById('inputNama').value,
@@ -1175,35 +1175,10 @@
     document.getElementById('fullscreenIcon').innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />`;
   }
 
-  // --- KONTROL PENCATATAN MEDIS (BONGKAR PASANG DATA DINAMIS) ---
-  function tambahBarisObat(nama = '', dosis = '', jml = '') {
-    const container = document.getElementById('obatListContainer');
-    const rowCount = container.querySelectorAll('.obat-row').length;
-    
-    const row = document.createElement('div');
-    row.className = 'obat-row';
-    
-    // Tampilkan tombol Hapus hanya jika ini BUKAN baris pertama
-    const btnHapusHTML = rowCount > 0 ? `<button type="button" class="btn-hapus-obat" onclick="this.parentElement.parentElement.remove()" title="Hapus Obat">✕</button>` : `<div style="width:36px;"></div>`;
-
-    row.innerHTML = `
-      <div class="input-group">
-        <input type="text" class="input-obat-nama" placeholder="Nama Obat (Cth: Captopril)" value="${nama}">
-      </div>
-      <div class="medis-row-3">
-        <div class="input-group" style="margin-bottom:0;">
-          <input type="text" class="input-obat-dosis" placeholder="Dosis (1x2)" value="${dosis}">
-        </div>
-        <div class="input-group" style="margin-bottom:0;">
-          <input type="number" class="input-obat-jumlah" placeholder="Jml (30)" value="${jml}">
-        </div>
-        ${btnHapusHTML}
-      </div>
-    `;
-    container.appendChild(row);
-  }
-
-  // --- FUNGSI MENCIPTAKAN KOTAK OBAT DINAMIS ---
+  // ========================================================
+  // KONTROL PENCATATAN MEDIS DINAMIS (MULTIPLE OBAT & VALIDASI)
+  // ========================================================
+  
   function tambahBarisObat(nama = '', dosis = '', jml = '') {
     const container = document.getElementById('obatListContainer');
     const rowCount = container.children.length;
@@ -1211,13 +1186,12 @@
     const row = document.createElement('div');
     row.className = 'obat-row';
     
-    // Tombol silang (X) hanya muncul pada obat ke-2, ke-3, dst
     const btnHapusHTML = rowCount > 0 ? `<button type="button" onclick="this.parentElement.remove()" style="position: absolute; top: -10px; right: -5px; background: var(--danger); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">✕</button>` : ``;
 
     row.innerHTML = `
       ${btnHapusHTML}
       <div class="input-group">
-        <input type="text" class="input-obat-nama" placeholder="Nama Obat (Cth: Amlodipine)" value="${nama}">
+        <input type="text" class="input-obat-nama" placeholder="Nama Obat (Cth: Captopril)" value="${nama}">
       </div>
       <div class="medis-row-3">
         <div class="input-group" style="margin-bottom: 0;">
@@ -1230,7 +1204,7 @@
     `;
     container.appendChild(row);
   }
-
+  
   function bukaFormMedis(nama, nik) {
     sessionStorage.setItem('pandu_last_view', 'medis');
     sessionStorage.setItem('pandu_last_medis', JSON.stringify({nama: nama, nik: nik}));
@@ -1253,31 +1227,35 @@
     
     gantiBulanMedis(); 
   }
-
+  
   function gantiBulanMedis() {
     if (!currentMedisData) return;
     const selectedBulan = document.getElementById('inputBulan').value;
     document.getElementById('inputTD').value = currentMedisData[selectedBulan] || "";
     
-    document.getElementById('obatListContainer').innerHTML = ''; // Kosongkan wadah
+    document.getElementById('obatListContainer').innerHTML = ''; 
     
     let terapiAsli = currentMedisData['therapi'] || "";
     
     if(terapiAsli.trim() !== "") {
-      // Bongkar kalimat panjang dari Excel berdasarkan ENTER (\n)
       let obatArray = terapiAsli.split('\n');
       obatArray.forEach(obatStr => {
-        // Bongkar lagi berdasarkan strip (-)
         let parts = obatStr.split(' - ');
         let nm = parts[0] ? parts[0].trim() : "";
         let ds = parts[1] ? parts[1].trim() : "";
-        let jm = parts[2] ? parts[2].replace(/[^0-9]/g, '') : ""; // Hapus teks non-angka
+        let jm = parts[2] ? parts[2].replace(/[^0-9]/g, '') : ""; 
         tambahBarisObat(nm, ds, jm);
       });
     } else {
-      // Jika data terapi di Excel kosong, tampilkan 1 kotak obat kosong
       tambahBarisObat(); 
     }
+  }
+
+  function tutupFormMedis() {
+    sessionStorage.removeItem('pandu_last_view');
+    sessionStorage.removeItem('pandu_last_medis');
+    document.getElementById('medisView').style.display = 'none';
+    document.getElementById('listView').style.display = 'block';
   }
 
   function simpanDataMedis() {
@@ -1287,7 +1265,6 @@
     
     if (!nik || nik.length !== 16) { alert("Sistem membutuhkan NIK yang valid."); return; }
     
-    // VALIDASI WAJIB TEKANAN DARAH
     if (td === "") {
        alert("Peringatan: Tekanan Darah wajib diisi!");
        document.getElementById('inputTD').focus();
@@ -1310,10 +1287,8 @@
       }
     });
     
-    // Gabung dengan ENTER (\n) agar tersusun ke bawah di Excel
     let therapiString = therapiArr.join("\n"); 
 
-    // VALIDASI WAJIB MINIMAL 1 OBAT
     if (therapiArr.length === 0) {
       alert("Peringatan: Minimal 1 Terapi Obat wajib diisi!"); 
       return;
@@ -1345,13 +1320,6 @@
       simpanOffline(dataMedis);
       hideLoader();
     }
-  }
-
-  function tutupFormMedis() {
-    sessionStorage.removeItem('pandu_last_view');
-    sessionStorage.removeItem('pandu_last_medis');
-    document.getElementById('medisView').style.display = 'none';
-    document.getElementById('listView').style.display = 'block';
   }
 
     // SATUKAN SEMUA BARIS OBAT MENJADI 1 KALIMAT
