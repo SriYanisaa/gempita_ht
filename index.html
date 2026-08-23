@@ -537,9 +537,9 @@
       <button type="button" class="btn btn-gps" onclick="getGPS()">📍 Cari Otomatis Via Satelit GPS</button>
       
       <div style="display: flex; gap: 10px;">
-        <button type="button" id="btnHapusPasien" class="btn" style="flex: 1; background: var(--danger-bg); color: var(--danger); border: 2px solid rgba(225, 29, 72, 0.2); display: none;" onclick="hapusPasien()">🗑️ Hapus</button>
-        <button type="submit" class="btn btn-submit" style="flex: 2;">Simpan Peta</button>
+        <button type="submit" class="btn btn-submit">Simpan Peta & Perubahan Nama</button>
       </div>
+    </form>
     </form>
   </div>
 </div>
@@ -936,8 +936,9 @@
           <span class="status-badge ${badgeClass}">${badgeText}</span>
         </div>
         <div class="card-actions">
-          <button class="btn-card btn-c-peta" onclick="bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}')">📍 Geotagging</button>
-          <button class="btn-card btn-c-medis" onclick="bukaFormMedis('${p.nama}', '${p.nik}')">📝 Catat Medis</button>
+          <button class="btn-card btn-c-peta" onclick="bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}')" style="flex: 1;">📍 Peta & Edit</button>
+          <button class="btn-card btn-c-medis" onclick="bukaFormMedis('${p.nama}', '${p.nik}')" style="flex: 1;">📝 Catat Medis</button>
+          <button class="btn-card" style="background: var(--danger-bg); color: var(--danger); flex: 0.3; padding: 12px 0;" onclick="hapusPasien('${p.nik}', '${p.nama}')" title="Hapus Pasien Permanen">🗑️</button>
         </div>
       `;
       container.appendChild(item);
@@ -1151,14 +1152,19 @@
 
     document.getElementById('listView').style.display = 'none';
     document.getElementById('medisView').style.display = 'none';
+    if(document.getElementById('notifView')) document.getElementById('notifView').style.display = 'none';
     document.getElementById('formView').style.display = 'block';
     
     document.getElementById('formAction').value = "update";
-    document.getElementById('subtitleNama').innerText = nama;
-    document.getElementById('groupNamaInput').style.display = 'none';
+    document.getElementById('subtitleNama').innerText = "Edit Data: " + nama;
+    
+    // MUNCULKAN NAMA AGAR BISA DIEDIT PETUGAS
+    document.getElementById('groupNamaInput').style.display = 'block';
+    document.getElementById('inputNama').value = nama;
+    document.getElementById('inputNama').required = true;
+    
     document.getElementById('groupAlamatInput').style.display = 'none';
     
-    document.getElementById('inputNama').required = false;
     document.getElementById('nik').value = nik;
     document.getElementById('nik').readOnly = true;
     document.getElementById('koordinat').value = koordinat || "";
@@ -1166,7 +1172,6 @@
     
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
-    document.getElementById('btnHapusPasien').style.display = 'block';
 
     updateTautanPeta(koordinat); 
     inisialisasiPeta(koordinat, nama);
@@ -1177,6 +1182,7 @@
 
     document.getElementById('listView').style.display = 'none';
     document.getElementById('medisView').style.display = 'none';
+    if(document.getElementById('notifView')) document.getElementById('notifView').style.display = 'none';
     document.getElementById('formView').style.display = 'block';
     
     document.getElementById('formAction').value = "tambah";
@@ -1194,12 +1200,10 @@
     document.getElementById('nikWarning').style.display = 'none';
     document.getElementById('nik').style.borderColor = 'var(--border-color)';
     document.getElementById('nikCount').innerText = '0';
-    document.getElementById('btnHapusPasien').style.display = 'none';
 
     updateTautanPeta(""); 
     inisialisasiPeta("", "Pasien Baru"); 
   }
-
   function tutupForm() { 
     sessionStorage.removeItem('pandu_last_view');
     sessionStorage.removeItem('pandu_last_patient');
@@ -1443,6 +1447,7 @@
     let data = { 
       action: action, 
       nik: cekNik, 
+      nama: document.getElementById('inputNama').value, // AMBIL NAMA TERBARU (EDIT/TAMBAH)
       koordinat: document.getElementById('koordinat').value,
       pin: localStorage.getItem('pandu_token'), 
       tanggalGeotagging: waktuGeotag
@@ -1492,7 +1497,7 @@
     }
   });
 
-  function hapusPasien() {
+  function hapusPasien(cekNik, namaPasien) {
     const cekNik = document.getElementById('nik').value;
     const namaPasien = document.getElementById('subtitleNama').innerText;
 
