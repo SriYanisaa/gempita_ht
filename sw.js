@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pandu-v19.6';
+const CACHE_NAME = 'pandu-v19.7';
 const MAP_CACHE_NAME = 'pandu-map-tiles-v1';
 
 // File utama yang harus selalu ada di HP
