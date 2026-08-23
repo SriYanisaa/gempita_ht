@@ -17,16 +17,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
   <style>
-    /* ==========================================
-       TEMA WARNA PUSKESMAS (HEALTHCARE UI)
-       ========================================== */
     :root {
-      --primary: #0d9488; /* Teal lembut */
+      --primary: #14b8a6; 
       --primary-dark: #0f766e;
       --primary-light: #f0fdfa;
       --accent-navy: #1e293b; 
       --header-bg: #0f172a; 
-      --bg-color: #f8fafc; /* Latar belakang lebih bersih */
+      --bg-color: #f8fafc; 
       --card-bg: #ffffff; 
       --text-main: #334155; 
       --text-muted: #64748b; 
@@ -46,7 +43,6 @@
     
     body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); padding-bottom: 40px; -webkit-tap-highlight-color: transparent; overflow-x: hidden;}
     
-    /* SPLASH SCREEN & LOADER */
     #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--header-bg); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease-out, visibility 0.6s ease-out;}
     #splashScreen.hidden { opacity: 0; visibility: hidden; }
     .splash-logo { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7); animation: pulseSplash 1.8s infinite; margin-bottom: 25px; }
@@ -60,7 +56,6 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loader-text { margin-top: 15px; font-weight: 700; color: var(--primary-dark); font-size: 14px; letter-spacing: 0.5px;}
 
-    /* LAYAR LOGIN */
     #loginView { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
     .login-box { background: var(--card-bg); width: 100%; max-width: 400px; padding: 45px 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); text-align: center; }
     .login-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.2); }
@@ -76,7 +71,6 @@
     .btn-logout { background: var(--danger-bg); color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; margin-top: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.2s;}
     .btn-logout:active { background: rgba(225, 29, 72, 0.2); }
 
-    /* HEADER & SIDEBAR MENU */
     .header { background: var(--header-bg); padding: 40px 20px 50px; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.15);}
     .header-text h1 { margin: 0; font-size: 24px; font-weight: 800; color: var(--primary); letter-spacing: 1px;}
     .header-text p { margin: 4px 0 0; font-size: 12px; color: #94a3b8; font-weight: 500; opacity: 0.8;}
@@ -100,7 +94,6 @@
     .menu-item.danger svg { color: var(--danger); }
     .sidebar-footer { padding: 20px; text-align: center; font-size: 10px; color: var(--text-muted); font-weight: 700; border-top: 1px solid var(--border-color); letter-spacing: 0.5px;}
 
-    /* LIST & PENCARIAN */
     .search-wrapper { padding: 0 20px; margin-top: -30px; position: relative; z-index: 20; margin-bottom: 25px;}
     .search-box { position: relative; display: flex; align-items: center; background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow-md); border: 1px solid rgba(226, 232, 240, 0.5);}
     .search-box input { width: 100%; padding: 18px 50px 18px 50px; border: 2px solid transparent; border-radius: 20px; font-family: inherit; font-size: 14px; font-weight: 600; outline: none; background: transparent; color: var(--accent-navy); transition: border-color 0.3s;}
@@ -128,28 +121,39 @@
     .badge-done { background: var(--success-bg); color: var(--success); border: 1px solid rgba(5, 150, 105, 0.2);}
     .badge-pending { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.2);}
 
-    /* TAMPILAN KARTU PASIEN BARU */
+    /* TAMPILAN KARTU PASIEN BARU & TOMBOL HAPUS DI DEPAN */
     .card-actions { display: flex; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border-color); }
-    .btn-card { flex: 1; border: none; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px;}
+    .btn-card { border: none; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px;}
     .btn-card:active { transform: scale(0.95); }
     .btn-c-peta { background: #ccfbf1; color: var(--primary-dark); }
     .btn-c-medis { background: #e0f2fe; color: #0284c7; }
 
     /* LAYOUT PENCATATAN MEDIS KHUSUS */
-    .medis-profile-box { background: linear-gradient(135deg, #0f766e, #0d9488); padding: 25px 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.2); color: white;}
-    .medis-profile-box h3 { margin: 0 0 8px 0; font-size: 20px; font-weight: 800; color: white;}
+    .medis-profile-box { background: linear-gradient(135deg, #0f766e, #0d9488); padding: 25px 20px; border-radius: var(--radius-lg); margin-bottom: 25px; box-shadow: var(--shadow-md); color: white;}
+    .medis-profile-box h3 { margin: 0 0 8px 0; font-size: 20px; font-weight: 800;}
     .medis-profile-box p { margin: 0; font-size: 13px; font-weight: 600; opacity: 0.9; letter-spacing: 1px; background: rgba(0,0,0,0.2); display: inline-block; padding: 4px 10px; border-radius: 8px;}
     
-    /* DESAIN FORM OBAT DINAMIS */
-    .obat-container { background: #ffffff; border: 1px solid var(--border-color); padding: 20px; border-radius: 14px; margin-bottom: 20px;}
-    .obat-container-title { font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
+    .btn-medis { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; box-shadow: 0 8px 25px rgba(2, 132, 199, 0.3); margin-top: 10px;}
     
-    .obat-row { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 12px; position: relative;}
-    .obat-row .input-group { margin-bottom: 10px;}
+    /* DESAIN FORM OBAT DINAMIS */
+    .obat-container { background: #f8fafc; border: 1px solid var(--border-color); padding: 20px; border-radius: var(--radius-md); margin-bottom: 20px;}
+    .obat-container-title { font-size: 12px; font-weight: 800; color: var(--text-main); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
+    
+    .obat-row { background: white; padding: 15px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 12px; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.3s;}
+    .obat-row .input-group { margin-bottom: 12px;}
+    .obat-row .input-group label { display: none; } 
+    .obat-row .input-group input { padding: 14px; border-color: #e2e8f0; font-size: 13px;}
+    
     .medis-row-3 { display: flex; gap: 10px; align-items: center;}
     .medis-row-3 .input-group { flex: 1; margin-bottom: 0;}
+    
+    .btn-hapus-obat { background: var(--danger-bg); color: var(--danger); border: none; width: 36px; height: 36px; border-radius: 10px; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;}
+    .btn-hapus-obat:active { transform: scale(0.9); }
+    
+    .btn-add-obat { background: transparent; border: 2px dashed var(--primary); color: var(--primary); width: 100%; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 13px; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;}
+    .btn-add-obat:active { background: var(--primary-light); transform: scale(0.98);}
 
-    /* MODAL UMUM */
+    /* MODAL & VIEW LAINNYA */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9500; visibility: hidden; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(4px);}
     .modal-overlay.active { visibility: visible; opacity: 1; }
     .modal-content { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); padding: 30px 25px 40px; box-sizing: border-box; border-top-left-radius: 30px; border-top-right-radius: 30px; transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 -10px 40px rgba(0,0,0,0.15);}
@@ -161,8 +165,7 @@
     .fab-add { position: fixed; bottom: 30px; right: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(13, 148, 136, 0.4); cursor: pointer; z-index: 100; border: none; transition: transform 0.2s; }
     .fab-add:active { transform: scale(0.9); }
 
-    /* LAYAR KEDUA (FORM PETA & MEDIS) */
-    #formView, #medisView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1000; overflow-y: auto; padding: 0; }
+    #formView, #medisView, #notifView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1000; overflow-y: auto; padding: 0; }
     .form-header { padding: 25px 20px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(226, 232, 240, 0.8); display: flex; align-items: center; gap: 15px;}
     .nav-back { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; width: 44px; height: 44px; font-size: 20px; color: var(--accent-navy); cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; box-shadow: var(--shadow-sm);}
     .nav-back:active { transform: scale(0.92); background: var(--input-bg); }
@@ -203,31 +206,6 @@
     .btn-street-view { flex: 1; background: #fff7ed; color: #d97706; border: 1px solid rgba(217, 119, 6, 0.2); text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; box-shadow: 0 4px 15px rgba(217, 119, 6, 0.1); padding: 16px; border-radius: var(--radius-md); font-weight: 800; font-size: 13px; text-align: center; transition: transform 0.2s;}
     .btn-street-view span { font-size: 10px; font-weight: 600; opacity: 0.8;}
     .btn-street-view:active { transform: scale(0.95); }
-
-    /* LAYOUT PENCATATAN MEDIS KHUSUS */
-    .medis-profile-box { background: linear-gradient(135deg, #0f766e, #0d9488); padding: 25px 20px; border-radius: var(--radius-lg); margin-bottom: 25px; box-shadow: var(--shadow-md); color: white;}
-    .medis-profile-box h3 { margin: 0 0 8px 0; font-size: 20px; font-weight: 800;}
-    .medis-profile-box p { margin: 0; font-size: 13px; font-weight: 600; opacity: 0.9; letter-spacing: 1px; background: rgba(0,0,0,0.2); display: inline-block; padding: 4px 10px; border-radius: 8px;}
-    
-    .btn-medis { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; box-shadow: 0 8px 25px rgba(2, 132, 199, 0.3); margin-top: 10px;}
-    
-    /* DESAIN FORM OBAT DINAMIS */
-    .obat-container { background: #f8fafc; border: 1px solid var(--border-color); padding: 20px; border-radius: var(--radius-md); margin-bottom: 20px;}
-    .obat-container-title { font-size: 12px; font-weight: 800; color: var(--text-main); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
-    
-    .obat-row { background: white; padding: 15px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 12px; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.3s;}
-    .obat-row .input-group { margin-bottom: 12px;}
-    .obat-row .input-group label { display: none; } /* Hide inner labels for clean look */
-    .obat-row .input-group input { padding: 14px; border-color: #e2e8f0; font-size: 13px;}
-    
-    .medis-row-3 { display: flex; gap: 10px; align-items: center;}
-    .medis-row-3 .input-group { flex: 1; margin-bottom: 0;}
-    
-    .btn-hapus-obat { background: var(--danger-bg); color: var(--danger); border: none; width: 36px; height: 36px; border-radius: 10px; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;}
-    .btn-hapus-obat:active { transform: scale(0.9); }
-    
-    .btn-add-obat { background: transparent; border: 2px dashed var(--primary); color: var(--primary); width: 100%; padding: 14px; border-radius: 14px; font-weight: 800; font-size: 13px; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;}
-    .btn-add-obat:active { background: var(--primary-light); transform: scale(0.98);}
 
     #distributionView { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1500; flex-direction: column; }
     .dist-filter-box { padding: 15px 20px; background: var(--card-bg); z-index: 10; border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
@@ -340,7 +318,7 @@
       <img src="logo_transparent.png?v=3" alt="Logo PANDU" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);">
       <div class="header-text">
         <h1 style="color: white;">PANDU</h1>
-        <p style="color: rgba(255,255,255,0.8);">Pemetaan Area dan Navigasi Data Unit Terpadu</p>
+        <p style="color: rgba(255,255,255,0.8);">Kesehatan Masyarakat Terpadu</p>
       </div>
     </div>
     <div style="display: flex; gap: 10px;">
@@ -539,7 +517,6 @@
       <div style="display: flex; gap: 10px;">
         <button type="submit" class="btn btn-submit">Simpan Peta & Perubahan Nama</button>
       </div>
-    </form>
     </form>
   </div>
 </div>
@@ -1158,7 +1135,6 @@
     document.getElementById('formAction').value = "update";
     document.getElementById('subtitleNama').innerText = "Edit Data: " + nama;
     
-    // MUNCULKAN NAMA AGAR BISA DIEDIT PETUGAS
     document.getElementById('groupNamaInput').style.display = 'block';
     document.getElementById('inputNama').value = nama;
     document.getElementById('inputNama').required = true;
@@ -1204,6 +1180,7 @@
     updateTautanPeta(""); 
     inisialisasiPeta("", "Pasien Baru"); 
   }
+
   function tutupForm() { 
     sessionStorage.removeItem('pandu_last_view');
     sessionStorage.removeItem('pandu_last_patient');
@@ -1260,18 +1237,16 @@
     const patient = dataPasienLokal.find(p => p.nik === nik);
     currentMedisData = patient && patient.medis ? patient.medis : {};
 
-    // 1. OTOMATIS PILIH BULAN SAAT INI
-    const currentMonth = new Date().getMonth(); // Agustus = index 7
+    const currentMonth = new Date().getMonth();
     const monthNames = ["Januari", "Pebruari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     
     const selectBulan = document.getElementById('inputBulan');
     
-    // 2. KUNCI (DISABLE) BULAN MASA DEPAN
     for (let i = 0; i < selectBulan.options.length; i++) {
       if (i > currentMonth) {
         selectBulan.options[i].disabled = true;
         selectBulan.options[i].text = monthNames[i] + " (Belum Masuk)";
-        selectBulan.options[i].style.color = "#cbd5e1"; // Warnakan abu-abu pudar
+        selectBulan.options[i].style.color = "#cbd5e1"; 
       } else {
         selectBulan.options[i].disabled = false;
         selectBulan.options[i].text = monthNames[i];
@@ -1279,36 +1254,29 @@
       }
     }
 
-    // Set dropdown menunjuk ke bulan saat ini
     selectBulan.value = monthNames[currentMonth];
-    
-    // 3. MUAT DATA DARI EXCEL (JIKA ADA) ATAU KOSONGKAN (JIKA BELUM ADA)
     gantiBulanMedis(); 
   }
-
+  
   function gantiBulanMedis() {
     if (!currentMedisData) return;
     const selectedBulan = document.getElementById('inputBulan').value;
-    
-    // Tarik nilai Tekanan Darah sesuai bulan yang dipilih di dropdown
     document.getElementById('inputTD').value = currentMedisData[selectedBulan] || "";
     
-    document.getElementById('obatListContainer').innerHTML = ''; // Kosongkan wadah obat
+    document.getElementById('obatListContainer').innerHTML = ''; 
     
     let terapiAsli = currentMedisData['therapi'] || "";
     
-    // Jika di Excel sudah ada rekam medisnya, bongkar dan isikan ke kotak
     if(terapiAsli.trim() !== "") {
       let obatArray = terapiAsli.split('\n');
       obatArray.forEach(obatStr => {
         let parts = obatStr.split(' - ');
         let nm = parts[0] ? parts[0].trim() : "";
         let ds = parts[1] ? parts[1].trim() : "";
-        let jm = parts[2] ? parts[2].replace(/[^0-9]/g, '') : ""; // Hapus tulisan 'Tab' sisa Excel
+        let jm = parts[2] ? parts[2].replace(/[^0-9]/g, '') : ""; 
         tambahBarisObat(nm, ds, jm);
       });
     } else {
-      // Jika di Excel masih kosong, berikan 1 kotak obat bersih
       tambahBarisObat(); 
     }
   }
@@ -1327,7 +1295,6 @@
     
     if (!nik || nik.length !== 16) { alert("Sistem membutuhkan NIK yang valid."); return; }
     
-    // VALIDASI WAJIB 1: TEKANAN DARAH TIDAK BOLEH KOSONG
     if (td === "") {
        alert("PERINGATAN: Tekanan Darah wajib diisi!");
        document.getElementById('inputTD').focus();
@@ -1350,13 +1317,11 @@
       }
     });
     
-    // VALIDASI WAJIB 2: MINIMAL 1 OBAT HARUS DIISI
     if (therapiArr.length === 0) {
       alert("PERINGATAN: Terapi Obat wajib diisi minimal 1 jenis obat!"); 
       return;
     }
     
-    // Gabung dengan ENTER (\n) agar tersusun ke bawah di Excel
     let therapiString = therapiArr.join("\n"); 
 
     let dataMedis = {
@@ -1447,7 +1412,7 @@
     let data = { 
       action: action, 
       nik: cekNik, 
-      nama: document.getElementById('inputNama').value, // AMBIL NAMA TERBARU (EDIT/TAMBAH)
+      nama: document.getElementById('inputNama').value, 
       koordinat: document.getElementById('koordinat').value,
       pin: localStorage.getItem('pandu_token'), 
       tanggalGeotagging: waktuGeotag
