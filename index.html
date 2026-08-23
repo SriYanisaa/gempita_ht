@@ -1220,13 +1220,13 @@
     const patient = dataPasienLokal.find(p => p.nik === nik);
     currentMedisData = patient && patient.medis ? patient.medis : {};
 
-    // 1. OTOMATIS AMBIL BULAN BERJALAN SAAT INI
-    const currentMonth = new Date().getMonth(); // Agutus = index 7
+    // 1. OTOMATIS PILIH BULAN SAAT INI
+    const currentMonth = new Date().getMonth(); // Agustus = index 7
     const monthNames = ["Januari", "Pebruari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     
     const selectBulan = document.getElementById('inputBulan');
     
-    // 2. DISABLE BULAN DEPAN (Belum Waktunya)
+    // 2. KUNCI (DISABLE) BULAN MASA DEPAN
     for (let i = 0; i < selectBulan.options.length; i++) {
       if (i > currentMonth) {
         selectBulan.options[i].disabled = true;
@@ -1240,24 +1240,37 @@
     }
 
     // Set dropdown menunjuk ke bulan saat ini
-    const selectedBulan = monthNames[currentMonth];
-    selectBulan.value = selectedBulan;
+    selectBulan.value = monthNames[currentMonth];
     
-    // 3. KOSONGKAN FORM (Ulang dari awal sesuai permintaan Anda)
-    document.getElementById('inputTD').value = ""; // Tensi kosong
-    document.getElementById('obatListContainer').innerHTML = ''; // Daftar obat dibersihkan
-    tambahBarisObat(); // Berikan 1 kotak obat kosong siap ketik
+    // 3. MUAT DATA DARI EXCEL (JIKA ADA) ATAU KOSONGKAN (JIKA BELUM ADA)
+    gantiBulanMedis(); 
   }
 
   function gantiBulanMedis() {
     if (!currentMedisData) return;
     const selectedBulan = document.getElementById('inputBulan').value;
     
-    // Jika petugas mundur memilih bulan sebelumnya, tampilkan data Tekanan Darah bulan tersebut (jika ada)
+    // Tarik nilai Tekanan Darah sesuai bulan yang dipilih di dropdown
     document.getElementById('inputTD').value = currentMedisData[selectedBulan] || "";
     
-    // Catatan: Kotak obat sengaja tidak saya reset saat ganti bulan, 
-    // agar jika petugas salah klik bulan, teks obat yang sudah terlanjur mereka ketik tidak hilang.
+    document.getElementById('obatListContainer').innerHTML = ''; // Kosongkan wadah obat
+    
+    let terapiAsli = currentMedisData['therapi'] || "";
+    
+    // Jika di Excel sudah ada rekam medisnya, bongkar dan isikan ke kotak
+    if(terapiAsli.trim() !== "") {
+      let obatArray = terapiAsli.split('\n');
+      obatArray.forEach(obatStr => {
+        let parts = obatStr.split(' - ');
+        let nm = parts[0] ? parts[0].trim() : "";
+        let ds = parts[1] ? parts[1].trim() : "";
+        let jm = parts[2] ? parts[2].replace(/[^0-9]/g, '') : ""; // Hapus tulisan 'Tab' sisa Excel
+        tambahBarisObat(nm, ds, jm);
+      });
+    } else {
+      // Jika di Excel masih kosong, berikan 1 kotak obat bersih
+      tambahBarisObat(); 
+    }
   }
 
   function tutupFormMedis() {
@@ -1274,8 +1287,9 @@
     
     if (!nik || nik.length !== 16) { alert("Sistem membutuhkan NIK yang valid."); return; }
     
+    // VALIDASI WAJIB 1: TEKANAN DARAH TIDAK BOLEH KOSONG
     if (td === "") {
-       alert("Peringatan: Tekanan Darah wajib diisi!");
+       alert("PERINGATAN: Tekanan Darah wajib diisi!");
        document.getElementById('inputTD').focus();
        return;
     }
@@ -1296,12 +1310,14 @@
       }
     });
     
-    let therapiString = therapiArr.join("\n"); 
-
+    // VALIDASI WAJIB 2: MINIMAL 1 OBAT HARUS DIISI
     if (therapiArr.length === 0) {
-      alert("Peringatan: Minimal 1 Terapi Obat wajib diisi!"); 
+      alert("PERINGATAN: Terapi Obat wajib diisi minimal 1 jenis obat!"); 
       return;
     }
+    
+    // Gabung dengan ENTER (\n) agar tersusun ke bawah di Excel
+    let therapiString = therapiArr.join("\n"); 
 
     let dataMedis = {
       action: "update_medis",
