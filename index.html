@@ -1498,9 +1498,6 @@
   });
 
   function hapusPasien(cekNik, namaPasien) {
-    const cekNik = document.getElementById('nik').value;
-    const namaPasien = document.getElementById('subtitleNama').innerText;
-
     if(confirm(`PERINGATAN!\n\nApakah Anda yakin ingin menghapus data pasien ${namaPasien} (NIK: ${cekNik}) secara permanen dari database?\n\nTindakan ini tidak dapat dibatalkan.`)) {
       showLoader("Menghapus data...");
       let data = { action: "hapus", nik: cekNik, pin: localStorage.getItem('pandu_token') };
