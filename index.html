@@ -1225,7 +1225,9 @@
     let terapiAsli = currentMedisData['therapi'] || "";
     
     if(terapiAsli.trim() !== "") {
-      let obatArray = terapiAsli.split(', ');
+      // UBAH DISINI: Membongkar kalimat berdasarkan ENTER (\n)
+      let obatArray = terapiAsli.split('\n');
+      
       obatArray.forEach(obatStr => {
         let parts = obatStr.split(' - ');
         let nm = parts[0] ? parts[0].trim() : "";
@@ -1272,9 +1274,8 @@
       }
     });
     
-    // Hasil gabungan antar obat akan dipisah koma.
-    // Contoh: "Amlodipine - 10 Mg - 30 Tab, Captopril - 25 Mg - 15 Tab"
-    let therapiString = therapiArr.join(", "); 
+    // UBAH DISINI: Hasil gabungan antar obat dipisah dengan ENTER (\n)
+    let therapiString = therapiArr.join("\n"); 
 
     if (!td && therapiString === "") {
       alert("Harap isi Tekanan Darah atau Minimal 1 Terapi Obat."); return;
