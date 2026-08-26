@@ -330,7 +330,7 @@
       });
 
       // HANYA MENAMPILKAN DESA (NAMA PASIEN DIRAHASIAKAN)
-      const popupHtml = `<b style="color:var(--accent-navy);">Pasien Hipertensi</b><br>Desa: ${p.alamat || '-'}<br><span style="font-size:10px; color:#ef4444; font-weight:800;">*Data Klinis Dirahasiakan</span>`;
+      const popupHtml = `<b style="color:var(--accent-navy); font-size:14px;">${p.nama || 'Tanpa Nama'}</b><br><span style="font-size:12px; color:var(--text-main);">Desa: ${p.alamat || '-'}</span>`;
       const marker = L.marker([lat, lng], {icon: customDot}).bindPopup(popupHtml);
       distMarkersLayer.addLayer(marker);
       bounds.push([lat, lng]);
