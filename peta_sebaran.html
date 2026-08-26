@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dashboard Pimpinan - PANDU</title>
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="logo_transparent.png?v=3">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root { --primary: #14b8a6; --primary-dark: #0f766e; --accent-navy: #1e293b; --header-bg: #0f172a; --bg-color: #f8fafc; --card-bg: #ffffff; --text-main: #334155; --text-muted: #64748b; --border-color: #e2e8f0; --input-bg: #f1f5f9; }
+    body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); -webkit-tap-highlight-color: transparent; }
+    
+    #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--header-bg); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease-out;}
+    .splash-logo { width: 110px; height: 110px; border-radius: 50%; box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7); animation: pulseSplash 1.8s infinite; margin-bottom: 25px; }
+    .splash-title { color: var(--primary); font-size: 32px; font-weight: 800; letter-spacing: 2px; margin: 0; }
+    @keyframes pulseSplash { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(13, 148, 136, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); } }
+
+    .header { background: var(--header-bg); padding: 40px 20px 50px; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; display: flex; justify-content: space-between; align-items: flex-start; box-shadow: 0 10px 30px rgba(0,0,0,0.15);}
+    
+    .dashboard-container { padding: 0 20px; margin-top: -30px; position: relative; z-index: 10; }
+    .welcome-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 25px 20px; border-radius: 20px; color: white; margin-bottom: 25px; box-shadow: 0 8px 25px rgba(13, 148, 136, 0.3);}
+    .welcome-card h2 { margin: 0 0 8px; font-weight: 800; font-size: 20px; }
+    .welcome-card p { margin: 0; font-size: 13px; opacity: 0.9; line-height: 1.5; }
+
+    .menu-card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: transform 0.2s;}
+    .menu-card:active { transform: scale(0.97); }
+    .menu-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 24px; flex-shrink: 0; }
+    
+    .form-header { padding: 25px 20px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;}
+    .nav-back { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; width: 44px; height: 44px; font-size: 20px; color: var(--accent-navy); cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
+    .nav-back:active { transform: scale(0.92); background: var(--input-bg); }
+  </style>
+</head>
+<body>
+
+<div id="splashScreen">
+  <img src="logo_transparent.png?v=3" alt="Logo PANDU" class="splash-logo">
+  <h1 class="splash-title">PANDU</h1>
+  <div style="color: #94a3b8; font-size: 13px; font-weight: 500; margin-top: 8px;">Portal Khusus Pimpinan</div>
+</div>
+
+<!-- TAMPILAN DASHBOARD UTAMA -->
+<div id="mainDashboard">
+  <div class="header">
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <img src="logo_transparent.png?v=3" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);">
+      <div>
+        <h1 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--primary);">PANDU</h1>
+        <p style="margin: 4px 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;">UPTD. Puskesmas Klungkung I</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dashboard-container">
+    <div class="welcome-card">
+      <h2>Selamat Datang, Bapak/Ibu</h2>
+      <p>Aplikasi ini menampilkan visualisasi pemetaan kesehatan spasial secara real-time di wilayah kerja desa.</p>
+    </div>
+
+    <h3 style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Dashboard Peta Sebaran</h3>
+    
+    <div class="menu-card" onclick="bukaPeta()">
+      <div class="menu-icon" style="background: #e0f2fe; color: #0284c7;">📍</div>
+      <div>
+        <h4 style="margin: 0 0 5px; font-size: 16px; font-weight: 800; color: var(--accent-navy);">Hipertensi (HT)</h4>
+        <p style="margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">Pemetaan titik lokasi domisili pasien Hipertensi</p>
+      </div>
+    </div>
+    
+    <div class="menu-card" onclick="alert('Peta sebaran Diabetes Melitus masih dalam tahap pengembangan data klinis.');">
+      <div class="menu-icon" style="background: #fffbeb; color: #d97706;">🗺️</div>
+      <div>
+        <h4 style="margin: 0 0 5px; font-size: 16px; font-weight: 800; color: var(--accent-navy);">Diabetes Melitus (DM)</h4>
+        <p style="margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">Tahap penyiapan dan pengembangan data</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAMPILAN PETA SEBARAN -->
+<div id="mapView" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: var(--bg-color); z-index: 1500; flex-direction: column;">
+  <div class="form-header">
+    <button class="nav-back" onclick="tutupPeta()">←</button>
+    <h2 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--accent-navy);">Peta Sebaran HT</h2>
+  </div>
+  
+  <div style="padding: 10px 20px;">
+    <select id="filterDistWilayah" onchange="renderPetaSebaran()" style="width:100%; padding:14px; border:2px solid var(--border-color); border-radius:14px; font-family:inherit; font-size:14px; background:var(--input-bg); color:var(--accent-navy); font-weight:700; outline:none; appearance:none;">
+      <option value="all">🌐 Semua Wilayah Desa</option>
+      <option value="Satra">Satra</option>
+      <option value="Kamasan">Kamasan</option>
+      <option value="Semarapura Kauh">Semarapura Kauh</option>
+      <option value="Gelgel">Gelgel</option>
+      <option value="Tojan">Tojan</option>
+      <option value="Tangkas">Tangkas</option>
+      <option value="Semarapura Klod">Semarapura Klod</option>
+      <option value="Semarapura Klod Kangin">Semarapura Klod Kangin</option>
+      <option value="Kampung Gelgel">Kampung Gelgel</option>
+      <option value="Jumpai">Jumpai</option>
+    </select>
+  </div>
+  
+  <div style="position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; min-height: 0;">
+    <div id="distMap" style="flex: 1; width: 100%; z-index: 1;"></div>
+    
+    <!-- LEGENDA -->
+    <div style="position: absolute; bottom: 20px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px 16px; border-radius: 12px; z-index: 1000; font-size: 11px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.15); max-height: 40vh; overflow-y: auto; backdrop-filter: blur(4px);">
+      <div style="font-weight: 800; margin-bottom: 8px; font-size: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Legenda Wilayah</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div> Satra</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#3b82f6;"></div> Kamasan</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#10b981;"></div> S. Kauh</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></div> Gelgel</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#8b5cf6;"></div> Tojan</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#ec4899;"></div> Tangkas</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#06b6d4;"></div> S. Klod</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#f97316;"></div> S. Klod Kangin</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#6366f1;"></div> Kp. Gelgel</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#84cc16;"></div> Jumpai</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // PASTE WEB APP URL ANDA DI SINI
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzcp57xHiOczZayb9wpQwDNkAuBiJpGPGHsfuaxpB4CxyaPzsfTN2fU9VpECskx49lE/exec"; 
+  
+  let dataPetaLokal = []; 
+  let distMap, distMarkersLayer;
+
+  window.addEventListener('load', () => {
+    fetchDataPeta(); // Tarik data di background
+    setTimeout(() => {
+      const splash = document.getElementById('splashScreen');
+      splash.style.opacity = '0';
+      setTimeout(() => { splash.remove(); }, 600);
+    }, 1500); 
+  });
+
+  async function fetchDataPeta() {
+    try {
+      const response = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get_peta_kades' })
+      });
+      dataPetaLokal = await response.json();
+    } catch(e) { console.log("Menunggu koneksi stabil untuk mengambil peta."); }
+  }
+
+  function bukaPeta() {
+    document.getElementById('mainDashboard').style.display = 'none';
+    document.getElementById('mapView').style.display = 'flex';
+    
+    if (!distMap) {
+      const batasKlungkung = L.latLngBounds([-8.9000, 115.3000], [-8.4000, 115.7000]);
+      distMap = L.map('distMap', { maxBounds: batasKlungkung, maxBoundsViscosity: 1.0, minZoom: 11 }).setView([-8.5400, 115.4000], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(distMap);
+      distMarkersLayer = L.layerGroup().addTo(distMap);
+    }
+    
+    setTimeout(() => { 
+      distMap.invalidateSize(); 
+      renderPetaSebaran(); 
+    }, 400);
+  }
+
+  function tutupPeta() {
+    document.getElementById('mapView').style.display = 'none';
+    document.getElementById('mainDashboard').style.display = 'block';
+  }
+
+  function renderPetaSebaran() {
+    if(!distMap || !distMarkersLayer) return;
+    distMarkersLayer.clearLayers(); 
+    
+    const wilayahFilter = document.getElementById('filterDistWilayah').value;
+    const regionColors = { "Satra": "#ef4444", "Kamasan": "#3b82f6", "Semarapura Kauh": "#10b981", "Gelgel": "#f59e0b", "Tojan": "#8b5cf6", "Tangkas": "#ec4899", "Semarapura Klod": "#06b6d4", "Semarapura Klod Kangin": "#f97316", "Kampung Gelgel": "#6366f1", "Jumpai": "#84cc16" };
+
+    const dataSebaran = dataPetaLokal.filter(p => {
+      let matchAlamat = true;
+      if (wilayahFilter !== 'all') {
+        const alamatDb = p.alamat ? p.alamat.toLowerCase() : "";
+        matchAlamat = alamatDb.includes(wilayahFilter.toLowerCase());
+      }
+      return matchAlamat;
+    });
+
+    const bounds = [];
+    dataSebaran.forEach(p => {
+      const parts = p.koordinat.split(',');
+      const lat = parseFloat(parts[0].trim());
+      const lng = parseFloat(parts[1].trim());
+      
+      let warnaPin = "#64748b"; 
+      const listDesa = Object.keys(regionColors).sort((a, b) => b.length - a.length);
+      for (let i = 0; i < listDesa.length; i++) {
+        if ((p.alamat || "").toLowerCase().includes(listDesa[i].toLowerCase())) {
+          warnaPin = regionColors[listDesa[i]]; break;
+        }
+      }
+      
+      const customDot = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="background-color: ${warnaPin}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"></div>`,
+        iconSize: [18, 18], iconAnchor: [9, 9]
+      });
+
+      // HANYA MENAMPILKAN DESA (NAMA PASIEN DIRAHASIAKAN)
+      const popupHtml = `<b style="color:var(--accent-navy);">Pasien Hipertensi</b><br>Desa: ${p.alamat || '-'}<br><span style="font-size:10px; color:#ef4444; font-weight:800;">*Data Klinis Dirahasiakan</span>`;
+      const marker = L.marker([lat, lng], {icon: customDot}).bindPopup(popupHtml);
+      distMarkersLayer.addLayer(marker);
+      bounds.push([lat, lng]);
+    });
+
+    if (bounds.length > 0) { distMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 }); }
+  }
+</script>
+</body>
+</html>
