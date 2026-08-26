@@ -244,18 +244,25 @@
     document.getElementById('aboutModal').classList.remove('active'); 
   }
 
-  // FUNGSI TARIK DATA DARI GOOGLE SHEETS
+  // FUNGSI TARIK DATA DARI GOOGLE SHEETS (ANTI-CACHE)
   async function fetchDataPeta() {
     try {
-      const response = await fetch(GAS_URL, {
+      // Tambahkan ?t= waktu saat ini agar browser tidak memakai data cache/lama
+      const response = await fetch(GAS_URL + "?t=" + new Date().getTime(), {
         method: 'POST',
         body: JSON.stringify({ action: 'get_peta_kades' })
       });
+      
+      if (!response.ok) throw new Error("Gagal terhubung ke Google Server.");
+      
       dataPetaLokal = await response.json();
-    } catch(e) { console.log("Menunggu koneksi stabil untuk mengambil peta."); }
+    } catch(e) { 
+      console.error("Error dari server:", e);
+      throw new Error(e.message); 
+    }
   }
 
-  // FUNGSI TOMBOL "SEGARKAN DATA"
+  // FUNGSI TOMBOL "SEGARKAN DATA" (DENGAN PERINGATAN ERROR ASLI)
   async function segarkanDataPeta() {
     closeSidebar();
     try {
@@ -266,7 +273,7 @@
         renderPetaSebaran();
       }
     } catch(e) {
-      alert("❌ Gagal menyegarkan data. Pastikan perangkat memiliki koneksi internet.");
+      alert("❌ GAGAL MENGAMBIL DATA TERBARU!\n\nAlasan: " + e.message + "\n\nPastikan:\n1. URL GAS_URL di HTML sudah benar.\n2. Hak akses deployment Google Script sudah 'Anyone' (Siapa Saja).");
     }
   }
 
