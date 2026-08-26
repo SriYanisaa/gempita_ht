@@ -66,6 +66,12 @@
 </head>
 <body>
 
+<div id="loaderOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: opacity 0.3s;">
+  <div style="width: 45px; height: 45px; border: 4px solid var(--border-color); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+  <div id="loaderText" style="margin-top: 15px; font-weight: 700; color: var(--primary-dark); font-size: 14px;">Memproses...</div>
+</div>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
 <div id="splashScreen">
   <img src="logo_transparent.png?v=3" alt="Logo PANDU" class="splash-logo">
   <h1 class="splash-title">PANDU</h1>
@@ -244,39 +250,54 @@
     document.getElementById('aboutModal').classList.remove('active'); 
   }
 
-  // FUNGSI TARIK DATA DARI GOOGLE SHEETS (ANTI-CACHE)
+  // --- KONTROL ANIMASI LOADING ---
+  function showLoader(text) { 
+    document.getElementById('loaderText').innerText = text; 
+    document.getElementById('loaderOverlay').style.visibility = 'visible';
+    document.getElementById('loaderOverlay').style.opacity = '1';
+  }
+  function hideLoader() { 
+    document.getElementById('loaderOverlay').style.visibility = 'hidden';
+    document.getElementById('loaderOverlay').style.opacity = '0';
+  }
+
+  // --- FUNGSI TARIK DATA (ANTI-CACHE) ---
   async function fetchDataPeta() {
     try {
-      // Tambahkan ?t= waktu saat ini agar browser tidak memakai data cache/lama
       const response = await fetch(GAS_URL + "?t=" + new Date().getTime(), {
         method: 'POST',
         body: JSON.stringify({ action: 'get_peta_kades' })
       });
-      
-      if (!response.ok) throw new Error("Gagal terhubung ke Google Server.");
-      
       dataPetaLokal = await response.json();
     } catch(e) { 
-      console.error("Error dari server:", e);
-      throw new Error(e.message); 
+      throw new Error("Koneksi gagal"); 
     }
   }
 
-  // FUNGSI TOMBOL "SEGARKAN DATA" (DENGAN PERINGATAN ERROR ASLI)
+  // --- FUNGSI SEGARKAN DATA (TOMBOL MENU KADES) ---
   async function segarkanDataPeta() {
     closeSidebar();
+    showLoader("Menyinkronkan Peta..."); // Munculkan Loading Kades
+    
     try {
-      await fetchDataPeta();
-      alert("✓ Data sebaran berhasil ditarik dan diperbarui dari Database PANDU!");
-      // Jika kepala desa sedang melihat peta, maka render ulang pin-nya
+      await fetchDataPeta(); // Tunggu data baru turun
+      
+      // Paksa render ulang jika peta sedang terbuka
       if(document.getElementById('mapView').style.display === 'flex') {
         renderPetaSebaran();
       }
+      
+      // Tunggu sebentar agar loading hilang dengan halus, lalu beritahu sukses
+      setTimeout(() => { 
+        hideLoader();
+        alert("✓ Peta sebaran berhasil diperbarui ke titik lokasi terbaru!"); 
+      }, 500);
+
     } catch(e) {
-      alert("❌ GAGAL MENGAMBIL DATA TERBARU!\n\nAlasan: " + e.message + "\n\nPastikan:\n1. URL GAS_URL di HTML sudah benar.\n2. Hak akses deployment Google Script sudah 'Anyone' (Siapa Saja).");
+      hideLoader();
+      alert("❌ Gagal menyinkronkan peta. Pastikan internet menyala.");
     }
   }
-
   // KONTROL PETA (LEAFLET)
   function bukaPeta() {
     document.getElementById('mainDashboard').style.display = 'none';
