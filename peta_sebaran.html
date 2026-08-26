@@ -13,15 +13,15 @@
 
   <style>
     :root { --primary: #14b8a6; --primary-dark: #0f766e; --accent-navy: #1e293b; --header-bg: #0f172a; --bg-color: #f8fafc; --card-bg: #ffffff; --text-main: #334155; --text-muted: #64748b; --border-color: #e2e8f0; --input-bg: #f1f5f9; }
-    body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
     
     #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--header-bg); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.6s ease-out;}
     .splash-logo { width: 110px; height: 110px; border-radius: 50%; box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7); animation: pulseSplash 1.8s infinite; margin-bottom: 25px; }
     .splash-title { color: var(--primary); font-size: 32px; font-weight: 800; letter-spacing: 2px; margin: 0; }
     @keyframes pulseSplash { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(13, 148, 136, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); } }
 
+    /* HEADER & DASHBOARD */
     .header { background: var(--header-bg); padding: 40px 20px 50px; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; display: flex; justify-content: space-between; align-items: flex-start; box-shadow: 0 10px 30px rgba(0,0,0,0.15);}
-    
     .dashboard-container { padding: 0 20px; margin-top: -30px; position: relative; z-index: 10; }
     .welcome-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 25px 20px; border-radius: 20px; color: white; margin-bottom: 25px; box-shadow: 0 8px 25px rgba(13, 148, 136, 0.3);}
     .welcome-card h2 { margin: 0 0 8px; font-weight: 800; font-size: 20px; }
@@ -32,8 +32,36 @@
     .menu-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 24px; flex-shrink: 0; }
     
     .form-header { padding: 25px 20px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;}
-    .nav-back { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; width: 44px; height: 44px; font-size: 20px; color: var(--accent-navy); cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
+    .nav-back { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; width: 44px; height: 44px; font-size: 20px; color: var(--accent-navy); cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s;}
     .nav-back:active { transform: scale(0.92); background: var(--input-bg); }
+
+    /* MENU HAMBURGER & SIDEBAR */
+    .btn-menu { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 10px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; width: 44px; height: 44px; box-sizing: border-box; backdrop-filter: blur(5px);}
+    .btn-menu:active { background: rgba(255, 255, 255, 0.2); transform: scale(0.95);}
+
+    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); z-index: 9000; visibility: hidden; opacity: 0; transition: all 0.3s ease; backdrop-filter: blur(4px); }
+    .sidebar-overlay.active { visibility: visible; opacity: 1; }
+    .sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100%; background: var(--card-bg); z-index: 9001; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: 10px 0 30px rgba(0,0,0,0.1); border-top-right-radius: 25px; border-bottom-right-radius: 25px;}
+    .sidebar.active { left: 0; }
+    .sidebar-header { padding: 50px 20px 30px; background: linear-gradient(135deg, var(--header-bg), #1e293b); border-top-right-radius: 25px; text-align: center; color: white;}
+    .sidebar-header img { width: 80px; height: 80px; border-radius: 50%; box-shadow: 0 0 20px rgba(13, 148, 136, 0.5); margin-bottom: 15px; border: 2px solid rgba(255,255,255,0.1);}
+    .sidebar-header h3 { margin: 0; font-weight: 800; font-size: 22px; }
+    .sidebar-header p { margin: 5px 0 0; color: var(--primary); font-size: 12px; font-weight: 600; }
+    .sidebar-menu { flex: 1; padding: 20px 15px; overflow-y: auto; }
+    .menu-item { display: flex; align-items: center; gap: 15px; padding: 16px; width: 100%; box-sizing: border-box; background: transparent; border: none; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--accent-navy); border-radius: 14px; cursor: pointer; transition: all 0.2s; text-align: left; margin-bottom: 4px; }
+    .menu-item:active { background: var(--input-bg); transform: translateX(5px); }
+    .menu-item svg { width: 22px; height: 22px; color: var(--primary); }
+    .sidebar-footer { padding: 20px; text-align: center; font-size: 10px; color: var(--text-muted); font-weight: 700; border-top: 1px solid var(--border-color);}
+
+    /* MODAL TENTANG APLIKASI */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9500; visibility: hidden; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(4px);}
+    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-content { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--card-bg); padding: 30px 25px 40px; box-sizing: border-box; border-top-left-radius: 30px; border-top-right-radius: 30px; transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 -10px 40px rgba(0,0,0,0.15);}
+    .modal-overlay.active .modal-content { bottom: 0; }
+    .close-modal { background: var(--input-bg); border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;}
+    .close-modal:active { background: #e2e8f0; }
+    .btn-submit { width: 100%; padding: 18px; border: none; border-radius: 14px; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 8px 25px rgba(13, 148, 136, 0.3);}
+    .btn-submit:active { transform: translateY(2px); }
   </style>
 </head>
 <body>
@@ -42,6 +70,51 @@
   <img src="logo_transparent.png?v=3" alt="Logo PANDU" class="splash-logo">
   <h1 class="splash-title">PANDU</h1>
   <div style="color: #94a3b8; font-size: 13px; font-weight: 500; margin-top: 8px;">Portal Khusus Pimpinan</div>
+</div>
+
+<!-- SIDEBAR MENU NAVIGASI -->
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+<div id="sidebarMenu" class="sidebar">
+  <div class="sidebar-header">
+    <img src="logo_transparent.png?v=3" alt="PANDU">
+    <h3>PANDU</h3>
+    <p>UPTD. Puskesmas Klungkung I</p>
+  </div>
+  <div class="sidebar-menu">
+    <button class="menu-item" onclick="keBeranda()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+      Beranda Utama
+    </button>
+    <button class="menu-item" onclick="segarkanDataPeta()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+      Segarkan Data Peta
+    </button>
+    <button class="menu-item" onclick="bukaAbout()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      Tentang Aplikasi
+    </button>
+  </div>
+  <div class="sidebar-footer">Aplikasi PANDU • v2.1 (Dashboard)</div>
+</div>
+
+<!-- MODAL TENTANG APLIKASI -->
+<div id="aboutModal" class="modal-overlay">
+  <div class="modal-content" style="text-align: center; padding-bottom: 30px;">
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+      <button class="close-modal" onclick="tutupAbout()">✕</button>
+    </div>
+    <img src="logo_transparent.png?v=3" style="width: 80px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3); border-radius: 50%;">
+    <h2 style="margin: 0 0 5px; color: var(--accent-navy); font-weight: 800;">PANDU</h2>
+    <p style="margin: 0 0 20px; font-size: 12px; color: var(--text-muted); font-weight: 700;">Pemetaaan Area dan Navigasi Data Unit</p>
+    
+    <div style="background: var(--input-bg); padding: 20px; border-radius: 16px; font-size: 13px; line-height: 1.6; color: var(--accent-navy); font-weight: 500; text-align: left; border: 1px solid var(--border-color);">
+      Sistem tata kelola data geospasial dan klinis yang dirancang khusus untuk memetakan episentrum penyakit secara akurat dan real-time di wilayah kerja <b>UPTD. Puskesmas Klungkung I</b>.<br><br>
+      <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">Dikembangkan Oleh:</div>
+      <b style="font-size: 14px; color: var(--primary-dark);">Penata Kelola Sistem dan Teknologi Informasi</b><br>
+      <span style="font-weight: 600;">UPTD. Puskesmas Klungkung I</span>
+    </div>
+    <button class="btn-submit" style="margin-top: 25px;" onclick="tutupAbout()">Tutup Halaman</button>
+  </div>
 </div>
 
 <!-- TAMPILAN DASHBOARD UTAMA -->
@@ -54,6 +127,11 @@
         <p style="margin: 4px 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;">UPTD. Puskesmas Klungkung I</p>
       </div>
     </div>
+    
+    <!-- TOMBOL HAMBURGER HEADER -->
+    <button class="btn-menu" onclick="bukaSidebar()" title="Buka Menu Navigasi">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
   </div>
   
   <div class="dashboard-container">
@@ -126,7 +204,7 @@
 </div>
 
 <script>
-  // PASTE WEB APP URL ANDA DI SINI
+  // PASTE WEB APP URL ANDA DI SINI (Pastikan sudah di-deploy sebagai "Anyone")
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzcp57xHiOczZayb9wpQwDNkAuBiJpGPGHsfuaxpB4CxyaPzsfTN2fU9VpECskx49lE/exec"; 
   
   let dataPetaLokal = []; 
@@ -141,6 +219,32 @@
     }, 1500); 
   });
 
+  // KONTROL SIDEBAR
+  function bukaSidebar() {
+    document.getElementById('sidebarOverlay').classList.add('active');
+    document.getElementById('sidebarMenu').classList.add('active');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebarOverlay').classList.remove('active');
+    document.getElementById('sidebarMenu').classList.remove('active');
+  }
+
+  function keBeranda() {
+    closeSidebar();
+    tutupPeta();
+  }
+
+  function bukaAbout() { 
+    closeSidebar(); 
+    document.getElementById('aboutModal').classList.add('active'); 
+  }
+
+  function tutupAbout() { 
+    document.getElementById('aboutModal').classList.remove('active'); 
+  }
+
+  // FUNGSI TARIK DATA DARI GOOGLE SHEETS
   async function fetchDataPeta() {
     try {
       const response = await fetch(GAS_URL, {
@@ -151,6 +255,22 @@
     } catch(e) { console.log("Menunggu koneksi stabil untuk mengambil peta."); }
   }
 
+  // FUNGSI TOMBOL "SEGARKAN DATA"
+  async function segarkanDataPeta() {
+    closeSidebar();
+    try {
+      await fetchDataPeta();
+      alert("✓ Data sebaran berhasil ditarik dan diperbarui dari Database PANDU!");
+      // Jika kepala desa sedang melihat peta, maka render ulang pin-nya
+      if(document.getElementById('mapView').style.display === 'flex') {
+        renderPetaSebaran();
+      }
+    } catch(e) {
+      alert("❌ Gagal menyegarkan data. Pastikan perangkat memiliki koneksi internet.");
+    }
+  }
+
+  // KONTROL PETA (LEAFLET)
   function bukaPeta() {
     document.getElementById('mainDashboard').style.display = 'none';
     document.getElementById('mapView').style.display = 'flex';
