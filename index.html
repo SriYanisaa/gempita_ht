@@ -265,7 +265,7 @@
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
       Beranda Utama
     </button>
-    <button class="menu-item" onclick="closeSidebar(); fetchDataPasien()">
+    <button class="menu-item" onclick="closeSidebar(); fetchDataPasien(true)">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
       Segarkan Data Server
     </button>
@@ -872,13 +872,15 @@
   request.onupgradeneeded = (e) => { db = e.target.result; db.createObjectStore("dataTunda", { autoIncrement: true }); };
   request.onsuccess = (e) => { db = e.target.result; if (navigator.onLine) sinkronisasiDataTunda(); };
 
-  async function fetchDataPasien() {
+  // Tambahkan parameter isManualRefresh
+  async function fetchDataPasien(isManualRefresh = false) {
     const token = localStorage.getItem('pandu_token');
     if (!token) return; 
 
-    setTimeout(() => showLoader("Mengambil data terbaru..."), 500);
+    // HILANGKAN setTimeout agar loading LANGSUNG muncul seketika
+    showLoader("Menyinkronkan Server..."); 
+    
     try {
-      // Tambahkan ?t= untuk menjebol cache dari Service Worker (sw.js)
       const response = await fetch(GAS_URL + "?t=" + new Date().getTime(), {
         method: 'POST',
         body: JSON.stringify({ action: 'get_data', pin: token })
@@ -889,25 +891,36 @@
       const data = await response.json();
       
       if (data.status === "unauthorized") {
-         alert("Otorisasi Gagal. PIN Anda salah atau sesi berakhir.");
+         alert("Otorisasi Gagal. Silakan login ulang.");
          prosesLogout();
          return;
       }
 
+      // Simpan data terbaru
       dataPasienLokal = data;
       const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), token).toString();
       localStorage.setItem('pesona_data_secure', encryptedData);
-      applyFilters(); 
       
-      if(document.getElementById('distributionView').style.display === 'flex') {
+      applyFilters(); // Perbarui daftar
+      
+      // PAKSA PERBARUI PETA JIKA SEDANG DIBUKA
+      if (document.getElementById('distributionView').style.display === 'flex') {
          renderPetaSebaran();
+      }
+
+      // Jika diklik manual, beri tahu petugas bahwa koordinat/data sukses ditarik
+      if (isManualRefresh) {
+         setTimeout(() => { alert("✓ Data server & koordinat terbaru berhasil disinkronkan!"); }, 300);
       }
       
     } catch(e) { 
-      console.log("Peringatan Offline / Error:", e);
-      alert("⚠️ Tidak dapat mengunduh data terbaru dari server.\nMenampilkan data riwayat (offline) yang tersimpan di HP Anda.");
-      applyFilters(); 
-    } finally { hideLoader(); }
+      console.log("Error Fetch:", e);
+      if (isManualRefresh) {
+         alert("⚠️ Gagal mengambil data terbaru. Periksa koneksi internet Anda.");
+      }
+    } finally { 
+      hideLoader(); 
+    }
   }
 
   function applyFilters() {
