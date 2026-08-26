@@ -265,7 +265,7 @@
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
       Beranda Utama
     </button>
-    <button class="menu-item" onclick="closeSidebar(); fetchDataPasien()">
+    <button id="sidebarMenuPetugas" class="menu-item" onclick="closeSidebar(); fetchDataPasien()">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
       Segarkan Data Server
     </button>
@@ -285,7 +285,7 @@
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
       Tentang Aplikasi
     </button>
-    <button class="menu-item danger" onclick="konfirmasiLogout()">
+    <button id="sidebarBtnAuth" class="menu-item danger" onclick="konfirmasiLogout()">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
       Kunci & Keluar (Logout)
     </button>
@@ -320,7 +320,7 @@
       </div>
     </div>
     <div style="display: flex; gap: 10px;">
-      <button class="btn-menu" onclick="bukaNotifikasi()" style="position: relative;" title="Peringatan Kontrol">
+      <button id="btnNotifHeader" class="btn-menu" onclick="bukaNotifikasi()" style="position: relative;" title="Peringatan Kontrol">
         <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
         <span id="notifBadge" style="position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 10px; display: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">0</span>
       </button>
@@ -763,53 +763,132 @@
     }
   }
 
+  function bukaLoginPetugas() {
+    closeSidebar();
+    document.getElementById('loginView').style.display = 'flex';
+  }
+
   function cekStatusLogin() {
     const token = localStorage.getItem('pandu_token');
+    
+    // Matikan layar login, langsung masuk ke Menu Utama (Beranda)
+    document.getElementById('loginView').style.display = 'none';
+    
+    const lastView = sessionStorage.getItem('pandu_last_view');
+    // Jika Petugas (Punya Token)
     if (token) {
-      document.getElementById('loginView').style.display = 'none';
-      
       const encryptedData = localStorage.getItem('pesona_data_secure');
       if (encryptedData) {
         try {
           const bytes = CryptoJS.AES.decrypt(encryptedData, token);
           dataPasienLokal = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-          applyFilters();
         } catch(e) { console.error("Gagal mendeskripsi data lokal."); }
       }
 
-      const lastView = sessionStorage.getItem('pandu_last_view');
-      if (lastView === 'tambah') {
-        bukaFormTambah(); 
-        pulihkanDraft(); 
-      } else if (lastView === 'detail') {
+      if (lastView === 'tambah') { bukaFormTambah(); pulihkanDraft(); } 
+      else if (lastView === 'detail') {
         const p = JSON.parse(sessionStorage.getItem('pandu_last_patient'));
-        if (p) { bukaForm(p.nama, p.nik, p.koordinat); pulihkanDraft(); } 
-        else { tutupForm(); }
-      } else if (lastView === 'medis') {
+        if (p) { bukaForm(p.nama, p.nik, p.koordinat); pulihkanDraft(); } else { tutupForm(); }
+      } 
+      else if (lastView === 'medis') {
         const p = JSON.parse(sessionStorage.getItem('pandu_last_medis'));
         if (p) { bukaFormMedis(p.nama, p.nik); } else { tutupFormMedis(); }
-      } else if (lastView === 'sebaran') {
-        bukaPetaSebaran(); 
-      } else if (lastView === 'underdev') {
+      } 
+      else if (lastView === 'sebaran') { bukaPetaSebaran(); } 
+      else if (lastView === 'underdev') {
         const devTitle = sessionStorage.getItem('pandu_dev_title') || 'Penyakit';
         bukaUnderDevelopment(devTitle);
-      } else {
-        document.getElementById('listView').style.display = 'block';
-        document.getElementById('formView').style.display = 'none';
-        document.getElementById('medisView').style.display = 'none';
-        document.getElementById('distributionView').style.display = 'none';
-        document.getElementById('underDevView').style.display = 'none';
+      } 
+      else { keBeranda(); }
+
+      terapkanHakAkses(true); // Mode Petugas
+      if (navigator.onLine) fetchDataPasien();
+    } 
+    // Jika Kepala Desa / Guest (Tidak Punya Token)
+    else {
+      if (lastView === 'sebaran') { bukaPetaSebaran(); }
+      else { keBeranda(); }
+      
+      terapkanHakAkses(false); // Mode Kades
+      if (navigator.onLine) fetchDataPetaKades();
+    }
+  }
+
+  function terapkanHakAkses(isPetugas) {
+    const fabAdd = document.querySelector('.fab-add');
+    const searchBox = document.querySelector('.search-wrapper');
+    const container = document.getElementById('patientList');
+    const btnNotif = document.getElementById('btnNotifHeader');
+    const menuPetugas = document.getElementById('sidebarMenuPetugas');
+    const btnAuth = document.getElementById('sidebarBtnAuth');
+
+    if (!isPetugas) {
+      // TAMPILAN KEPALA DESA
+      if(fabAdd) fabAdd.style.display = 'none';
+      if(searchBox) searchBox.style.display = 'none';
+      if(btnNotif) btnNotif.style.display = 'none';
+      
+      if(menuPetugas) menuPetugas.style.display = 'none';
+      if(btnAuth) {
+        btnAuth.className = "menu-item"; // Hapus warna merah
+        btnAuth.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg> Login Petugas`;
+        btnAuth.onclick = bukaLoginPetugas;
       }
 
-      if (navigator.onLine) fetchDataPasien();
+      // Render Dashboard Menu Utama Khusus Kades
+      container.innerHTML = `
+        <div style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 25px 20px; border-radius: var(--radius-lg); color: white; margin-bottom: 25px; box-shadow: var(--shadow-md);">
+           <h2 style="margin: 0 0 10px; font-weight: 800; font-size: 20px;">Selamat Datang, Bapak/Ibu</h2>
+           <p style="margin: 0; font-size: 13px; opacity: 0.9; line-height: 1.5;">Pantau sebaran titik rawan kesehatan (episentrum) di wilayah desa secara real-time.</p>
+        </div>
+        <h3 style="font-size: 13px; font-weight: 800; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Dashboard Peta Sebaran</h3>
+        
+        <div class="patient-card" onclick="bukaPetaSebaran()" style="cursor:pointer; display: flex; flex-direction: row; align-items: center; gap: 15px; padding: 20px;">
+           <div style="background: #e0f2fe; color: #0284c7; width: 50px; height: 50px; border-radius: 14px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; font-size: 24px;">📍</div>
+           <div>
+              <h4 style="margin: 0 0 5px; font-size: 16px; font-weight: 800; color: var(--accent-navy);">Hipertensi (HT)</h4>
+              <p style="margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">Pemetaan titik lokasi domisili pasien Hipertensi aktif</p>
+           </div>
+        </div>
+        
+        <div class="patient-card" onclick="bukaUnderDevelopment('Diabetes Melitus (DM)')" style="cursor:pointer; display: flex; flex-direction: row; align-items: center; gap: 15px; padding: 20px;">
+           <div style="background: #fffbeb; color: #d97706; width: 50px; height: 50px; border-radius: 14px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; font-size: 24px;">🗺️</div>
+           <div>
+              <h4 style="margin: 0 0 5px; font-size: 16px; font-weight: 800; color: var(--accent-navy);">Diabetes Melitus (DM)</h4>
+              <p style="margin: 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;">Masih dalam tahap pengembangan dan penyiapan data</p>
+           </div>
+        </div>
+      `;
     } else {
-      document.getElementById('listView').style.display = 'none';
-      document.getElementById('formView').style.display = 'none';
-      document.getElementById('medisView').style.display = 'none';
-      document.getElementById('distributionView').style.display = 'none';
-      document.getElementById('underDevView').style.display = 'none';
-      document.getElementById('loginView').style.display = 'flex';
+      // TAMPILAN PETUGAS
+      if(fabAdd) fabAdd.style.display = 'flex';
+      if(searchBox) searchBox.style.display = 'block';
+      if(btnNotif) btnNotif.style.display = 'flex';
+      
+      if(menuPetugas) menuPetugas.style.display = 'flex';
+      if(btnAuth) {
+        btnAuth.className = "menu-item danger";
+        btnAuth.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg> Kunci & Keluar (Logout)`;
+        btnAuth.onclick = konfirmasiLogout;
+      }
+      applyFilters(); // Merender daftar pasien
     }
+  }
+
+  // FUNGSI TARIK DATA KHUSUS KADES (TANPA PIN)
+  async function fetchDataPetaKades() {
+    try {
+      const response = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get_peta_kades' })
+      });
+      dataPasienLokal = await response.json();
+      
+      // Jika kebetulan kades sedang buka peta, perbarui titiknya
+      if(document.getElementById('distributionView').style.display === 'flex') {
+         renderPetaSebaran();
+      }
+    } catch(e) { console.log("Gagal memuat peta kades/Offline"); }
   }
 
   async function prosesLogin() {
@@ -1058,6 +1137,7 @@
         }
       }
       
+      // (Di dalam fungsi renderPetaSebaran, cari baris ini)
       // Mendesain Titik (Pin) dengan Warna yang Tepat
       const customDot = L.divIcon({
         className: 'custom-div-icon',
@@ -1066,7 +1146,17 @@
         iconAnchor: [9, 9]
       });
 
-      const marker = L.marker([lat, lng], {icon: customDot}).bindPopup(`<b>${p.nama}</b><br>NIK: ${p.nik}<br>Desa: ${p.alamat}`);
+      // --- TAMBAHKAN LOGIKA INI ---
+      let infoPopup = "";
+      if (localStorage.getItem('pandu_token')) {
+         // Tampilan Petugas: Tampilkan detail
+         infoPopup = `<b>${p.nama}</b><br>NIK: ${p.nik}<br>Desa: ${p.alamat}`;
+      } else {
+         // Tampilan Kades: Rahasiakan identitas
+         infoPopup = `<b style="color:var(--accent-navy);">Pasien Hipertensi</b><br>Desa: ${p.alamat}<br><span style="font-size:10px; color:#ef4444; font-weight:800;">*Data Medis Dirahasiakan</span>`;
+      }
+
+      const marker = L.marker([lat, lng], {icon: customDot}).bindPopup(infoPopup);
       distMarkersLayer.addLayer(marker);
       bounds.push([lat, lng]);
     });
