@@ -876,16 +876,20 @@
     const token = localStorage.getItem('pandu_token');
     if (!token) return; 
 
-    setTimeout(() => showLoader("Mengambil data..."), 1500);
+    setTimeout(() => showLoader("Mengambil data terbaru..."), 500);
     try {
-      const response = await fetch(GAS_URL, {
+      // Tambahkan ?t= untuk menjebol cache dari Service Worker (sw.js)
+      const response = await fetch(GAS_URL + "?t=" + new Date().getTime(), {
         method: 'POST',
         body: JSON.stringify({ action: 'get_data', pin: token })
       });
+      
+      if (!response.ok) throw new Error("Koneksi ditolak oleh server Google.");
+      
       const data = await response.json();
       
       if (data.status === "unauthorized") {
-         alert("Otorisasi Gagal. Silakan login kembali.");
+         alert("Otorisasi Gagal. PIN Anda salah atau sesi berakhir.");
          prosesLogout();
          return;
       }
@@ -900,7 +904,8 @@
       }
       
     } catch(e) { 
-      console.log("Mode offline aktif");
+      console.log("Peringatan Offline / Error:", e);
+      alert("⚠️ Tidak dapat mengunduh data terbaru dari server.\nMenampilkan data riwayat (offline) yang tersimpan di HP Anda.");
       applyFilters(); 
     } finally { hideLoader(); }
   }
