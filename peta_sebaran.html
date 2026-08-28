@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PANDU - Peta Sebaran Penyakit Lingkungan UPTD. Puskesmas Klungkung I</title>
+  <title>Dashboard Pimpinan - PANDU</title>
   <meta name="theme-color" content="#0f172a">
   <link rel="apple-touch-icon" href="logo_transparent.png?v=3">
   
@@ -78,6 +78,31 @@
   <div style="color: #94a3b8; font-size: 13px; font-weight: 500; margin-top: 8px;">Portal Khusus Pimpinan</div>
 </div>
 
+<!-- LAYAR PILIH DESA (Hanya Muncul Sekali Saat Pertama Kali Buka Aplikasi) -->
+<div id="pilihDesaView" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 5000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+  <div style="background: var(--card-bg); width: 100%; max-width: 400px; padding: 45px 30px; border-radius: 20px; box-shadow: 0 8px 25px rgba(13, 148, 136, 0.08); text-align: center;">
+    <img src="logo_transparent.png?v=3" style="width: 80px; margin-bottom: 20px;">
+    <h2 style="margin:0 0 5px; color:var(--accent-navy); font-weight:800;">Selamat Datang</h2>
+    <p style="margin:0 0 25px; font-size:13px; color:var(--text-muted); font-weight:500;">Silakan pilih wilayah kerja Anda</p>
+    
+    <select id="inputPilihDesa" style="width: 100%; padding: 16px; border: 2px solid var(--border-color); border-radius: 14px; font-family: inherit; font-size: 15px; font-weight: 700; color: var(--accent-navy); margin-bottom: 25px; background: var(--input-bg); outline: none; appearance: none; text-align: center;">
+      <option value="" disabled selected>-- Ketuk untuk Pilih Desa --</option>
+      <option value="Satra">Satra</option>
+      <option value="Kamasan">Kamasan</option>
+      <option value="Semarapura Kauh">Semarapura Kauh</option>
+      <option value="Gelgel">Gelgel</option>
+      <option value="Tojan">Tojan</option>
+      <option value="Tangkas">Tangkas</option>
+      <option value="Semarapura Klod">Semarapura Klod</option>
+      <option value="Semarapura Klod Kangin">Semarapura Klod Kangin</option>
+      <option value="Kampung Gelgel">Kampung Gelgel</option>
+      <option value="Jumpai">Jumpai</option>
+    </select>
+    
+    <button class="btn-submit" onclick="simpanPilihanDesa()">Simpan & Masuk Aplikasi</button>
+  </div>
+</div>
+
 <!-- SIDEBAR MENU NAVIGASI -->
 <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 <div id="sidebarMenu" class="sidebar">
@@ -99,8 +124,12 @@
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
       Tentang Aplikasi
     </button>
+    <button class="menu-item" style="color: #e11d48; margin-top: 15px; background: var(--danger-bg); border: 1px dashed rgba(225, 29, 72, 0.3);" onclick="keluarKades()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: #e11d48;"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg> 
+      Ganti Desa Akses
+    </button>
   </div>
-  <div class="sidebar-footer">Aplikasi PANDU • v2.1 (Dashboard)</div>
+  <div class="sidebar-footer">Aplikasi PANDU • v2.2 (Dashboard)</div>
 </div>
 
 <!-- MODAL TENTANG APLIKASI -->
@@ -124,13 +153,13 @@
 </div>
 
 <!-- TAMPILAN DASHBOARD UTAMA -->
-<div id="mainDashboard">
+<div id="mainDashboard" style="display: none;">
   <div class="header">
     <div style="display: flex; align-items: center; gap: 15px;">
       <img src="logo_transparent.png?v=3" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);">
       <div>
         <h1 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--primary);">PANDU</h1>
-        <p style="margin: 4px 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;">UPTD. Puskesmas Klungkung I</p>
+        <p id="labelDesaHeader" style="margin: 4px 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;">UPTD. Puskesmas Klungkung I</p>
       </div>
     </div>
     
@@ -143,7 +172,7 @@
   <div class="dashboard-container">
     <div class="welcome-card">
       <h2>Selamat Datang, Bapak/Ibu</h2>
-      <p>Aplikasi ini menampilkan visualisasi pemetaan kesehatan spasial secara real-time di wilayah kerja desa.</p>
+      <p>Aplikasi ini menampilkan visualisasi pemetaan kesehatan spasial secara real-time di yurisdiksi <b id="labelDesaWelcome">Desa Anda</b>.</p>
     </div>
 
     <h3 style="font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Dashboard Peta Sebaran</h3>
@@ -166,89 +195,50 @@
   </div>
 </div>
 
-<!-- TAMPILAN PETA SEBARAN -->
+<!-- TAMPILAN PETA SEBARAN (SUDAH DIFILTER OTOMATIS) -->
 <div id="mapView" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: var(--bg-color); z-index: 1500; flex-direction: column;">
   <div class="form-header">
     <button class="nav-back" onclick="tutupPeta()">←</button>
-    <h2 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--accent-navy);">Peta Sebaran HT</h2>
-  </div>
-  
-  <div style="padding: 10px 20px;">
-    <select id="filterDistWilayah" onchange="renderPetaSebaran()" style="width:100%; padding:14px; border:2px solid var(--border-color); border-radius:14px; font-family:inherit; font-size:14px; background:var(--input-bg); color:var(--accent-navy); font-weight:700; outline:none; appearance:none;">
-      <option value="all">🌐 Semua Wilayah Desa</option>
-      <option value="Satra">Satra</option>
-      <option value="Kamasan">Kamasan</option>
-      <option value="Semarapura Kauh">Semarapura Kauh</option>
-      <option value="Gelgel">Gelgel</option>
-      <option value="Tojan">Tojan</option>
-      <option value="Tangkas">Tangkas</option>
-      <option value="Semarapura Klod">Semarapura Klod</option>
-      <option value="Semarapura Klod Kangin">Semarapura Klod Kangin</option>
-      <option value="Kampung Gelgel">Kampung Gelgel</option>
-      <option value="Jumpai">Jumpai</option>
-    </select>
+    <h2 id="judulPetaDesa" style="margin: 0; font-size: 18px; font-weight: 800; color: var(--accent-navy);">Peta Sebaran HT</h2>
   </div>
   
   <div style="position: relative; flex: 1; width: 100%; display: flex; flex-direction: column; min-height: 0;">
     <div id="distMap" style="flex: 1; width: 100%; z-index: 1;"></div>
     
-    <!-- LEGENDA -->
+    <!-- LEGENDA (Disederhanakan untuk 1 Desa) -->
     <div style="position: absolute; bottom: 20px; left: 10px; background: rgba(255,255,255,0.95); padding: 12px 16px; border-radius: 12px; z-index: 1000; font-size: 11px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.15); max-height: 40vh; overflow-y: auto; backdrop-filter: blur(4px);">
-      <div style="font-weight: 800; margin-bottom: 8px; font-size: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Legenda Wilayah</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div> Satra</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#3b82f6;"></div> Kamasan</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#10b981;"></div> S. Kauh</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></div> Gelgel</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#8b5cf6;"></div> Tojan</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#ec4899;"></div> Tangkas</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#06b6d4;"></div> S. Klod</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#f97316;"></div> S. Klod Kangin</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#6366f1;"></div> Kp. Gelgel</div>
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><div style="width:12px; height:12px; border-radius:50%; background:#84cc16;"></div> Jumpai</div>
+      <div style="font-weight: 800; margin-bottom: 8px; font-size: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">Keterangan Titik</div>
+      <div style="display:flex; align-items:center; gap:8px;"><div style="width:14px; height:14px; border-radius:50%; background:#ef4444; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div> Pasien HT</div>
     </div>
   </div>
 </div>
 
 <script>
-  // PASTE WEB APP URL ANDA DI SINI (Pastikan sudah di-deploy sebagai "Anyone")
+  // PASTIKAN URL INI MENGARAH KE DEPLOYMENT "ANYONE" ANDA
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzcp57xHiOczZayb9wpQwDNkAuBiJpGPGHsfuaxpB4CxyaPzsfTN2fU9VpECskx49lE/exec"; 
   
   let dataPetaLokal = []; 
   let distMap, distMarkersLayer;
+  let namaDesaTarget = "";
 
   window.addEventListener('load', () => {
     fetchDataPeta(); // Tarik data di background
     setTimeout(() => {
       const splash = document.getElementById('splashScreen');
       splash.style.opacity = '0';
-      setTimeout(() => { splash.remove(); }, 600);
+      setTimeout(() => { 
+        splash.remove(); 
+        cekLoginAwal(); 
+      }, 600);
     }, 1500); 
   });
 
-  // KONTROL SIDEBAR
-  function bukaSidebar() {
-    document.getElementById('sidebarOverlay').classList.add('active');
-    document.getElementById('sidebarMenu').classList.add('active');
-  }
-
-  function closeSidebar() {
-    document.getElementById('sidebarOverlay').classList.remove('active');
-    document.getElementById('sidebarMenu').classList.remove('active');
-  }
-
-  function keBeranda() {
-    closeSidebar();
-    tutupPeta();
-  }
-
-  function bukaAbout() { 
-    closeSidebar(); 
-    document.getElementById('aboutModal').classList.add('active'); 
-  }
-
-  function tutupAbout() { 
-    document.getElementById('aboutModal').classList.remove('active'); 
-  }
+  // --- KONTROL SIDEBAR & MODAL ---
+  function bukaSidebar() { document.getElementById('sidebarOverlay').classList.add('active'); document.getElementById('sidebarMenu').classList.add('active'); }
+  function closeSidebar() { document.getElementById('sidebarOverlay').classList.remove('active'); document.getElementById('sidebarMenu').classList.remove('active'); }
+  function keBeranda() { closeSidebar(); tutupPeta(); }
+  function bukaAbout() { closeSidebar(); document.getElementById('aboutModal').classList.add('active'); }
+  function tutupAbout() { document.getElementById('aboutModal').classList.remove('active'); }
 
   // --- KONTROL ANIMASI LOADING ---
   function showLoader(text) { 
@@ -261,6 +251,43 @@
     document.getElementById('loaderOverlay').style.opacity = '0';
   }
 
+  // --- LOGIKA PEMILIHAN DESA (TANPA KODE) ---
+  function cekLoginAwal() {
+    const savedDesa = localStorage.getItem('pandu_kades_desa');
+    
+    if (savedDesa) {
+      namaDesaTarget = savedDesa;
+      siapkanDashboard();
+    } else {
+      document.getElementById('pilihDesaView').style.display = 'flex';
+    }
+  }
+
+  function simpanPilihanDesa() {
+    const desaDipilih = document.getElementById('inputPilihDesa').value;
+    if (!desaDipilih) { alert("Ketuk dan pilih desa Anda dari daftar terlebih dahulu."); return; }
+    
+    localStorage.setItem('pandu_kades_desa', desaDipilih);
+    namaDesaTarget = desaDipilih;
+    
+    document.getElementById('pilihDesaView').style.display = 'none';
+    siapkanDashboard();
+  }
+
+  function siapkanDashboard() {
+    document.getElementById('mainDashboard').style.display = 'block';
+    document.getElementById('labelDesaHeader').innerText = "Desa " + namaDesaTarget;
+    document.getElementById('labelDesaWelcome').innerText = "Desa " + namaDesaTarget;
+    document.getElementById('judulPetaDesa').innerText = "Peta HT - " + namaDesaTarget;
+  }
+
+  function keluarKades() {
+    if(confirm("Apakah Anda yakin ingin mengatur ulang profil wilayah desa?")) {
+      localStorage.removeItem('pandu_kades_desa');
+      window.location.reload();
+    }
+  }
+
   // --- FUNGSI TARIK DATA (ANTI-CACHE) ---
   async function fetchDataPeta() {
     try {
@@ -270,42 +297,37 @@
       });
       dataPetaLokal = await response.json();
     } catch(e) { 
-      throw new Error("Koneksi gagal"); 
+      console.log("Koneksi sedang offline"); 
     }
   }
 
-  // --- FUNGSI SEGARKAN DATA (TOMBOL MENU KADES) ---
+  // --- FUNGSI SEGARKAN DATA ---
   async function segarkanDataPeta() {
     closeSidebar();
-    showLoader("Menyinkronkan Peta..."); // Munculkan Loading Kades
+    showLoader("Menyinkronkan Peta..."); 
     
     try {
-      await fetchDataPeta(); // Tunggu data baru turun
-      
-      // Paksa render ulang jika peta sedang terbuka
+      await fetchDataPeta(); 
       if(document.getElementById('mapView').style.display === 'flex') {
         renderPetaSebaran();
       }
-      
-      // Tunggu sebentar agar loading hilang dengan halus, lalu beritahu sukses
       setTimeout(() => { 
         hideLoader();
-        alert("✓ Peta sebaran berhasil diperbarui ke titik lokasi terbaru!"); 
+        alert("✓ Peta sebaran Desa " + namaDesaTarget + " berhasil diperbarui!"); 
       }, 500);
-
     } catch(e) {
       hideLoader();
       alert("❌ Gagal menyinkronkan peta. Pastikan internet menyala.");
     }
   }
-  // KONTROL PETA (LEAFLET)
+
+  // --- KONTROL PETA (LEAFLET) ---
   function bukaPeta() {
     document.getElementById('mainDashboard').style.display = 'none';
     document.getElementById('mapView').style.display = 'flex';
     
     if (!distMap) {
-      const batasKlungkung = L.latLngBounds([-8.9000, 115.3000], [-8.4000, 115.7000]);
-      distMap = L.map('distMap', { maxBounds: batasKlungkung, maxBoundsViscosity: 1.0, minZoom: 11 }).setView([-8.5400, 115.4000], 13);
+      distMap = L.map('distMap').setView([-8.5400, 115.4000], 14);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(distMap);
       distMarkersLayer = L.layerGroup().addTo(distMap);
     }
@@ -324,47 +346,40 @@
   function renderPetaSebaran() {
     if(!distMap || !distMarkersLayer) return;
     distMarkersLayer.clearLayers(); 
-    
-    const wilayahFilter = document.getElementById('filterDistWilayah').value;
-    const regionColors = { "Satra": "#ef4444", "Kamasan": "#3b82f6", "Semarapura Kauh": "#10b981", "Gelgel": "#f59e0b", "Tojan": "#8b5cf6", "Tangkas": "#ec4899", "Semarapura Klod": "#06b6d4", "Semarapura Klod Kangin": "#f97316", "Kampung Gelgel": "#6366f1", "Jumpai": "#84cc16" };
 
-    const dataSebaran = dataPetaLokal.filter(p => {
-      let matchAlamat = true;
-      if (wilayahFilter !== 'all') {
-        const alamatDb = p.alamat ? p.alamat.toLowerCase() : "";
-        matchAlamat = alamatDb.includes(wilayahFilter.toLowerCase());
-      }
-      return matchAlamat;
+    // FILTER HANYA DATA DESA YANG DIPILIH KADES
+    const dataSebaranDesa = dataPetaLokal.filter(p => {
+      if (!p.alamat) return false;
+      return p.alamat.toLowerCase().includes(namaDesaTarget.toLowerCase());
     });
 
     const bounds = [];
-    dataSebaran.forEach(p => {
+    dataSebaranDesa.forEach(p => {
       const parts = p.koordinat.split(',');
       const lat = parseFloat(parts[0].trim());
       const lng = parseFloat(parts[1].trim());
       
-      let warnaPin = "#64748b"; 
-      const listDesa = Object.keys(regionColors).sort((a, b) => b.length - a.length);
-      for (let i = 0; i < listDesa.length; i++) {
-        if ((p.alamat || "").toLowerCase().includes(listDesa[i].toLowerCase())) {
-          warnaPin = regionColors[listDesa[i]]; break;
-        }
-      }
-      
       const customDot = L.divIcon({
         className: 'custom-div-icon',
-        html: `<div style="background-color: ${warnaPin}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"></div>`,
+        html: `<div style="background-color: #ef4444; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5);"></div>`,
         iconSize: [18, 18], iconAnchor: [9, 9]
       });
 
-      // HANYA MENAMPILKAN DESA (NAMA PASIEN DIRAHASIAKAN)
+      // MENAMPILKAN NAMA DAN DESA SAJA
       const popupHtml = `<b style="color:var(--accent-navy); font-size:14px;">${p.nama || 'Tanpa Nama'}</b><br><span style="font-size:12px; color:var(--text-main);">Desa: ${p.alamat || '-'}</span>`;
+      
       const marker = L.marker([lat, lng], {icon: customDot}).bindPopup(popupHtml);
       distMarkersLayer.addLayer(marker);
       bounds.push([lat, lng]);
     });
 
-    if (bounds.length > 0) { distMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 }); }
+    // Peta otomatis zoom fokus ke titik desa tersebut
+    if (bounds.length > 0) { 
+      distMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 17 }); 
+    } else {
+      alert("Belum ada data pasien Hipertensi yang ditandai dengan koordinat di yurisdiksi Desa " + namaDesaTarget + ".");
+      distMap.setView([-8.5400, 115.4000], 14); // Kembali ke zoom default jika kosong
+    }
   }
 </script>
 </body>
