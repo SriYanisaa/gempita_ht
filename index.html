@@ -967,25 +967,27 @@
       const badgeClass = isSelesai ? "badge-done" : "badge-pending";
       const badgeText = isSelesai ? "Sudah Ditandai" : "Belum Ditandai";
       const alamat = p.alamat || "Alamat tidak tercatat";
+      
+      // --- PENAMBAHAN: PELINDUNG TANDA KUTIP PADA NAMA PASIEN ---
+      const safeNama = p.nama.replace(/'/g, "\\'"); 
 
       const item = document.createElement('div');
       item.className = `patient-card`;
       
-      // Perhatikan tambahan onclick pada card-top dan card-bottom
       item.innerHTML = `
-        <div class="card-top" onclick="bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}')">
+        <div class="card-top" onclick="bukaForm('${safeNama}', '${p.nik}', '${p.koordinat}')">
           <div><h3 class="p-name">${p.nama}</h3><div class="p-nik">NIK: ${p.nik}</div></div>
           <svg width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24" style="opacity:0.5; margin-top:5px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
         </div>
         
-        <div class="card-bottom" onclick="bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}')" style="cursor: pointer;">
+        <div class="card-bottom" onclick="bukaForm('${safeNama}', '${p.nik}', '${p.koordinat}')" style="cursor: pointer;">
           <p class="p-address">${svgPin} <span>${alamat}</span></p>
           <span class="status-badge ${badgeClass}">${badgeText}</span>
         </div>
         
         <div class="card-actions">
-          <button class="btn-card btn-c-medis" onclick="bukaFormMedis('${p.nama}', '${p.nik}')" style="flex: 1; padding: 14px; font-size: 13px;">📝 Catat Medis Kunjungan</button>
-          <button class="btn-card" style="background: var(--danger-bg); color: var(--danger); flex: 0.2; padding: 14px 0;" onclick="hapusPasien('${p.nik}', '${p.nama}')" title="Hapus Pasien Permanen">🗑️</button>
+          <button class="btn-card btn-c-medis" onclick="bukaFormMedis('${safeNama}', '${p.nik}')" style="flex: 1; padding: 14px; font-size: 13px;">📝 Catat Medis Kunjungan</button>
+          <button class="btn-card" style="background: var(--danger-bg); color: var(--danger); flex: 0.2; padding: 14px 0;" onclick="hapusPasien('${p.nik}', '${safeNama}')" title="Hapus Pasien Permanen">🗑️</button>
         </div>
       `;
       container.appendChild(item);
@@ -1725,19 +1727,19 @@
     }
 
     daftarBelumKontrol.forEach(p => {
+      // --- PENAMBAHAN: PELINDUNG TANDA KUTIP PADA NAMA PASIEN ---
+      const safeNama = p.nama.replace(/'/g, "\\'");
+
       const item = document.createElement('div');
       item.style.cssText = "background: white; padding: 18px; border-radius: 14px; margin-bottom: 12px; border-left: 5px solid var(--danger); box-shadow: var(--shadow-sm); position: relative;";
       item.innerHTML = `
-        <!-- Membungkus nama dan NIK agar bisa diklik menuju Peta & Edit -->
-        <div onclick="document.getElementById('notifView').style.display='none'; bukaForm('${p.nama}', '${p.nik}', '${p.koordinat}');" style="cursor: pointer; padding-bottom: 8px;">
+        <div onclick="document.getElementById('notifView').style.display='none'; bukaForm('${safeNama}', '${p.nik}', '${p.koordinat}');" style="cursor: pointer; padding-bottom: 8px;">
           <h3 style="margin: 0 0 5px 0; font-size: 15px; font-weight: 800; color: var(--accent-navy);">${p.nama}</h3>
           <p style="margin: 0; font-size: 11px; color: var(--text-muted); font-weight: 700;">NIK: ${p.nik} • ${p.alamat || 'Tanpa Alamat'}</p>
         </div>
-        
         <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
-          <button onclick="document.getElementById('notifView').style.display='none'; bukaFormMedis('${p.nama}', '${p.nik}');" style="background: var(--danger-bg); color: var(--danger); border: none; padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; transition: transform 0.2s; width: 100%;">📝 Catat Medis Sekarang</button>
-        </div>
-      `;
+          <button onclick="document.getElementById('notifView').style.display='none'; bukaFormMedis('${safeNama}', '${p.nik}');" style="background: var(--danger-bg); color: var(--danger); border: none; padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; width: 100%;">📝 Catat Medis Sekarang</button>
+        </div>`;
       container.appendChild(item);
     });
   }
